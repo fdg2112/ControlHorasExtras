@@ -14,16 +14,16 @@ public partial class Usuario
     public int UsuarioId { get; set; }
 
     [StringLength(100)]
-    public string NombreUsuario { get; set; } = null!;
+    public string NombreUsuario { get; set; } = string.Empty;
 
     [StringLength(255)]
-    public string Contraseña { get; set; } = null!;
+    public string Contraseña { get; set; } = string.Empty;
 
     [StringLength(50)]
-    public string Nombre { get; set; } = null!;
+    public string Nombre { get; set; } = string.Empty;
 
     [StringLength(50)]
-    public string Apellido { get; set; } = null!;
+    public string Apellido { get; set; } = string.Empty;
 
     [Column("RolID")]
     public int RolId { get; set; }
@@ -43,9 +43,19 @@ public partial class Usuario
 
     [ForeignKey("RolId")]
     [InverseProperty("Usuarios")]
-    public virtual Role Rol { get; set; } = null!;
+    public virtual Rol Rol { get; set; } = null!;
 
     [ForeignKey("SecretariaId")]
     [InverseProperty("Usuarios")]
     public virtual Secretaria? Secretaria { get; set; }
+
+    public Usuario()
+    {
+        // Inicialización para evitar advertencias
+        NombreUsuario = string.Empty;
+        Contraseña = string.Empty;
+        Nombre = string.Empty;
+        Apellido = string.Empty;
+        AuditoriaLogins = new List<AuditoriaLogin>();
+    }
 }

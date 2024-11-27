@@ -1,0 +1,56 @@
+﻿@model ControlHorasExtras.Models.Usuario
+
+@{
+    ViewData["Title"] = "Crear Usuario";
+}
+
+<h2>Crear Usuario</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label for="NombreUsuario">Nombre de Usuario</label>
+        <input type="text" id="NombreUsuario" name="NombreUsuario" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Contraseña">Contraseña</label>
+        <input type="password" id="Contraseña" name="Contraseña" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Nombre">Nombre</label>
+        <input type="text" id="Nombre" name="Nombre" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Apellido">Apellido</label>
+        <input type="text" id="Apellido" name="Apellido" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="RolID">Rol</label>
+        <select id="RolID" name="RolID" class="form-control" required>
+            <option value="">Seleccione un rol</option>
+            @foreach (var rol in (IEnumerable<ControlHorasExtras.Models.Rol>)ViewData["Roles"] ?? Enumerable.Empty<ControlHorasExtras.Models.Rol>())
+            {
+                <option value="@rol.RolId">@rol.NombreRol</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="AreaID">Área</label>
+        <select id="AreaID" name="AreaID" class="form-control">
+            <option value="">Seleccione un área (opcional)</option>
+            @foreach (var area in (IEnumerable<ControlHorasExtras.Models.Area>)ViewData["Areas"] ?? Enumerable.Empty<ControlHorasExtras.Models.Area>())
+            {
+                <option value="@area.AreaId">@area.NombreArea</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="SecretariaID">Secretaría</label>
+        <select id="SecretariaID" name="SecretariaID" class="form-control" required>
+            @foreach (var secretaria in (IEnumerable<ControlHorasExtras.Models.Secretaria>)ViewData["Secretarias"] ?? Enumerable.Empty<ControlHorasExtras.Models.Secretaria>())
+            {
+                <option value="@secretaria.SecretariaId">@secretaria.NombreSecretaria</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>

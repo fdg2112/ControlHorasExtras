@@ -117,6 +117,44 @@ CREATE TABLE AuditoriaLogins (
 );
 GO
 
+INSERT INTO Secretarias (NombreSecretaria)
+VALUES 
+('Gobierno'),
+('Obras y Servicios Públicos');
+
+INSERT INTO Areas (NombreArea, SecretariaID)
+VALUES 
+('Ordenanzas', 1), -- Relacionada con Gobierno
+('Control de Despachos', 1), -- Relacionada con Gobierno
+('Tránsito', 1), -- Relacionada con Gobierno
+('Taller', 2), -- Relacionada con Obras y Servicios Públicos
+('Obras Públicas', 2), -- Relacionada con Obras y Servicios Públicos
+('Obras Privadas', 2), -- Relacionada con Obras y Servicios Públicos
+('Servicios Públicos', 2), -- Relacionada con Obras y Servicios Públicos
+('Administración', 2); -- Relacionada con Obras y Servicios Públicos
+
+-- Insertar usuarios con roles específicos
+-- Usuario Jefe de Área
+INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
+VALUES 
+('jefe_area_1', 'contraseña123', 'Juan', 'Pérez', 1, 1, 1); -- Ordenanzas en Gobierno
+
+-- Usuario Secretario
+INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
+VALUES 
+('secretario1', 'contraseña123', 'Pedro', 'Gómez', 2, NULL, 1); -- Gobierno
+
+-- Usuario Secretario de Hacienda
+INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
+VALUES 
+('hacienda', 'contraseña123', 'Ruben', 'Buson', 3, NULL, NULL); -- No asociado a área ni secretaría
+
+-- Usuario Intendente
+INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
+VALUES 
+('intendente', 'contraseña123', 'Hernan', 'Besel', 4, NULL, NULL); -- No asociado a área ni secretaría
+
+
 -- Trigger para validar la coherencia entre AreaID y SecretariaID en la tabla Empleados
 GO
 CREATE TRIGGER trg_ValidarAreaSecretaria_Empleado

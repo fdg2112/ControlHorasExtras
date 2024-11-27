@@ -1,0 +1,38 @@
+﻿@model IEnumerable<ControlHorasExtras.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+<h2>Usuarios</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre de Usuario</th>
+            <th>Nombre Completo</th>
+            <th>Rol</th>
+            <th>Área</th>
+            <th>Secretaría</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var usuario in Model)
+        {
+            <tr>
+                <td>@usuario.NombreUsuario</td>
+                <td>@usuario.Nombre @usuario.Apellido</td>
+                <td>@usuario.Rol?.NombreRol</td>
+                <td>@usuario.Area?.NombreArea</td>
+                <td>@usuario.Secretaria?.NombreSecretaria</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@usuario.UsuarioId" class="btn btn-info">Detalles</a>
+                    <a asp-action="Edit" asp-route-id="@usuario.UsuarioId" class="btn btn-warning">Editar</a>
+                    <a asp-action="Delete" asp-route-id="@usuario.UsuarioId" class="btn btn-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-action="Create" class="btn btn-success">Crear Usuario</a>

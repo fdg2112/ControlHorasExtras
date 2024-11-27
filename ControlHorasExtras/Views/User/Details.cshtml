@@ -1,0 +1,29 @@
+﻿@model ControlHorasExtras.Models.Usuario
+
+@{
+    ViewData["Title"] = "Detalles del Usuario";
+}
+
+<h2>Detalles del Usuario</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Nombre de Usuario</dt>
+        <dd class="col-sm-10">@Model.NombreUsuario</dd>
+
+        <dt class="col-sm-2">Nombre Completo</dt>
+        <dd class="col-sm-10">@Model.Nombre @Model.Apellido</dd>
+
+        <dt class="col-sm-2">Rol</dt>
+        <dd class="col-sm-10">@Model.Rol?.NombreRol</dd>
+
+        <dt class="col-sm-2">Área</dt>
+        <dd class="col-sm-10">@Model.Area?.NombreArea ?? "No asignado"</dd>
+
+        <dt class="col-sm-2">Secretaría</dt>
+        <dd class="col-sm-10">@Model.Secretaria?.NombreSecretaria</dd>
+    </dl>
+
+    <a href="@Url.Action("Edit", "User", new { id = Model.UsuarioId })" class="btn btn-warning">Editar</a>
+    <a href="@Url.Action("Index", "User")" class="btn btn-secondary">Volver al listado</a>
+</div>

@@ -1,0 +1,17 @@
+﻿@model ControlHorasExtras.Models.Usuario
+
+@{
+    ViewData["Title"] = "Eliminar Usuario";
+}
+
+<h2>Eliminar Usuario</h2>
+
+<div class="alert alert-warning" role="alert">
+    ¿Estás seguro de que deseas eliminar el usuario <strong>@Model.NombreUsuario</strong>?
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" name="id" value="@Model.UsuarioId" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a href="@Url.Action("Index", "User")" class="btn btn-secondary">Cancelar</a>
+</form>

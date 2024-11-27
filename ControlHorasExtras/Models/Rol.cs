@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ControlHorasExtras.Models;
 
-public partial class Role
+public partial class Rol
 {
     [Key]
     [Column("RolID")]
