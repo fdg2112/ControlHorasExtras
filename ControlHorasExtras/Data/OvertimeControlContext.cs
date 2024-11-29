@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ControlHorasExtras.Data;
 
-public partial class ControlHorasExtrasContext : DbContext
+public partial class OvertimeControlContext : DbContext
 {
-    public ControlHorasExtrasContext()
+    public OvertimeControlContext()
     {
     }
 
-    public ControlHorasExtrasContext(DbContextOptions<ControlHorasExtrasContext> options)
+    public OvertimeControlContext(DbContextOptions<OvertimeControlContext> options)
         : base(options)
     {
     }
@@ -28,7 +28,7 @@ public partial class ControlHorasExtrasContext : DbContext
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=DESKTOP-4PEIPL5\\SQLEXPRESS;Initial Catalog=ControlHorasExtras;Integrated Security=True;Encrypt=False");
+        => optionsBuilder.UseSqlServer("Data Source=ESTA-PC\\SQLEXPRESS;Initial Catalog=ControlHorasExtras;Integrated Security=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

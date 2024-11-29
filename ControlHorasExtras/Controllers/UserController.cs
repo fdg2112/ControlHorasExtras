@@ -9,9 +9,9 @@ namespace ControlHorasExtras.Controllers
 {
     public class UserController : Controller
     {
-        private readonly ControlHorasExtrasContext _context;
+        private readonly OvertimeControlContext _context;
 
-        public UserController(ControlHorasExtrasContext context)
+        public UserController(OvertimeControlContext context)
         {
             _context = context;
         }

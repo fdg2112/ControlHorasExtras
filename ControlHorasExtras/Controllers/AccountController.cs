@@ -13,9 +13,9 @@ namespace ControlHorasExtras.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ControlHorasExtrasContext _context;
+        private readonly OvertimeControlContext _context;
 
-        public AccountController(ControlHorasExtrasContext context)
+        public AccountController(OvertimeControlContext context)
         {
             _context = context;
         }
