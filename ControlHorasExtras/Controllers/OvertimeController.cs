@@ -14,6 +14,40 @@ namespace ControlHorasExtras.Controllers
             _context = context;
         }
 
+        // Método para cargar la vista del Dashboard
+        // Método privado para obtener la lista de empleados
+        private List<Empleado> GetEmpleados()
+        {
+            return _context.Empleados.ToList(); // Carga los empleados desde la base de datos
+        }
+
+        // Modificar el método Dashboard para incluir empleados
+        public IActionResult Dashboard()
+        {
+            ViewData["Secretarias"] = GetSecretarias();
+            ViewData["Areas"] = GetAreas();
+            ViewData["Empleados"] = GetEmpleados();
+
+            // Otros datos para la vista
+            ViewData["HorasDelMes"] = 120; // Ejemplo
+            ViewData["GastoDelMes"] = 45000.50; // Ejemplo
+
+            return View();
+        }
+
+
+        // Método privado para obtener Secretarías
+        private List<Secretaria> GetSecretarias()
+        {
+            return _context.Secretarias.ToList(); // Carga desde la base de datos
+        }
+
+        // Método privado para obtener Áreas
+        private List<Area> GetAreas()
+        {
+            return _context.Areas.ToList(); // Carga desde la base de datos
+        }
+
         // Mostrar el formulario de carga
         public IActionResult Create()
         {

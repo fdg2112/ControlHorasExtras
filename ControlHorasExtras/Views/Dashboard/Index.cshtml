@@ -31,12 +31,28 @@
 
 <!-- Formulario flotante para cargar horas -->
 <div class="floating-form">
-    <button class="btn btn-primary" onclick="toggleForm()">Cargar Horas Extras</button>
+    <button class="btn btn-primary" id="btnCargarHoras" onclick="toggleForm()">Cargar Horas Extras</button>
     <form id="formHoras" class="hidden mt-3">
-        <h4>Cargar Horas</h4>
+        <h4>Cargar Horas Extras</h4>
+        <!-- Campo para seleccionar empleado -->
         <div class="mb-3">
             <label for="empleado" class="form-label">Empleado</label>
-            <input type="text" id="empleado" class="form-control" placeholder="Ingrese nombre o legajo">
+            <select id="empleado" class="form-select">
+                <option value="" selected disabled>Seleccione un empleado</option>
+                @if (ViewData["Empleados"] != null && ViewData["Empleados"] is List<ControlHorasExtras.Models.Empleado> empleados)
+                {
+                    foreach (var empleado in empleados)
+                    {
+                        <option value="@empleado.EmpleadoId">
+                            @empleado.Legajo - @empleado.Nombre @empleado.Apellido
+                        </option>
+                    }
+                }
+                else
+                {
+                    <option>No hay empleados disponibles</option>
+                }
+            </select>
         </div>
         <div class="mb-3">
             <label for="fechaInicio" class="form-label">Fecha y Hora Inicio</label>
@@ -50,7 +66,51 @@
             <label for="lugar" class="form-label">Lugar</label>
             <input type="text" id="lugar" class="form-control">
         </div>
-        <button type="submit" class="btn btn-success">Guardar</button>
+        <div class="mb-3">
+            <label for="secretaria" class="form-label">Secretaría</label>
+            <select id="secretaria" class="form-control">
+                <option value="">Seleccionar Secretaría</option>
+                @if (ViewData["Secretarias"] != null && ViewData["Secretarias"] is List<ControlHorasExtras.Models.Secretaria> secretarias)
+                {
+                    foreach (var secretaria in secretarias)
+                    {
+                        <option value="@secretaria.SecretariaId">@secretaria.NombreSecretaria</option>
+                    }
+                }
+                else
+                {
+                    <option value="">No hay datos disponibles</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="area" class="form-label">Área</label>
+            <select id="area" class="form-control">
+                <option value="">Seleccionar Área</option>
+                @if (ViewData["Areas"] != null && ViewData["Areas"] is List<ControlHorasExtras.Models.Area> areas)
+                {
+                    foreach (var area in areas)
+                    {
+                        <option value="@area.AreaId">@area.NombreArea</option>
+                    }
+                }
+                else
+                {
+                    <option value="">No hay datos disponibles</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="tipoHora" class="form-label">Tipo de Hora</label>
+            <select id="tipoHora" class="form-control">
+                <option value="50">50%</option>
+                <option value="100">100%</option>
+            </select>
+        </div>
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cerrar</button>
+        </div>
     </form>
 </div>
 
@@ -88,7 +148,10 @@
 
     function toggleForm() {
         const form = document.getElementById('formHoras');
-        form.classList.toggle('hidden');
+        const boton = document.getElementById('btnCargarHoras');
+
+        form.classList.toggle('hidden'); // Mostrar/ocultar el formulario
+        boton.classList.toggle('hidden'); // Mostrar/ocultar el botón
     }
 </script>
 
@@ -98,10 +161,37 @@
         bottom: 20px;
         right: 20px;
         background: white;
-        padding: 15px;
+        padding: 10px;
         border-radius: 8px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 350px; /* Tamaño reducido */
+        z-index: 9999;
+        font-size: 0.9rem; /* Fuente más pequeña */
     }
+
+        .floating-form h4 {
+            font-size: 1rem; /* Reducir título */
+            margin-bottom: 8px; /* Espacio más pequeño */
+        }
+
+        .floating-form .form-label {
+            font-size: 0.85rem; /* Reducir el tamaño de los labels */
+            margin-bottom: 4px; /* Menos espacio debajo de los labels */
+        }
+
+        .floating-form .form-control,
+        .floating-form .form-select {
+            font-size: 0.8rem; /* Reducir el tamaño de los inputs/selects */
+            padding: 6px; /* Menos padding para que quede más compacto */
+            height: 30px; /* Reducir la altura de los campos */
+        }
+
+        .floating-form button {
+            font-size: 0.85rem; /* Reducir tamaño de los botones */
+            padding: 6px 12px; /* Menos padding para el botón */
+            margin-top: 10px; /* Espacio arriba del botón */
+        }
+
     .hidden {
         display: none;
     }

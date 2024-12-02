@@ -14,9 +14,12 @@ public partial class Usuario
     public int UsuarioId { get; set; }
 
     [StringLength(100)]
+    [Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
     public string NombreUsuario { get; set; } = string.Empty;
 
     [StringLength(255)]
+    [Required(ErrorMessage = "La contraseña es obligatoria.")]
+    [DataType(DataType.Password)]
     public string Contraseña { get; set; } = string.Empty;
 
     [StringLength(50)]

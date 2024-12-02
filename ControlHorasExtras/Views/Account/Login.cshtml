@@ -1,4 +1,6 @@
-﻿@{
+﻿@model ControlHorasExtras.Models.LoginViewModel
+
+@{
     ViewData["Title"] = "Login";
 }
 
@@ -7,18 +9,24 @@
 <form asp-action="Login" method="post">
     <div class="form-group">
         <label for="nombreUsuario">Nombre de usuario</label>
-        <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" required />
+        <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" required asp-for="NombreUsuario" />
+        @Html.ValidationMessageFor(model => model.NombreUsuario, "", new { @class = "text-danger" })
     </div>
     <div class="form-group">
         <label for="contraseña">Contraseña</label>
-        <input type="password" id="contraseña" name="contraseña" class="form-control" required />
+        <input type="password" id="contraseña" name="contraseña" class="form-control" required asp-for="Contraseña" />
+        @Html.ValidationMessageFor(model => model.Contraseña, "", new { @class = "text-danger" })
     </div>
     <button type="submit" class="btn btn-primary">Iniciar sesión</button>
 </form>
 
-@if (ViewData["ErrorMessage"] != null)
+<!-- Mostrar los errores desde ModelState -->
+@if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger mt-2">
-        @ViewData["ErrorMessage"]
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
     </div>
 }

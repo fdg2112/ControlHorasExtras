@@ -3,45 +3,46 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using ControlHorasExtras.Data;
+using Microsoft.AspNetCore.Authorization;
 
-namespace ControlHorasExtras.Controllers;
-
-public class DashboardController : Controller
+namespace ControlHorasExtras.Controllers
 {
-    private readonly OvertimeControlContext _context;
-
-    public DashboardController(OvertimeControlContext context)
+    [Authorize]  // Esto garantiza que solo los usuarios autenticados pueden acceder al Dashboard
+    public class DashboardController : Controller
     {
-        _context = context;
-    }
+        private readonly OvertimeControlContext _context;
 
-    public async Task<IActionResult> Index()
-    {
-        // Total de horas extras del mes actual
-        var horasDelMes = await _context.HorasExtras
-            .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-            .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin));
+        public DashboardController(OvertimeControlContext context)
+        {
+            _context = context;
+        }
 
-        // Gasto en horas extras del mes actual
-        var gastoDelMes = await _context.HorasExtras
-            .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-            .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin) * (h.TipoHora == "50" ? 1.5 : 2.0));
+        public async Task<IActionResult> Index()
+        {
+            // Cargar datos para el Dashboard
+            var horasDelMes = await _context.HorasExtras
+                .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
+                .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin));
 
-        // Datos para gráficos
-        var horasPorMes = await _context.HorasExtras
-            .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month })
-            .Select(g => new
-            {
-                Mes = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"), // Ejemplo: "Noviembre 2024"
-                TotalHoras = g.Sum(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin))
-            })
-            .ToListAsync();
+            var gastoDelMes = await _context.HorasExtras
+                .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
+                .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin) * (h.TipoHora == "50" ? 1.5 : 2.0));
 
-        // Preparar datos para la vista
-        ViewData["HorasDelMes"] = horasDelMes;
-        ViewData["GastoDelMes"] = gastoDelMes;
-        ViewData["HorasPorMes"] = horasPorMes;
+            var horasPorMes = await _context.HorasExtras
+                .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month })
+                .Select(g => new
+                {
+                    Mes = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"),
+                    TotalHoras = g.Sum(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin))
+                })
+                .ToListAsync();
 
-        return View();
+            // Pasar datos a la vista
+            ViewData["HorasDelMes"] = horasDelMes;
+            ViewData["GastoDelMes"] = gastoDelMes;
+            ViewData["HorasPorMes"] = horasPorMes;
+
+            return View();
+        }
     }
 }

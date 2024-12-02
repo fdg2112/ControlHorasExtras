@@ -29,53 +29,61 @@ namespace ControlHorasExtras.Controllers
 
         // Acción para el login
         [HttpPost]
-        public async Task<IActionResult> Login(string nombreUsuario, string contraseña)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            var usuario = await _context.Usuarios
-                .Include(u => u.Rol)
-                .FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario);
-
-            if (usuario != null && usuario.Contraseña == contraseña)
+            if (ModelState.IsValid)
             {
-                // Auditoría de login
-                var auditoriaLogin = new AuditoriaLogin
+                var usuario = await _context.Usuarios
+                    .Include(u => u.Rol)
+                    .FirstOrDefaultAsync(u => u.NombreUsuario == model.NombreUsuario);
+
+                if (usuario != null && usuario.Contraseña == model.Contraseña)
                 {
-                    UsuarioId = usuario.UsuarioId,
-                    FechaHoraLogin = DateTime.Now,
-                    Ip = HttpContext.Connection.RemoteIpAddress?.ToString()
-                };
-                _context.AuditoriaLogins.Add(auditoriaLogin);
-                await _context.SaveChangesAsync();
+                    // Auditoría de login
+                    var auditoriaLogin = new AuditoriaLogin
+                    {
+                        UsuarioId = usuario.UsuarioId,
+                        FechaHoraLogin = DateTime.Now,
+                        Ip = HttpContext.Connection.RemoteIpAddress?.ToString()
+                    };
+                    _context.AuditoriaLogins.Add(auditoriaLogin);
+                    await _context.SaveChangesAsync();
 
-                // Crear Claims para la sesión del usuario
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                    new Claim("Rol", usuario.Rol.NombreRol),
-                    new Claim("UsuarioId", usuario.UsuarioId.ToString())
-                };
+                    // Crear Claims para la sesión del usuario
+                    var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, usuario.NombreUsuario),
+                new Claim("Rol", usuario.Rol.NombreRol),
+                new Claim("UsuarioId", usuario.UsuarioId.ToString())
+            };
 
-                var identity = new ClaimsIdentity(claims, "Login");
-                var principal = new ClaimsPrincipal(identity);
+                    var identity = new ClaimsIdentity(claims, "Cookies"); // Especificamos el esquema 'Cookies'
+                    var principal = new ClaimsPrincipal(identity);
+                    await HttpContext.SignInAsync("Cookies", principal);  // Especificamos 'Cookies' aquí también
 
-                await HttpContext.SignInAsync(principal);
-
-                // Redirección según el rol del usuario
-                if (usuario.Rol.NombreRol == "Jefe de Área")
-                    return RedirectToAction("Index", "Area");
-                else if (usuario.Rol.NombreRol == "Secretario")
-                    return RedirectToAction("Index", "Secretaria");
-                else if (usuario.Rol.NombreRol == "Secretario Hacienda")
-                    return RedirectToAction("Index", "Hacienda");
-                else if (usuario.Rol.NombreRol == "Intendente")
-                    return RedirectToAction("Index", "Intendente");
+                    // Redirección según el rol del usuario
+                    if (usuario.Rol.NombreRol == "Jefe de Área")
+                        return RedirectToAction("Index", "Area");
+                    else if (usuario.Rol.NombreRol == "Secretario")
+                        return RedirectToAction("Index", "Secretaria");
+                    else if (usuario.Rol.NombreRol == "Secretario Hacienda")
+                        return RedirectToAction("Index", "Hacienda");
+                    else if (usuario.Rol.NombreRol == "Intendente")
+                        return RedirectToAction("Index", "Intendente");
+                    else
+                    {
+                        // Si el rol no coincide con los anteriores, redirige al Dashboard
+                        return RedirectToAction("Index", "Dashboard");
+                    }
+                }
                 else
-                    return RedirectToAction("Index", "Home");
+                {
+                    ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");
+                }
             }
-
-            ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");
-            return View();
+            return View(model);
         }
+
 
         // Logout
         public async Task<IActionResult> Logout()
