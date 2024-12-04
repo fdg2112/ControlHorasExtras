@@ -51,39 +51,20 @@ namespace ControlHorasExtras.Controllers
 
                     // Crear Claims para la sesión del usuario
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                new Claim("Rol", usuario.Rol.NombreRol),
-                new Claim("UsuarioId", usuario.UsuarioId.ToString())
-            };
-
+                        {
+                            new Claim(ClaimTypes.Name, usuario.NombreUsuario),
+                            new Claim("Rol", usuario.Rol.NombreRol),
+                            new Claim("UsuarioId", usuario.UsuarioId.ToString())
+                        };
                     var identity = new ClaimsIdentity(claims, "Cookies"); // Especificamos el esquema 'Cookies'
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync("Cookies", principal);  // Especificamos 'Cookies' aquí también
-
-                    // Redirección según el rol del usuario
-                    if (usuario.Rol.NombreRol == "Jefe de Área")
-                        return RedirectToAction("Index", "Area");
-                    else if (usuario.Rol.NombreRol == "Secretario")
-                        return RedirectToAction("Index", "Secretaria");
-                    else if (usuario.Rol.NombreRol == "Secretario Hacienda")
-                        return RedirectToAction("Index", "Hacienda");
-                    else if (usuario.Rol.NombreRol == "Intendente")
-                        return RedirectToAction("Index", "Intendente");
-                    else
-                    {
-                        // Si el rol no coincide con los anteriores, redirige al Dashboard
-                        return RedirectToAction("Index", "Dashboard");
-                    }
+                    return RedirectToAction("Index", "Dashboard");
                 }
-                else
-                {
-                    ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");
-                }
+                else ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");
             }
             return View(model);
         }
-
 
         // Logout
         public async Task<IActionResult> Logout()
