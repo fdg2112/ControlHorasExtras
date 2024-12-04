@@ -51,14 +51,18 @@ namespace ControlHorasExtras.Controllers
 
                     // Crear Claims para la sesión del usuario
                     var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                            new Claim("Rol", usuario.Rol.NombreRol),
-                            new Claim("UsuarioId", usuario.UsuarioId.ToString())
-                        };
-                    var identity = new ClaimsIdentity(claims, "Cookies"); // Especificamos el esquema 'Cookies'
+                    {
+                        new Claim(ClaimTypes.Name, usuario.NombreUsuario), // Nombre del usuario
+                        new Claim("Nombre", usuario.Nombre),
+                        new Claim("UsuarioId", usuario.UsuarioId.ToString()), // ID del usuario
+                        new Claim("Rol", usuario.Rol.NombreRol) // Rol del usuario
+                    };
+                    var identity = new ClaimsIdentity(claims, "Cookies");
                     var principal = new ClaimsPrincipal(identity);
-                    await HttpContext.SignInAsync("Cookies", principal);  // Especificamos 'Cookies' aquí también
+
+                    // Inicia sesión con el esquema de cookies
+                    await HttpContext.SignInAsync("Cookies", principal);
+
                     return RedirectToAction("Index", "Dashboard");
                 }
                 else ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");

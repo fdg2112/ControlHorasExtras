@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ControlHorasExtras.Data;
 using Microsoft.AspNetCore.Authorization;
 using ControlHorasExtras.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ControlHorasExtras.Controllers
 {
@@ -21,37 +22,48 @@ namespace ControlHorasExtras.Controllers
         public async Task<IActionResult> Index()
         {
             // Obtener los claims del usuario logueado
-            var usuarioId = int.Parse(User.FindFirst("UsuarioId").Value);
-            var rol = User.FindFirst("Rol").Value;
+            var usuarioIdClaim = User.FindFirst("UsuarioId");
+            var rolClaim = User.FindFirst("Rol");
+            var nombreClaim = User.FindFirst("Nombre");
+            var apellidoClaim = User.FindFirst("Apellido");
+            var areaIdClaim = User.FindFirst("AreaId");
+            var secretariaIdClaim = User.FindFirst("SecretariaId");
+            if (usuarioIdClaim == null || rolClaim == null)
+            {
+                return Unauthorized(); // Redirigir a una página de error o al login
+            }
+
+            // Parsear los valores de los claims
+            var usuarioId = int.Parse(usuarioIdClaim.Value);
+            var rol = rolClaim.Value;
+            var nombre = nombreClaim.Value;
+            var apellido = apellidoClaim.Value;
+            var areaId = int.Parse(areaIdClaim.Value);
+            var secretariaId = int.Parse(secretariaIdClaim.Value);
 
             // Filtrar los datos según el rol
             IQueryable<HorasExtra> query = _context.HorasExtras;
 
             if (rol == "Jefe de Área")
             {
-                var areaId = await _context.Usuarios
+                var areaID = await _context.Usuarios
                     .Where(u => u.UsuarioId == usuarioId)
                     .Select(u => u.AreaId)
                     .FirstOrDefaultAsync();
 
-                query = query.Where(h => h.AreaId == areaId);
+                query = query.Where(h => h.AreaId == areaID);
             }
             else if (rol == "Secretario")
             {
-                var secretariaId = await _context.Usuarios
+                var secretariaID = await _context.Usuarios
                     .Where(u => u.UsuarioId == usuarioId)
                     .Select(u => u.SecretariaId)
                     .FirstOrDefaultAsync();
 
-                query = query.Where(h => h.SecretariaId == secretariaId);
-            }
-            // Intendente y Hacienda no filtran datos
-            else if (rol == "Secretario Hacienda" || rol == "Intendente")
-            {
-                // Ver todo
+                query = query.Where(h => h.SecretariaId == secretariaID);
             }
 
-            // Calcular datos del dashboard
+            // Obtener datos del dashboard
             var horasDelMes = await query
                 .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
                 .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin));
@@ -60,22 +72,14 @@ namespace ControlHorasExtras.Controllers
                 .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
                 .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin) * (h.TipoHora == "50" ? 1.5 : 2.0));
 
-            var horasPorMes = await query
-                .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month })
-                .Select(g => new
-                {
-                    Mes = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy"),
-                    TotalHoras = g.Sum(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin))
-                })
-                .ToListAsync();
-
-            // Pasar datos a la vista
+            // Preparar datos para la vista
             ViewData["HorasDelMes"] = horasDelMes;
             ViewData["GastoDelMes"] = gastoDelMes;
-            ViewData["HorasPorMes"] = horasPorMes;
+            ViewData["Nombre"] = nombreClaim;
 
             return View();
         }
+
 
     }
 }
