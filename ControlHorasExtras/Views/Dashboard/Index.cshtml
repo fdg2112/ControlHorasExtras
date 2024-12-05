@@ -30,13 +30,13 @@
 
 <!-- Formulario flotante para cargar horas -->
 <div class="floating-form">
-    <button class="btn btn-primary" id="btnCargarHoras" onclick="toggleForm()">Cargar Horas Extras</button>
+    <button class="btn btn-primary" id="btnCargarHoras" onclick="cargarFormulario()">Cargar Horas Extras</button>
     <form id="formHoras" class="hidden mt-3">
         <h4>Cargar Horas Extras</h4>
         <!-- Campo para seleccionar empleado -->
         <div class="mb-3">
             <label for="empleado" class="form-label">Empleado</label>
-            <select id="empleado" class="form-select">
+            <select id="empleado" name="EmpleadoId" class="form-select">
                 <option value="" selected disabled>Seleccione un empleado</option>
                 @if (ViewData["Empleados"] != null && ViewData["Empleados"] is List<ControlHorasExtras.Models.Empleado> empleados)
                 {
@@ -51,8 +51,10 @@
                 {
                     <option>No hay empleados disponibles</option>
                 }
+
             </select>
         </div>
+
         <div class="mb-3">
             <label for="fechaInicio" class="form-label">Fecha y Hora Inicio</label>
             <input type="datetime-local" id="fechaInicio" class="form-control">
@@ -76,10 +78,12 @@
                         <option value="@secretaria.SecretariaId">@secretaria.NombreSecretaria</option>
                     }
                 }
+                }
                 else
                 {
-                    <option value="">No hay datos disponibles</option>
+                <option>No hay secretarías disponibles</option>
                 }
+
             </select>
         </div>
         <div class="mb-3">
@@ -116,35 +120,111 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Datos para gráficos
-    const horasDelMes = @Html.Raw(Json.Serialize(ViewData["HorasDelMes"] ?? new List<object>()));
-    const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
-    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
+    // const horasDelMes = @Html.Raw(Json.Serialize(ViewData["HorasDelMes"] ?? new List<object>()));
+    // const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
+    // const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
 
+    // new Chart(horasMesChart, {
+    //     type: 'bar',
+    //     data: {
+    //         labels: (horasDelMes || []).map(h => h.Mes),
+    //         datasets: [{
+    //             label: 'Horas Realizadas',
+    //             data: (horasDelMes || []).map(h => h.TotalHoras),
+    //             backgroundColor: 'rgba(75, 192, 192, 0.6)'
+    //         }]
+    //     }
+    // });
+
+    // new Chart(gastoMesChart, {
+    //     type: 'line',
+    //     data: {
+    //         labels: (horasDelMes || []).map(h => h.Mes),
+    //         datasets: [{
+    //             label: 'Gasto Mensual',
+    //             data: (horasDelMes || []).map(h => h.TotalHoras * 150), // Ejemplo de cálculo
+    //             borderColor: 'rgba(255, 99, 132, 1)',
+    //             fill: false
+    //         }]
+    //     }
+    // });
+
+    const horasDelMes = @Html.Raw(ViewData["HorasDelMes"] ?? 0);
+    const gastoDelMes = @Html.Raw(ViewData["GastoDelMes"] ?? 0);
+
+    console.log("Horas del Mes:", horasDelMes);
+    console.log("Gasto del Mes:", gastoDelMes);
+
+    // Inicializar gráficos
+    const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
     new Chart(horasMesChart, {
         type: 'bar',
         data: {
-            labels: (horasDelMes || []).map(h => h.Mes),
+            labels: ['Horas del Mes'],
             datasets: [{
                 label: 'Horas Realizadas',
-                data: (horasDelMes || []).map(h => h.TotalHoras),
+                data: [horasDelMes],
                 backgroundColor: 'rgba(75, 192, 192, 0.6)'
             }]
         }
     });
 
+    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
     new Chart(gastoMesChart, {
         type: 'line',
         data: {
-            labels: (horasDelMes || []).map(h => h.Mes),
+            labels: ['Gasto del Mes'],
             datasets: [{
                 label: 'Gasto Mensual',
-                data: (horasDelMes || []).map(h => h.TotalHoras * 150), // Ejemplo de cálculo
+                data: [gastoDelMes],
                 borderColor: 'rgba(255, 99, 132, 1)',
                 fill: false
             }]
         }
     });
 
+    function cargarFormulario() {
+        const form = document.getElementById('formHoras');
+        const boton = document.getElementById('btnCargarHoras');
+
+        // Mostrar/ocultar el formulario
+        form.classList.toggle('hidden');
+        boton.classList.toggle('hidden');
+
+        if (!form.classList.contains('hidden')) {
+            // Realizar la solicitud AJAX para cargar los datos
+            fetch('/Overtime/Create') // Llamar al método Create del controlador
+                .then(response => response.json())
+                .then(data => {
+                    // Procesar los datos y cargar las opciones en el formulario
+                    cargarOpcionesFormulario(data);
+                })
+                .catch(error => console.error('Error al cargar los datos:', error));
+        }
+    }
+
+    function cargarOpcionesFormulario(data) {
+        // Llenar las opciones de empleados
+        const empleadoSelect = document.getElementById('empleado');
+        empleadoSelect.innerHTML = '<option value="" selected disabled>Seleccione un empleado</option>';
+        data.empleados.forEach(empleado => {
+            empleadoSelect.innerHTML += `<option value="${empleado.id}">${empleado.legajo} - ${empleado.nombre} ${empleado.apellido}</option>`;
+        });
+
+        // Llenar las opciones de secretarías
+        const secretariaSelect = document.getElementById('secretaria');
+        secretariaSelect.innerHTML = '<option value="" selected disabled>Seleccione una secretaría</option>';
+        data.secretarias.forEach(secretaria => {
+            secretariaSelect.innerHTML += `<option value="${secretaria.id}">${secretaria.nombre}</option>`;
+        });
+
+        // Llenar las opciones de áreas
+        const areaSelect = document.getElementById('area');
+        areaSelect.innerHTML = '<option value="" selected disabled>Seleccione un área</option>';
+        data.areas.forEach(area => {
+            areaSelect.innerHTML += `<option value="${area.id}">${area.nombre}</option>`;
+        });
+    }
 
     function toggleForm() {
         const form = document.getElementById('formHoras');

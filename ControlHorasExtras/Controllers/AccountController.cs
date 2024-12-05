@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ControlHorasExtras.Models;
-using ControlHorasExtras.Data;  // Reemplazar con tu modelo adecuado
+using ControlHorasExtras.Data;
 
 namespace ControlHorasExtras.Controllers
 {
@@ -20,14 +20,12 @@ namespace ControlHorasExtras.Controllers
             _context = context;
         }
 
-        // Vista de login
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // Acción para el login
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -49,13 +47,16 @@ namespace ControlHorasExtras.Controllers
                     _context.AuditoriaLogins.Add(auditoriaLogin);
                     await _context.SaveChangesAsync();
 
-                    // Crear Claims para la sesión del usuario
+                    // Claims para la sesión del usuario
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, usuario.NombreUsuario), // Nombre del usuario
+                        new Claim(ClaimTypes.Name, usuario.NombreUsuario),
                         new Claim("Nombre", usuario.Nombre),
-                        new Claim("UsuarioId", usuario.UsuarioId.ToString()), // ID del usuario
-                        new Claim("Rol", usuario.Rol.NombreRol) // Rol del usuario
+                        new Claim("Apellido", usuario.Apellido),
+                        new Claim("UsuarioId", usuario.UsuarioId.ToString()),
+                        new Claim("Rol", usuario.Rol.NombreRol),
+                        new Claim("AreaId", usuario.AreaId.ToString()),
+                        new Claim("SecretariaId", usuario.SecretariaId.ToString())
                     };
                     var identity = new ClaimsIdentity(claims, "Cookies");
                     var principal = new ClaimsPrincipal(identity);
@@ -69,6 +70,31 @@ namespace ControlHorasExtras.Controllers
             }
             return View(model);
         }
+
+        public IActionResult Create()
+        {
+            // Obtener el AreaId del usuario logueado desde los claims
+            var areaIdClaim = User.FindFirst("AreaId");
+
+            if (areaIdClaim == null)
+            {
+                // Si no se encuentra el AreaId en los claims, redirigir o mostrar un error
+                return Unauthorized(); // O redirigir a alguna página de error
+            }
+
+            var areaId = int.Parse(areaIdClaim.Value);  // Convertir el AreaId a entero
+
+            // Filtrar los empleados según el área del usuario logueado
+            var empleados = _context.Empleados
+                .Where(e => e.AreaId == areaId)  // Filtrar empleados por el AreaId del usuario
+                .ToList();
+
+            // Pasar los empleados filtrados a la vista
+            ViewData["Empleados"] = empleados;
+
+            return View();
+        }
+
 
         // Logout
         public async Task<IActionResult> Logout()

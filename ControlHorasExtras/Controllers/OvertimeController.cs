@@ -49,14 +49,52 @@ namespace ControlHorasExtras.Controllers
         }
 
         // Mostrar el formulario de carga
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewData["Empleados"] = _context.Empleados.ToList();
-            ViewData["Areas"] = _context.Areas.ToList();
-            return View();
+            var areaIdClaim = User.FindFirst("AreaId");
+            var secretariaIdClaim = User.FindFirst("SecretariaId");
+            var areaId = int.Parse(areaIdClaim.Value);
+            var secretariaId = int.Parse(secretariaIdClaim.Value);
+
+            if (areaIdClaim == null)
+            {
+                return Json(new { error = "Área no encontrada en los claims." });
+            }
+            if (secretariaIdClaim == null)
+            {
+                // Si no hay claim de SecretariaId, devolvé un JSON con error o manejalo adecuadamente
+                return Json(new { error = "No se encontró el claim de SecretariaId." });
+            }
+            
+
+
+            // Filtrar empleados, secretarías y áreas
+            var empleados = _context.Empleados
+                .Where(e => e.AreaId == areaId)
+                .Select(e => new { id = e.EmpleadoId, legajo = e.Legajo, nombre = e.Nombre, apellido = e.Apellido })
+                .ToList();
+
+            var secretarias = _context.Secretarias
+                .Select(s => new { id = s.SecretariaId, nombre = s.NombreSecretaria })
+                .ToList();
+
+            var areas = _context.Areas
+                .Where(a => a.SecretariaId == secretariaId)
+                .Select(a => new { id = a.AreaId, nombre = a.NombreArea })
+                .ToList();
+
+            // Devolver datos en formato JSON
+            return Json(new
+            {
+                empleados,
+                secretarias,
+                areas
+            });
         }
 
-        // Procesar la carga de horas extras
+
+        //Procesar la carga de horas extras
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(HorasExtra horasExtra)
