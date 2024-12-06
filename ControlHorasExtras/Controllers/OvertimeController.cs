@@ -54,31 +54,34 @@ namespace ControlHorasExtras.Controllers
         {
             var areaIdClaim = User.FindFirst("AreaId");
             var secretariaIdClaim = User.FindFirst("SecretariaId");
-            var areaId = int.Parse(areaIdClaim.Value);
-            var secretariaId = int.Parse(secretariaIdClaim.Value);
 
-            if (areaIdClaim == null)
+            // Determinar Área y Secretaría del usuario
+            int? areaId = null;
+            if (areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value))
             {
-                return Json(new { error = "Área no encontrada en los claims." });
+                areaId = int.Parse(areaIdClaim.Value);
             }
-            if (secretariaIdClaim == null)
+
+            if (secretariaIdClaim == null || string.IsNullOrEmpty(secretariaIdClaim.Value))
             {
-                // Si no hay claim de SecretariaId, devolvé un JSON con error o manejalo adecuadamente
                 return Json(new { error = "No se encontró el claim de SecretariaId." });
             }
-            
+            int secretariaId = int.Parse(secretariaIdClaim.Value);
 
-
-            // Filtrar empleados, secretarías y áreas
+            // Filtrar empleados según el rol del usuario
             var empleados = _context.Empleados
-                .Where(e => e.AreaId == areaId)
+                .Where(e =>
+                    (areaId.HasValue && e.AreaId == areaId) || // Empleados del área si existe AreaId
+                    (!areaId.HasValue && e.SecretariaId == secretariaId)) // Empleados de la secretaría si no hay Área
                 .Select(e => new { id = e.EmpleadoId, legajo = e.Legajo, nombre = e.Nombre, apellido = e.Apellido })
                 .ToList();
 
+            // Filtrar secretarías
             var secretarias = _context.Secretarias
                 .Select(s => new { id = s.SecretariaId, nombre = s.NombreSecretaria })
                 .ToList();
 
+            // Filtrar áreas
             var areas = _context.Areas
                 .Where(a => a.SecretariaId == secretariaId)
                 .Select(a => new { id = a.AreaId, nombre = a.NombreArea })
@@ -92,7 +95,6 @@ namespace ControlHorasExtras.Controllers
                 areas
             });
         }
-
 
         //Procesar la carga de horas extras
         [HttpPost]

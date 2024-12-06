@@ -120,68 +120,68 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Datos para gráficos
-    // const horasDelMes = @Html.Raw(Json.Serialize(ViewData["HorasDelMes"] ?? new List<object>()));
-    // const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
-    // const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
-
-    // new Chart(horasMesChart, {
-    //     type: 'bar',
-    //     data: {
-    //         labels: (horasDelMes || []).map(h => h.Mes),
-    //         datasets: [{
-    //             label: 'Horas Realizadas',
-    //             data: (horasDelMes || []).map(h => h.TotalHoras),
-    //             backgroundColor: 'rgba(75, 192, 192, 0.6)'
-    //         }]
-    //     }
-    // });
-
-    // new Chart(gastoMesChart, {
-    //     type: 'line',
-    //     data: {
-    //         labels: (horasDelMes || []).map(h => h.Mes),
-    //         datasets: [{
-    //             label: 'Gasto Mensual',
-    //             data: (horasDelMes || []).map(h => h.TotalHoras * 150), // Ejemplo de cálculo
-    //             borderColor: 'rgba(255, 99, 132, 1)',
-    //             fill: false
-    //         }]
-    //     }
-    // });
-
-    const horasDelMes = @Html.Raw(ViewData["HorasDelMes"] ?? 0);
-    const gastoDelMes = @Html.Raw(ViewData["GastoDelMes"] ?? 0);
-
-    console.log("Horas del Mes:", horasDelMes);
-    console.log("Gasto del Mes:", gastoDelMes);
-
-    // Inicializar gráficos
+    const horasDelMes = @Html.Raw(Json.Serialize(ViewData["HorasDelMes"] ?? new List<object>()));
     const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
+    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
+
     new Chart(horasMesChart, {
         type: 'bar',
         data: {
-            labels: ['Horas del Mes'],
+            labels: (horasDelMes || []).map(h => h.Mes),
             datasets: [{
                 label: 'Horas Realizadas',
-                data: [horasDelMes],
+                data: (horasDelMes || []).map(h => h.TotalHoras),
                 backgroundColor: 'rgba(75, 192, 192, 0.6)'
             }]
         }
     });
 
-    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
     new Chart(gastoMesChart, {
         type: 'line',
         data: {
-            labels: ['Gasto del Mes'],
+            labels: (horasDelMes || []).map(h => h.Mes),
             datasets: [{
                 label: 'Gasto Mensual',
-                data: [gastoDelMes],
+                data: (horasDelMes || []).map(h => h.TotalHoras * 150), // Ejemplo de cálculo
                 borderColor: 'rgba(255, 99, 132, 1)',
                 fill: false
             }]
         }
     });
+
+    // const horasDelMes = @Html.Raw(ViewData["HorasDelMes"] ?? 0);
+    // const gastoDelMes = @Html.Raw(ViewData["GastoDelMes"] ?? 0);
+
+    // console.log("Horas del Mes:", horasDelMes);
+    // console.log("Gasto del Mes:", gastoDelMes);
+
+    // // Inicializar gráficos
+    // const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
+    // new Chart(horasMesChart, {
+    //     type: 'bar',
+    //     data: {
+    //         labels: ['Horas del Mes'],
+    //         datasets: [{
+    //             label: 'Horas Realizadas',
+    //             data: [horasDelMes],
+    //             backgroundColor: 'rgba(75, 192, 192, 0.6)'
+    //         }]
+    //     }
+    // });
+
+    // const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
+    // new Chart(gastoMesChart, {
+    //     type: 'line',
+    //     data: {
+    //         labels: ['Gasto del Mes'],
+    //         datasets: [{
+    //             label: 'Gasto Mensual',
+    //             data: [gastoDelMes],
+    //             borderColor: 'rgba(255, 99, 132, 1)',
+    //             fill: false
+    //         }]
+    //     }
+    // });
 
     function cargarFormulario() {
         const form = document.getElementById('formHoras');
