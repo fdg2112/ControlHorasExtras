@@ -58,6 +58,9 @@ namespace ControlHorasExtras.Controllers
             // Obtener el mes y año actuales
             var mesActual = DateTime.Now.Month;
             var anioActual = DateTime.Now.Year;
+            // Obtener los últimos 12 meses
+            var fechaInicio = DateTime.Now.AddMonths(-11);
+            var fechaFin = DateTime.Now;
 
             var horasDelMes = await query
                 .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
@@ -94,12 +97,46 @@ namespace ControlHorasExtras.Controllers
             var gasto50 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "50%")?.TotalGasto ?? 0;
             var gasto100 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "100%")?.TotalGasto ?? 0;
 
+            var historicoHoras = await query
+            .Where(h => h.FechaHoraInicio >= fechaInicio && h.FechaHoraInicio <= fechaFin)
+            .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
+            .Select(g => new
+            {
+                Mes = g.Key.Month,
+                Anio = g.Key.Year,
+                TipoHora = g.Key.TipoHora,
+                TotalHoras = g.Sum(h => h.CantidadHoras)
+            })
+            .OrderBy(h => h.Anio)
+            .ThenBy(h => h.Mes)
+            .ToListAsync();
+
+            // Agrupar datos para el gráfico
+            var meses = historicoHoras
+                .Select(h => $"{h.Mes:00}/{h.Anio}")
+                .Distinct()
+                .ToList();
+
+            var horas50Historico = meses
+                .Select(m => historicoHoras
+                    .Where(h => $"{h.Mes:00}/{h.Anio}" == m && h.TipoHora.Trim() == "50%")
+                    .Sum(h => h.TotalHoras))
+                .ToList();
+
+            var horas100Historico = meses
+                .Select(m => historicoHoras
+                    .Where(h => $"{h.Mes:00}/{h.Anio}" == m && h.TipoHora.Trim() == "100%")
+                    .Sum(h => h.TotalHoras))
+                .ToList();
 
             // Agrega datos al ViewData
             ViewData["Horas50"] = horas50;
             ViewData["Horas100"] = horas100;
             ViewData["Gasto50"] = Math.Round(gasto50, 2); // Redondear a dos decimales
             ViewData["Gasto100"] = Math.Round(gasto100, 2);
+            ViewData["Meses"] = meses;
+            ViewData["Horas50Historico"] = horas50Historico;
+            ViewData["Horas100Historico"] = horas100Historico;
 
             return View();
         }

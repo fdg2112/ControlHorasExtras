@@ -110,20 +110,6 @@
         }
     });
 
-    // const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
-    // new Chart(gastoMesChart, {
-    //     type: 'line',
-    //     data: {
-    //         labels: ['Gasto del Mes'],
-    //         datasets: [{
-    //             label: 'Gasto Mensual',
-    //             data: [gastoDelMes],
-    //             borderColor: 'rgba(255, 99, 132, 1)',
-    //             fill: false
-    //         }]
-    //     }
-    // });
-
         // Calcular el total de gasto (50% + 100%)
     const totalGasto = gasto50Num + gasto100Num;
 
@@ -163,8 +149,59 @@
         }
     });
 
+        // Datos del gráfico de histórico
+    const meses = @Html.Raw(Json.Serialize(ViewData["Meses"]));
+    const horas50Historico = @Html.Raw(Json.Serialize(ViewData["Horas50Historico"]));
+    const horas100Historico = @Html.Raw(Json.Serialize(ViewData["Horas100Historico"]));
 
-
+    // Gráfico de histórico de horas
+    const horasHistoricasChart = document.getElementById('horasHistoricasChart').getContext('2d');
+    new Chart(horasHistoricasChart, {
+        type: 'line',
+        data: {
+            labels: meses, // Etiquetas de los meses
+            datasets: [
+                {
+                    label: 'Horas 50%',
+                    data: horas50Historico,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true
+                },
+                {
+                    label: 'Horas 100%',
+                    data: horas100Historico,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Histórico de Horas por Mes'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Meses'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Horas'
+                    }
+                }
+            }
+        }
+    });
 
     function cargarFormulario() {
         const form = document.getElementById('formHoras');
