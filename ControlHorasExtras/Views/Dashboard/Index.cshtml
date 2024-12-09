@@ -78,6 +78,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
     // Datos para gráficos
     const horas50 = @Html.Raw(Json.Serialize(ViewData["Horas50"] ?? 0));
@@ -107,8 +108,29 @@
                 data: [horas50, horas100],
                 backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)']
             }]
-        }
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                datalabels: {
+                    anchor: 'end', // Posición de la etiqueta
+                    align: 'top',  // Alineación de la etiqueta
+                    formatter: Math.round, // Formatear los números (opcional)
+                    font: {
+                        weight: 'bold',
+                        size: 12
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        },
+        plugins: [ChartDataLabels] // Activar el plugin de DataLabels
     });
+
 
         // Calcular el total de gasto (50% + 100%)
     const totalGasto = gasto50Num + gasto100Num;
@@ -119,12 +141,12 @@
     // Gráfico de Gasto Mensual
     const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
     new Chart(gastoMesChart, {
-        type: 'bar',  // Cambié 'line' a 'bar'
+        type: 'bar',
         data: {
             labels: ['Gasto 50%', 'Gasto 100%'],
             datasets: [{
                 label: 'Gasto Mensual',
-                data: [gasto50Num, gasto100Num],  // Usar las variables numéricas
+                data: [gasto50Num, gasto100Num],
                 backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)'],
                 borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
                 borderWidth: 1
@@ -135,19 +157,30 @@
             plugins: {
                 title: {
                     display: true,
-                    text: `Gasto en horas extras: ${totalGastoFormatted}`, // Mostrar el total en el título
+                    text: `TOTAL: ${totalGastoFormatted}`, // Mostrar el total en el título
                     font: {
                         size: 18
+                    }
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: value => value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }),
+                    font: {
+                        weight: 'bold',
+                        size: 12
                     }
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true  // Asegurarse de que el eje Y comience en 0
+                    beginAtZero: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
+
 
         // Datos del gráfico de histórico
     const meses = @Html.Raw(Json.Serialize(ViewData["Meses"]));
