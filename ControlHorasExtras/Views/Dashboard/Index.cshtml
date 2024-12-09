@@ -80,13 +80,21 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Datos para gráficos
-        const horas50 = @Html.Raw(ViewData["Horas50"] ?? 0);
-    const horas100 = @Html.Raw(ViewData["Horas100"] ?? 0);
-    const gastoDelMes = @Html.Raw(ViewData["GastoDelMes"] ?? 0);
+    const horas50 = @Html.Raw(Json.Serialize(ViewData["Horas50"] ?? 0));
+    const horas100 = @Html.Raw(Json.Serialize(ViewData["Horas100"] ?? 0));
+    const gasto50 = @Html.Raw(Json.Serialize(ViewData["Gasto50"] ?? 0));
+    const gasto100 = @Html.Raw(Json.Serialize(ViewData["Gasto100"] ?? 0));
 
-    console.log("Horas 50 del Mes:", horas50);
-    console.log("Horas 100 del Mes:", horas100);
-    console.log("Gasto del Mes:", gastoDelMes);
+    // Convertir a números en caso de que sean cadenas vacías
+    const horas50Num = parseFloat(horas50) || 0;
+    const horas100Num = parseFloat(horas100) || 0;
+    const gasto50Num = parseFloat(gasto50) || 0;
+    const gasto100Num = parseFloat(gasto100) || 0;
+
+    console.log("Horas 50 del Mes:", horas50Num);
+    console.log("Horas 100 del Mes:", horas100Num);
+    console.log("Gasto 50 del Mes:", gasto50Num);
+    console.log("Gasto 100 del Mes:", gasto100Num);
 
     // Inicializar gráficos
     const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
@@ -102,19 +110,61 @@
         }
     });
 
+    // const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
+    // new Chart(gastoMesChart, {
+    //     type: 'line',
+    //     data: {
+    //         labels: ['Gasto del Mes'],
+    //         datasets: [{
+    //             label: 'Gasto Mensual',
+    //             data: [gastoDelMes],
+    //             borderColor: 'rgba(255, 99, 132, 1)',
+    //             fill: false
+    //         }]
+    //     }
+    // });
+
+        // Calcular el total de gasto (50% + 100%)
+    const totalGasto = gasto50Num + gasto100Num;
+
+    // Formatear el total en formato de moneda (puedes ajustar el formato a lo que necesites)
+    const totalGastoFormatted = totalGasto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+
+    // Gráfico de Gasto Mensual
     const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
     new Chart(gastoMesChart, {
-        type: 'line',
+        type: 'bar',  // Cambié 'line' a 'bar'
         data: {
-            labels: ['Gasto del Mes'],
+            labels: ['Gasto 50%', 'Gasto 100%'],
             datasets: [{
                 label: 'Gasto Mensual',
-                data: [gastoDelMes],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                fill: false
+                data: [gasto50Num, gasto100Num],  // Usar las variables numéricas
+                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
+                borderWidth: 1
             }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Gasto en horas extras: ${totalGastoFormatted}`, // Mostrar el total en el título
+                    font: {
+                        size: 18
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true  // Asegurarse de que el eje Y comience en 0
+                }
+            }
         }
     });
+
+
+
 
     function cargarFormulario() {
         const form = document.getElementById('formHoras');
