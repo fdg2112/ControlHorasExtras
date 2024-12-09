@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ControlHorasExtras.Models;
 
-public partial class CategoriasSalariale
+public partial class CategoriasSalariales
 {
     [Key]
     [Column("CategoriaID")]

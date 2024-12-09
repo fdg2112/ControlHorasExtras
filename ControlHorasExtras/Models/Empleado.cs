@@ -38,7 +38,7 @@ public partial class Empleado
 
     [ForeignKey("CategoriaId")]
     [InverseProperty("Empleados")]
-    public virtual CategoriasSalariale Categoria { get; set; } = null!;
+    public virtual CategoriasSalariales Categoria { get; set; } = null!;
 
     [InverseProperty("Empleado")]
     public virtual ICollection<HorasExtra> HorasExtras { get; set; } = new List<HorasExtra>();

@@ -21,11 +21,11 @@ public partial class HorasExtra
     [Column(TypeName = "datetime")]
     public DateTime FechaHoraFin { get; set; }
 
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public int CantidadHoras { get; set; }
+
     [StringLength(50)]
     public string TipoHora { get; set; } = null!;
-
-    [StringLength(200)]
-    public string Lugar { get; set; } = null!;
 
     [Column("AreaID")]
     public int AreaId { get; set; }

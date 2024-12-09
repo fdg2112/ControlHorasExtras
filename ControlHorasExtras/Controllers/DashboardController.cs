@@ -19,124 +19,6 @@ namespace ControlHorasExtras.Controllers
             _context = context;
         }
 
-        //public async Task<IActionResult> Index()
-        //{
-        //    // Obtener los claims del usuario logueado
-        //    var usuarioIdClaim = User.FindFirst("UsuarioId");
-        //    var rolClaim = User.FindFirst("Rol");
-        //    var nombreClaim = User.FindFirst("Nombre");
-        //    var apellidoClaim = User.FindFirst("Apellido");
-        //    var areaIdClaim = User.FindFirst("AreaId");
-        //    var secretariaIdClaim = User.FindFirst("SecretariaId");
-        //    if (usuarioIdClaim == null || rolClaim == null)
-        //    {
-        //        return Unauthorized(); // Redirigir a una página de error o al login
-        //    }
-
-        //    // Parsear los valores de los claims
-        //    var usuarioId = int.Parse(usuarioIdClaim.Value);
-        //    var rol = rolClaim.Value;
-        //    var nombre = nombreClaim.Value;
-        //    var apellido = apellidoClaim.Value;
-        //    var areaId = areaIdClaim.Value;
-        //    var secretariaId = secretariaIdClaim.Value;
-
-        //    // Filtrar los datos según el rol
-        //    IQueryable<HorasExtra> query = _context.HorasExtras;
-
-        //    if (rol == "Jefe de Área")
-        //    {
-        //        var areaID = await _context.Usuarios
-        //            .Where(u => u.UsuarioId == usuarioId)
-        //            .Select(u => u.AreaId)
-        //            .FirstOrDefaultAsync();
-
-        //        query = query.Where(h => h.AreaId == areaID);
-        //    }
-        //    else if (rol == "Secretario")
-        //    {
-        //        var secretariaID = await _context.Usuarios
-        //            .Where(u => u.UsuarioId == usuarioId)
-        //            .Select(u => u.SecretariaId)
-        //            .FirstOrDefaultAsync();
-
-        //        query = query.Where(h => h.SecretariaId == secretariaID);
-        //    }
-
-        //    // Obtener datos del dashboard
-        //    var horasDelMes = await query
-        //        .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-        //        .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin));
-
-        //    var gastoDelMes = await query
-        //        .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-        //        .SumAsync(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin) * (h.TipoHora == "50" ? 1.5 : 2.0));
-
-        //    // Preparar datos para la vista
-        //    ViewData["HorasDelMes"] = horasDelMes;
-        //    ViewData["GastoDelMes"] = gastoDelMes;
-        //    ViewData["Nombre"] = nombreClaim;
-
-        //    return View();
-        //}
-
-        //public async Task<IActionResult> Index()
-        //{
-        //    // Obtener los claims del usuario logueado
-        //    var usuarioIdClaim = User.FindFirst("UsuarioId");
-        //    var rolClaim = User.FindFirst("Rol");
-        //    var nombreClaim = User.FindFirst("Nombre");
-        //    var apellidoClaim = User.FindFirst("Apellido");
-        //    var areaIdClaim = User.FindFirst("AreaId");
-        //    var secretariaIdClaim = User.FindFirst("SecretariaId");
-
-        //    if (usuarioIdClaim == null || rolClaim == null)
-        //    {
-        //        return Unauthorized(); // Redirigir a una página de error o al login
-        //    }
-
-        //    // Parsear los valores de los claims
-        //    var usuarioId = int.Parse(usuarioIdClaim.Value);
-        //    var rol = rolClaim.Value;
-        //    var nombre = nombreClaim.Value;
-        //    var apellido = nombreClaim.Value;
-        //    int? areaId = string.IsNullOrEmpty(areaIdClaim?.Value) ? null : int.Parse(areaIdClaim.Value);
-        //    int secretariaId = int.Parse(secretariaIdClaim.Value);
-
-        //    // Filtrar los datos según el rol
-        //    IQueryable<HorasExtra> query = _context.HorasExtras.AsQueryable();
-
-        //    if (rol == "Jefe de Área")
-        //    {
-        //        if (areaId.HasValue)
-        //        {
-        //            query = query.Where(h => h.AreaId == areaId);
-        //        }
-        //    }
-        //    else if (rol == "Secretario")
-        //    {
-        //        query = query.Where(h => h.SecretariaId == secretariaId);
-        //    }
-
-        //    // Obtener datos del dashboard
-        //    var horasDelMes = await query
-        //        .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-        //        .Select(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin))
-        //        .SumAsync();
-
-        //    var gastoDelMes = await query
-        //        .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-        //        .Select(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin) * (h.TipoHora == "50" ? 1.5 : 2.0))
-        //        .SumAsync();
-
-        //    // Preparar datos para la vista
-        //    ViewData["HorasDelMes"] = horasDelMes;
-        //    ViewData["GastoDelMes"] = gastoDelMes;
-        //    ViewData["Nombre"] = nombreClaim.Value;
-
-        //    return View();
-        //}
-
         public async Task<IActionResult> Index()
         {
             // Obtener los claims del usuario logueado
@@ -173,20 +55,27 @@ namespace ControlHorasExtras.Controllers
                 query = query.Where(h => h.SecretariaId == secretariaId);
             }
 
-            // Filtrar por mes y año actuales
+            // Obtener el mes y año actuales
+            var mesActual = DateTime.Now.Month;
+            var anioActual = DateTime.Now.Year;
+
             var horasDelMes = await query
-                .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-                .Select(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin))
-                .SumAsync();
+                .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
+                .GroupBy(h => h.TipoHora)
+                .Select(g => new
+                {
+                    TipoHora = g.Key, // 50% o 100%
+                    TotalHoras = g.Sum(h => h.CantidadHoras)
+                })
+                .ToListAsync();
 
-            var gastoDelMes = await query
-                .Where(h => h.FechaHoraInicio.Month == DateTime.Now.Month && h.FechaHoraInicio.Year == DateTime.Now.Year)
-                .Select(h => EF.Functions.DateDiffHour(h.FechaHoraInicio, h.FechaHoraFin) * (h.TipoHora == "50" ? 1.5 : 2.0))
-                .SumAsync();
+            // Procesa el resultado para obtener valores por separado
+            var horas50 = horasDelMes.FirstOrDefault(h => h.TipoHora == "50%")?.TotalHoras ?? 0;
+            var horas100 = horasDelMes.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0;
 
-            // Preparar datos para la vista
-            ViewData["HorasDelMes"] = horasDelMes;
-            ViewData["GastoDelMes"] = gastoDelMes;
+            // Agrega datos al ViewData
+            ViewData["Horas50"] = horas50;
+            ViewData["Horas100"] = horas100;
 
             return View();
         }

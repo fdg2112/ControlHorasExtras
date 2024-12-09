@@ -64,46 +64,6 @@
             <input type="datetime-local" id="fechaFin" class="form-control">
         </div>
         <div class="mb-3">
-            <label for="lugar" class="form-label">Lugar</label>
-            <input type="text" id="lugar" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label for="secretaria" class="form-label">Secretaría</label>
-            <select id="secretaria" class="form-control">
-                <option value="">Seleccionar Secretaría</option>
-                @if (ViewData["Secretarias"] != null && ViewData["Secretarias"] is List<ControlHorasExtras.Models.Secretaria> secretarias)
-                {
-                    foreach (var secretaria in secretarias)
-                    {
-                        <option value="@secretaria.SecretariaId">@secretaria.NombreSecretaria</option>
-                    }
-                }
-                }
-                else
-                {
-                <option>No hay secretarías disponibles</option>
-                }
-
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="area" class="form-label">Área</label>
-            <select id="area" class="form-control">
-                <option value="">Seleccionar Área</option>
-                @if (ViewData["Areas"] != null && ViewData["Areas"] is List<ControlHorasExtras.Models.Area> areas)
-                {
-                    foreach (var area in areas)
-                    {
-                        <option value="@area.AreaId">@area.NombreArea</option>
-                    }
-                }
-                else
-                {
-                    <option value="">No hay datos disponibles</option>
-                }
-            </select>
-        </div>
-        <div class="mb-3">
             <label for="tipoHora" class="form-label">Tipo de Hora</label>
             <select id="tipoHora" class="form-control">
                 <option value="50">50%</option>
@@ -120,68 +80,41 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Datos para gráficos
-    const horasDelMes = @Html.Raw(Json.Serialize(ViewData["HorasDelMes"] ?? new List<object>()));
-    const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
-    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
+        const horas50 = @Html.Raw(ViewData["Horas50"] ?? 0);
+    const horas100 = @Html.Raw(ViewData["Horas100"] ?? 0);
+    const gastoDelMes = @Html.Raw(ViewData["GastoDelMes"] ?? 0);
 
+    console.log("Horas 50 del Mes:", horas50);
+    console.log("Horas 100 del Mes:", horas100);
+    console.log("Gasto del Mes:", gastoDelMes);
+
+    // Inicializar gráficos
+    const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
     new Chart(horasMesChart, {
         type: 'bar',
         data: {
-            labels: (horasDelMes || []).map(h => h.Mes),
+            labels: ['50%', '100%'],
             datasets: [{
                 label: 'Horas Realizadas',
-                data: (horasDelMes || []).map(h => h.TotalHoras),
-                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                data: [horas50, horas100],
+                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)']
             }]
         }
     });
 
+    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
     new Chart(gastoMesChart, {
         type: 'line',
         data: {
-            labels: (horasDelMes || []).map(h => h.Mes),
+            labels: ['Gasto del Mes'],
             datasets: [{
                 label: 'Gasto Mensual',
-                data: (horasDelMes || []).map(h => h.TotalHoras * 150), // Ejemplo de cálculo
+                data: [gastoDelMes],
                 borderColor: 'rgba(255, 99, 132, 1)',
                 fill: false
             }]
         }
     });
-
-    // const horasDelMes = @Html.Raw(ViewData["HorasDelMes"] ?? 0);
-    // const gastoDelMes = @Html.Raw(ViewData["GastoDelMes"] ?? 0);
-
-    // console.log("Horas del Mes:", horasDelMes);
-    // console.log("Gasto del Mes:", gastoDelMes);
-
-    // // Inicializar gráficos
-    // const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
-    // new Chart(horasMesChart, {
-    //     type: 'bar',
-    //     data: {
-    //         labels: ['Horas del Mes'],
-    //         datasets: [{
-    //             label: 'Horas Realizadas',
-    //             data: [horasDelMes],
-    //             backgroundColor: 'rgba(75, 192, 192, 0.6)'
-    //         }]
-    //     }
-    // });
-
-    // const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
-    // new Chart(gastoMesChart, {
-    //     type: 'line',
-    //     data: {
-    //         labels: ['Gasto del Mes'],
-    //         datasets: [{
-    //             label: 'Gasto Mensual',
-    //             data: [gastoDelMes],
-    //             borderColor: 'rgba(255, 99, 132, 1)',
-    //             fill: false
-    //         }]
-    //     }
-    // });
 
     function cargarFormulario() {
         const form = document.getElementById('formHoras');

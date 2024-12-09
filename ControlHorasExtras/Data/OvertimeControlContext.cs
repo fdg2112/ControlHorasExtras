@@ -18,7 +18,7 @@ public partial class OvertimeControlContext : DbContext
 
     public virtual DbSet<Area> Areas { get; set; } = null!;
     public virtual DbSet<AuditoriaLogin> AuditoriaLogins { get; set; } = null!;
-    public virtual DbSet<CategoriasSalariale> CategoriasSalariales { get; set; } = null!;
+    public virtual DbSet<CategoriasSalariales> CategoriasSalariales { get; set; } = null!;
     public virtual DbSet<Empleado> Empleados { get; set; } = null!;
     public virtual DbSet<HorasExtra> HorasExtras { get; set; } = null!;
     public virtual DbSet<Rol> Roles { get; set; } = null!;
@@ -52,7 +52,7 @@ public partial class OvertimeControlContext : DbContext
                 .HasConstraintName("FK__Auditoria__Usuar__5812160E");
         });
 
-        modelBuilder.Entity<CategoriasSalariale>(entity =>
+        modelBuilder.Entity<CategoriasSalariales>(entity =>
         {
             entity.HasKey(e => e.CategoriaId).HasName("PK__Categori__F353C1C5FF775B23");
         });
