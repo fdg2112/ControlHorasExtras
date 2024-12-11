@@ -6,6 +6,7 @@ using ControlHorasExtras.Data;
 using Microsoft.AspNetCore.Authorization;
 using ControlHorasExtras.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Globalization;
 
 namespace ControlHorasExtras.Controllers
 {
@@ -129,6 +130,10 @@ namespace ControlHorasExtras.Controllers
                     .Sum(h => h.TotalHoras))
                 .ToList();
 
+            // Calcular el total de gasto (50% + 100%)
+            var totalGasto = gasto50 + gasto100;  // Sumar los gastos
+            var totalGastoFormatted = totalGasto.ToString("C", new CultureInfo("es-AR")); // Formato monetario argentino
+
             // Agrega datos al ViewData
             ViewData["Horas50"] = horas50;
             ViewData["Horas100"] = horas100;
@@ -137,6 +142,7 @@ namespace ControlHorasExtras.Controllers
             ViewData["Meses"] = meses;
             ViewData["Horas50Historico"] = horas50Historico;
             ViewData["Horas100Historico"] = horas100Historico;
+            ViewData["GastoTotalFormatted"] = totalGastoFormatted; // Pasar el total formateado a la vista
 
             return View();
         }

@@ -25,7 +25,7 @@ public partial class HorasExtra
     public int CantidadHoras { get; set; }
 
     [StringLength(50)]
-    public string TipoHora { get; set; } = null!;
+    public string TipoHora { get; set; }
 
     [Column("AreaID")]
     public int AreaId { get; set; }
@@ -35,13 +35,13 @@ public partial class HorasExtra
 
     [ForeignKey("AreaId")]
     [InverseProperty("HorasExtras")]
-    public virtual Area Area { get; set; } = null!;
+    public virtual Area Area { get; set; }
 
     [ForeignKey("EmpleadoId")]
     [InverseProperty("HorasExtras")]
-    public virtual Empleado Empleado { get; set; } = null!;
+    public virtual Empleado Empleado { get; set; }
 
     [ForeignKey("SecretariaId")]
     [InverseProperty("HorasExtras")]
-    public virtual Secretaria Secretaria { get; set; } = null!;
+    public virtual Secretaria Secretaria { get; set; }
 }

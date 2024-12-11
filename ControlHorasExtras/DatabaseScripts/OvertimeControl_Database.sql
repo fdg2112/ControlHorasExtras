@@ -101,7 +101,7 @@ CREATE TABLE HorasExtras (
     FechaHoraFin DATETIME NOT NULL,
     CantidadHoras AS DATEDIFF(HOUR, FechaHoraInicio, FechaHoraFin),
     TipoHora NVARCHAR(50) NOT NULL CHECK (TipoHora IN ('50%', '100%')),
-    AreaID INT NOT NULL,
+    AreaID INT NULL,
     SecretariaID INT NOT NULL,
     FOREIGN KEY (EmpleadoID) REFERENCES Empleados(EmpleadoID),
     FOREIGN KEY (AreaID) REFERENCES Areas(AreaID),

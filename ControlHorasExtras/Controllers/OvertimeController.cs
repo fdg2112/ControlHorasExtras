@@ -24,28 +24,7 @@ namespace ControlHorasExtras.Controllers
         // Modificar el método Dashboard para incluir empleados
         public IActionResult Dashboard()
         {
-            ViewData["Secretarias"] = GetSecretarias();
-            ViewData["Areas"] = GetAreas();
-            ViewData["Empleados"] = GetEmpleados();
-
-            // Otros datos para la vista
-            ViewData["HorasDelMes"] = 120; // Ejemplo
-            ViewData["GastoDelMes"] = 45000.50; // Ejemplo
-
             return View();
-        }
-
-
-        // Método privado para obtener Secretarías
-        private List<Secretaria> GetSecretarias()
-        {
-            return _context.Secretarias.ToList(); // Carga desde la base de datos
-        }
-
-        // Método privado para obtener Áreas
-        private List<Area> GetAreas()
-        {
-            return _context.Areas.ToList(); // Carga desde la base de datos
         }
 
         // Mostrar el formulario de carga
@@ -96,6 +75,7 @@ namespace ControlHorasExtras.Controllers
             });
         }
 
+
         //Procesar la carga de horas extras
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -125,5 +105,49 @@ namespace ControlHorasExtras.Controllers
             ViewData["Areas"] = _context.Areas.ToList();
             return View(horasExtra);
         }
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(HorasExtra horasExtra)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        // Obtener área y secretaría del empleado
+        //        var empleado = await _context.Empleados
+        //            .Where(e => e.EmpleadoId == horasExtra.EmpleadoId)
+        //            .Select(e => new { e.AreaId, e.SecretariaId })
+        //            .FirstOrDefaultAsync();
+
+        //        if (empleado == null)
+        //        {
+        //            return Json(new { success = false, message = "El empleado seleccionado no existe." });
+        //        }
+
+        //        // Asignar Área y Secretaría al modelo
+        //        horasExtra.AreaId = empleado.AreaId ?? 0; // Manejar nulos si AreaId puede ser nulo
+        //        horasExtra.SecretariaId = empleado.SecretariaId;
+
+        //        // Validar que las horas no se solapen
+        //        var solapamiento = await _context.HorasExtras
+        //            .AnyAsync(h => h.EmpleadoId == horasExtra.EmpleadoId &&
+        //                           h.FechaHoraInicio.Date == horasExtra.FechaHoraInicio.Date &&
+        //                           !(h.FechaHoraFin <= horasExtra.FechaHoraInicio || h.FechaHoraInicio >= horasExtra.FechaHoraFin));
+
+        //        if (solapamiento)
+        //        {
+        //            return Json(new { success = false, message = "Las horas extras se solapan con otras ya registradas." });
+        //        }
+
+        //        // Guardar en la base de datos
+        //        _context.Add(horasExtra);
+        //        await _context.SaveChangesAsync();
+
+        //        return Json(new { success = true, message = "Horas extras guardadas exitosamente." });
+        //    }
+
+        //    return Json(new { success = false, message = "Error al guardar las horas extras. Por favor, revise los datos ingresados." });
+        //}
     }
 }
+
+
