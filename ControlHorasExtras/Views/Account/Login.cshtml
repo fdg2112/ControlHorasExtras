@@ -4,29 +4,92 @@
     ViewData["Title"] = "Login";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="login-container">
+    <div class="login-form">
+        <h2>@ViewData["Title"]</h2>
 
-<form asp-action="Login" method="post">
-    <div class="form-group">
-        <label for="nombreUsuario">Nombre de usuario</label>
-        <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" required asp-for="NombreUsuario" />
-        @Html.ValidationMessageFor(model => model.NombreUsuario, "", new { @class = "text-danger" })
-    </div>
-    <div class="form-group">
-        <label for="contraseña">Contraseña</label>
-        <input type="password" id="contraseña" name="contraseña" class="form-control" required asp-for="Contraseña" />
-        @Html.ValidationMessageFor(model => model.Contraseña, "", new { @class = "text-danger" })
-    </div>
-    <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-</form>
+        <form asp-action="Login" method="post">
+            <div class="form-group">
+                <label for="nombreUsuario">Nombre de usuario</label>
+                <input type="text" id="nombreUsuario" name="nombreUsuario" class="form-control" required asp-for="NombreUsuario" />
+                @Html.ValidationMessageFor(model => model.NombreUsuario, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                <label for="contraseña">Contraseña</label>
+                <input type="password" id="contraseña" name="contraseña" class="form-control" required asp-for="Contraseña" />
+                @Html.ValidationMessageFor(model => model.Contraseña, "", new { @class = "text-danger" })
+            </div>
+            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        </form>
 
-<!-- Mostrar los errores desde ModelState -->
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger mt-2">
-        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        <!-- Mostrar los errores desde ModelState -->
+        @if (!ViewData.ModelState.IsValid)
         {
-            <p>@error.ErrorMessage</p>
+            <div class="alert alert-danger mt-2">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
         }
     </div>
-}
+</div>
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    }
+
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    .login-form {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .login-form h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        background-color: #2575fc;
+        border: none;
+        color: white;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #1e63cc;
+    }
+
+    .alert {
+        margin-top: 15px;
+    }
+
+</style>

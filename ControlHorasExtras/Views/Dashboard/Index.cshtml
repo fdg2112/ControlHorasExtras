@@ -34,6 +34,7 @@
     <form id="formHoras" class="hidden mt-3">
         @Html.AntiForgeryToken() <!-- Esto agrega el token antifalsificación -->
         <h4>Cargar Horas Extras</h4>
+        <!-- Campo de Empleados -->
         <div class="mb-3">
             <label for="empleado" class="form-label">Empleado</label>
             <select id="empleado" name="EmpleadoId" class="form-select" required onchange="actualizarAreaYSecretaria()">
@@ -52,8 +53,11 @@
                     }
                 }
             </select>
-        </div>
 
+        </div>
+        <!-- Campos ocultos para AreaId y SecretariaId -->
+        <input type="hidden" id="areaId" name="AreaId" value="">
+        <input type="hidden" id="secretariaId" name="SecretariaId" value="">
         <!-- Campo de Secretaría (solo lectura) -->
         <div class="mb-3">
             <label for="secretaria" class="form-label">Secretaría</label>
@@ -61,7 +65,6 @@
                 <option value="">Seleccione un empleado primero</option>
             </select>
         </div>
-
         <!-- Campo de Área (solo lectura) -->
         <div class="mb-3">
             <label for="area" class="form-label">Área</label>
@@ -69,15 +72,17 @@
                 <option value="">Seleccione un empleado primero</option>
             </select>
         </div>
-
+        <!-- Campo Hora Inicio -->
         <div class="mb-3">
             <label for="fechaInicio" class="form-label">Fecha y Hora Inicio</label>
             <input type="datetime-local" id="fechaInicio" name="FechaHoraInicio" class="form-control">
         </div>
+        <!-- Campo Hora Fin -->
         <div class="mb-3">
             <label for="fechaFin" class="form-label">Fecha y Hora Fin</label>
             <input type="datetime-local" id="fechaFin" name="FechaHoraFin" class="form-control">
         </div>
+        <!-- Campo Tipo Hora -->
         <div class="mb-3">
             <label for="tipoHora" class="form-label">Tipo de Hora</label>
             <select id="tipoHora" name="TipoHora" class="form-control">
@@ -85,35 +90,13 @@
                 <option value="100%">100%</option>
             </select>
         </div>
+        <!-- Botones Guardar y Cerrar -->
         <div class="d-flex justify-content-between">
             <button type="submit" class="btn btn-success">Guardar</button>
             <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cerrar</button>
         </div>
     </form>
 </div>
-
-<script>
-    function actualizarAreaYSecretaria() {
-        const empleadoSelect = document.getElementById('empleado');
-        const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
-
-        const areaId = selectedOption.getAttribute('data-area-id') || '';
-        const areaNombre = selectedOption.getAttribute('data-area-nombre') || 'Sin Área';
-        const secretariaId = selectedOption.getAttribute('data-secretaria-id') || '';
-        const secretariaNombre = selectedOption.getAttribute('data-secretaria-nombre') || 'Sin Secretaría';
-
-        // Actualizar los valores del área
-        const areaSelect = document.getElementById('area');
-        areaSelect.innerHTML = `<option value="${areaId}" selected>${areaNombre}</option>`;
-        areaSelect.disabled = true;  // Mantener el campo como solo lectura
-
-        // Actualizar los valores de la secretaría
-        const secretariaSelect = document.getElementById('secretaria');
-        secretariaSelect.innerHTML = `<option value="${secretariaId}" selected>${secretariaNombre}</option>`;
-        secretariaSelect.disabled = true;  // Mantener el campo como solo lectura
-    }
-</script>
-
 
 @* 
 ---------------------------------------- SCRIPT GRAFICOS -----------------------------------------------
@@ -299,21 +282,21 @@
 ---------------------------------------- SCRIPT CARGAR HORAS -----------------------------------------------
  *@
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    // Funciones relacionadas con el formulario
+    const formHoras = document.getElementById('formHoras');
+    const btnCargarHoras = document.getElementById('btnCargarHoras');
+    let empleadoId = null;  // Variable global para almacenar el ID del empleado
+
     function cargarFormulario() {
-        const form = document.getElementById('formHoras');
-        const boton = document.getElementById('btnCargarHoras');
-        // Mostrar/ocultar el formulario
-        form.classList.toggle('hidden');
-        boton.classList.toggle('hidden');
-        if (!form.classList.contains('hidden')) {
+        formHoras.classList.toggle('hidden');
+        btnCargarHoras.classList.toggle('hidden');
+        if (!formHoras.classList.contains('hidden')) {
             // Realizar la solicitud AJAX para cargar los datos
-            fetch('/Overtime/Create') // Llamar al método Create del controlador
+            fetch('/Overtime/Create')
                 .then(response => response.json())
-                .then(data => {
-                    // Procesar los datos y cargar las opciones en el formulario
-                    cargarOpcionesFormulario(data);
-                })
+                .then(data => cargarOpcionesFormulario(data))
                 .catch(error => console.error('Error al cargar los datos:', error));
         }
     }
@@ -323,25 +306,80 @@
         const empleadoSelect = document.getElementById('empleado');
         empleadoSelect.innerHTML = '<option value="" selected disabled>Seleccione un empleado</option>';
         data.empleados.forEach(empleado => {
-            empleadoSelect.innerHTML += `<option value="${empleado.id}">${empleado.legajo} - ${empleado.nombre} ${empleado.apellido}</option>`;
+            empleadoSelect.innerHTML += `
+                <option value="${empleado.empleadoId}"
+                        data-area-id="${empleado.areaId}"
+                        data-area-nombre="${empleado.areaNombre}"
+                        data-secretaria-id="${empleado.secretariaId}"
+                        data-secretaria-nombre="${empleado.secretariaNombre}">
+                    ${empleado.legajo} - ${empleado.nombre} ${empleado.apellido}
+                </option>`;
         });
     }
 
     function toggleForm() {
-        const form = document.getElementById('formHoras');
-        const boton = document.getElementById('btnCargarHoras');
-        form.classList.toggle('hidden'); // Mostrar/ocultar el formulario
-        boton.classList.toggle('hidden'); // Mostrar/ocultar el botón
+        formHoras.classList.toggle('hidden');
+        btnCargarHoras.classList.toggle('hidden');
     }
-</script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    // Función para actualizar los campos de área y secretaría según el empleado seleccionado
+    // function actualizarAreaYSecretaria() {
+    //     const empleadoSelect = document.getElementById('empleado');
+    //     const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
 
-<script>
-        document.getElementById('formHoras').addEventListener('submit', function (e) {
+    //     // Ahora extraemos correctamente el valor de EmpleadoId desde 'value'
+    //     empleadoId = selectedOption.value; // Este es el valor que debería ser el EmpleadoId
+    //     console.log("Empleado ID seleccionado:", empleadoId);  // Verifica si el ID del empleado es correcto
+
+    //     // Si no se está seleccionando correctamente, esto imprimirá 'undefined'
+    //     if (empleadoId === "undefined") {
+    //         console.log("Error: El EmpleadoId es undefined.");
+    //     }
+
+    //     // Recuperamos los datos adicionales del área y la secretaría
+    //     const areaId = selectedOption.getAttribute('data-area-id') || '';
+    //     const areaNombre = selectedOption.getAttribute('data-area-nombre') || 'Sin Área';
+    //     const secretariaId = selectedOption.getAttribute('data-secretaria-id') || '';
+    //     const secretariaNombre = selectedOption.getAttribute('data-secretaria-nombre') || 'Sin Secretaría';
+
+    //     // Actualizamos los valores del área en el select correspondiente
+    //     const areaSelect = document.getElementById('area');
+    //     areaSelect.innerHTML = `<option value="${areaId}" selected>${areaNombre}</option>`;
+    //     areaSelect.disabled = true;  // Mantener el campo como solo lectura
+
+    //     // Actualizamos los valores de la secretaría en el select correspondiente
+    //     const secretariaSelect = document.getElementById('secretaria');
+    //     secretariaSelect.innerHTML = `<option value="${secretariaId}" selected>${secretariaNombre}</option>`;
+    //     secretariaSelect.disabled = true;  // Mantener el campo como solo lectura
+
+    //     // Asegúrate de que el empleado seleccionado tenga su ID correctamente actualizado en el formulario
+    //     document.getElementById('empleado').value = empleadoId;  // Esto garantiza que el valor se actualice correctamente
+    // }
+
+    function actualizarAreaYSecretaria() {
+        const empleadoSelect = document.getElementById('empleado');
+        const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
+
+        empleadoId = selectedOption.value;
+
+        const areaId = selectedOption.getAttribute('data-area-id') || '';
+        const areaNombre = selectedOption.getAttribute('data-area-nombre') || 'Sin Área';
+        const secretariaId = selectedOption.getAttribute('data-secretaria-id') || '';
+        const secretariaNombre = selectedOption.getAttribute('data-secretaria-nombre') || 'Sin Secretaría';
+
+        // Actualizar los selects visibles
+        document.getElementById('area').innerHTML = `<option value="${areaId}" selected>${areaNombre}</option>`;
+        document.getElementById('secretaria').innerHTML = `<option value="${secretariaId}" selected>${secretariaNombre}</option>`;
+
+        // Actualizar los campos ocultos que se envían al servidor
+        document.getElementById('areaId').value = areaId;
+        document.getElementById('secretariaId').value = secretariaId;
+    }
+
+
+    // Manejador del envío del formulario
+    function enviarFormulario(e) {
         e.preventDefault();
-
-        const empleadoId = document.getElementById('empleado').value;
         if (!empleadoId) {
             Swal.fire({
                 title: 'Error',
@@ -351,9 +389,10 @@
             });
             return;
         }
+        // Preparar los datos para enviar
+        const formData = new FormData(formHoras);
+        console.log("EmpleadoId desde submit:", empleadoId);  // Verifica si el ID se captura correctamente
 
-        // Continuar con el envío si todo está correcto
-        const formData = new FormData(this);
         fetch('/Overtime/Create', {
             method: 'POST',
             body: formData,
@@ -370,9 +409,7 @@
                     text: data.message,
                     icon: 'success',
                     confirmButtonText: 'OK'
-                }).then(() => {
-                    location.reload(); // Recargar la página para actualizar los gráficos
-                });
+                }).then(() => location.reload()); // Recargar la página
             } else {
                 Swal.fire({
                     title: 'Error',
@@ -391,8 +428,10 @@
                 confirmButtonText: 'OK'
             });
         });
-    });
+    }
 
+    // Asociar el manejador del formulario a la función 'enviarFormulario'
+    formHoras.addEventListener('submit', enviarFormulario);
 </script>
 
 
