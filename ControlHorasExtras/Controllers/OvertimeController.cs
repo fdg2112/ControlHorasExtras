@@ -85,6 +85,10 @@ namespace ControlHorasExtras.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(HorasExtra horasExtra)
         {
+            ModelState.Remove("Area");
+            ModelState.Remove("Secretaria");
+            ModelState.Remove("Empleado");
+
             if (ModelState.IsValid)
             {
                 // Obtener área y secretaría del empleado
