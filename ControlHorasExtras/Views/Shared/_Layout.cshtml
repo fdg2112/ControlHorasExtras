@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,15 +12,34 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand">Control de Horas Extras</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Botón de menú hamburguesa alineado a la izquierda -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Botón de Salir -->
+                <!-- Título de la marca a la izquierda del botón hamburguesa -->
+                <a class="navbar-brand" href="#">Control de Horas Extras</a>
+
+                <!-- Menú desplegable (solo visible cuando el usuario está autenticado) -->
                 @if (User.Identity.IsAuthenticated)
                 {
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="@Url.Action("Index", "Dashboard")">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Create", "HorasExtra")">Registrar Horas Extras</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Employee")">Empleados</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Reportes", "Informes")">Informes</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Botón de Salir -->
                     <div class="d-flex align-items-center">
                         <a asp-controller="Account" asp-action="Logout" class="btn btn-outline-danger btn-sm">Salir</a>
                     </div>
@@ -28,6 +47,7 @@
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -39,6 +59,7 @@
             &copy; 2024 - ControlHorasExtras - <a href="https://www.linkedin.com/in/frangonza90/" target="_blank" rel="noopener noreferrer">Franco Gonzalez</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

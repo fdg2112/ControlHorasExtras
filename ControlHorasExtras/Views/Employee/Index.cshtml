@@ -1,0 +1,263 @@
+﻿@{
+    ViewData["Title"] = "Gestión de Empleados";
+    var empleados = ViewData["Empleados"] as List<ControlHorasExtras.Models.Empleado>;
+}
+
+<h1>Gestión de Empleados</h1>
+
+<div class="container mt-4">
+    <h2>Empleados en tu Área y Secretaría</h2>
+
+    <!-- Tabla de empleados -->
+    @if (empleados != null && empleados.Count > 0)
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Legajo</th>
+                    <th>Apellido</th>
+                    <th>Nombre</th>
+                    <th>Categoría Salarial</th>
+                    <th>Área</th>
+                    <th>Secretaría</th>
+                    <th>Horas 50%</th>
+                    <th>Horas 100%</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var empleado in empleados)
+                {
+                    <tr>
+                        <td>@empleado.Legajo</td>
+                        <td>@empleado.Apellido</td>
+                        <td>@empleado.Nombre</td>
+                        <td>@empleado.Categoria?.NombreCategoria ?? "Sin categoría"</td>
+                        <td>@empleado.Area?.NombreArea</td>
+                        <td>@empleado.Secretaria?.NombreSecretaria</td>
+                        <td>@empleado.HorasExtras.Where(h => h.TipoHora == "50%").Count()</td>
+                        <td>@empleado.HorasExtras.Where(h => h.TipoHora == "100%").Count()</td>
+                        <td>
+                            <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No hay empleados disponibles.</p>
+    }
+
+        <thead>
+            <tr>
+                <th>Legajo</th>
+                <th>Apellido</th>
+                <th>Nombre</th>
+                <th>Categoría Salarial</th>
+                <th>Área</th>
+                <th>Secretaría</th>
+                <th>Horas 50%</th>
+                <th>Horas 100%</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var empleado in empleados)
+            {
+                <tr>
+                    <td>@empleado.Legajo</td>
+                    <td>@empleado.Apellido</td>
+                    <td>@empleado.Nombre</td>
+                    <td>@empleado.Categoria.NombreCategoria</td>
+                    <td>@empleado.Area?.NombreArea</td>
+                    <td>@empleado.Secretaria?.NombreSecretaria</td>
+                    <td>@empleado.HorasExtras.Where(h => h.TipoHora == "50%").Count()</td>
+                    <td>@empleado.HorasExtras.Where(h => h.TipoHora == "100%").Count()</td>
+                    <td>
+                        <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Formulario flotante para agregar nuevo empleado -->
+<div class="floating-form">
+    <button class="btn btn-primary" id="btnAgregarEmpleado" onclick="cargarFormulario()">Agregar Empleado</button>
+    <form id="formEmpleado" class="hidden mt-3">
+        @Html.AntiForgeryToken() <!-- Esto agrega el token antifalsificación -->
+        <h4>Agregar Nuevo Empleado</h4>
+
+        <!-- Campo de Legajo -->
+        <div class="mb-3">
+            <label for="legajo" class="form-label">Legajo</label>
+            <input type="number" class="form-control" id="legajo" name="Legajo" required>
+        </div>
+
+        <!-- Campo de Nombre -->
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="Nombre" required>
+        </div>
+
+        <!-- Campo de Apellido -->
+        <div class="mb-3">
+            <label for="apellido" class="form-label">Apellido</label>
+            <input type="text" class="form-control" id="apellido" name="Apellido" required>
+        </div>
+
+        <!-- Campo de Categoría Salarial -->
+        <div class="mb-3">
+            <label for="categoriaId" class="form-label">Categoría Salarial</label>
+            <select class="form-select" id="categoriaId" name="CategoriaId" required>
+                @if (ViewData["Categorias"] != null)
+                {
+                    var categorias = ViewData["Categorias"] as List<ControlHorasExtras.Models.CategoriasSalariales>;
+                    if (categorias != null && categorias.Any())
+                    {
+                        @foreach (var categoria in categorias)
+                        {
+                            <option value="@categoria.CategoriaId">@categoria.NombreCategoria</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="">No hay categorías disponibles</option>
+                    }
+                }
+                else
+                {
+                    <option value="">No se pudo cargar las categorías</option>
+                }
+            </select>
+
+        </div>
+
+        <!-- Campo de Área -->
+        <div class="mb-3">
+            <label for="areaId" class="form-label">Área</label>
+            <select class="form-select" id="areaId" name="AreaId" required>
+                @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
+                {
+                    <option value="@area.AreaId">@area.NombreArea</option>
+                }
+            </select>
+        </div>
+
+        <!-- Campo de Secretaría -->
+        <div class="mb-3">
+            <label for="secretariaId" class="form-label">Secretaría</label>
+            <select class="form-select" id="secretariaId" name="SecretariaId" required>
+                @foreach (var secretaria in ViewData["Secretarias"] as List<ControlHorasExtras.Models.Secretaria>)
+                {
+                    <option value="@secretaria.SecretariaId">@secretaria.NombreSecretaria</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cerrar</button>
+    </form>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const formEmpleado = document.getElementById('formEmpleado');
+    const btnAgregarEmpleado = document.getElementById('btnAgregarEmpleado');
+
+    function cargarFormulario() {
+        formEmpleado.classList.toggle('hidden');
+        btnAgregarEmpleado.classList.toggle('hidden');
+    }
+
+    function toggleForm() {
+        formEmpleado.classList.toggle('hidden');
+        btnAgregarEmpleado.classList.toggle('hidden');
+    }
+
+    formEmpleado.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(formEmpleado);
+        fetch('/Empleado/CreateEmpleado', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Éxito',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Ocurrió un error inesperado.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+    });
+</script>
+
+<style>
+    .floating-form {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 350px;
+        z-index: 9999;
+        font-size: 0.9rem;
+    }
+
+        .floating-form h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .floating-form .form-label {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .floating-form .form-control,
+        .floating-form .form-select {
+            font-size: 0.8rem;
+            padding: 6px;
+            height: 30px;
+        }
+
+        .floating-form button {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            margin-top: 10px;
+        }
+
+    .hidden {
+        display: none;
+    }
+</style>
