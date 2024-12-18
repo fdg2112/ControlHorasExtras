@@ -130,6 +130,7 @@ namespace ControlHorasExtras.Controllers
                 return Json(new { success = false, message = "Error al guardar las horas extras. Por favor, revise los datos ingresados." });
             }
         }
+
     }
 }
 

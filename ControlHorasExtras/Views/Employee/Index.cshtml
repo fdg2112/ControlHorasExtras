@@ -20,8 +20,6 @@
                     <th>Categoría Salarial</th>
                     <th>Área</th>
                     <th>Secretaría</th>
-                    <th>Horas 50%</th>
-                    <th>Horas 100%</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -32,11 +30,9 @@
                         <td>@empleado.Legajo</td>
                         <td>@empleado.Apellido</td>
                         <td>@empleado.Nombre</td>
-                        <td>@empleado.Categoria?.NombreCategoria ?? "Sin categoría"</td>
+                        <td>@empleado.Categoria?.NombreCategoria</td>
                         <td>@empleado.Area?.NombreArea</td>
                         <td>@empleado.Secretaria?.NombreSecretaria</td>
-                        <td>@empleado.HorasExtras.Where(h => h.TipoHora == "50%").Count()</td>
-                        <td>@empleado.HorasExtras.Where(h => h.TipoHora == "100%").Count()</td>
                         <td>
                             <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
                         </td>
@@ -47,48 +43,15 @@
     }
     else
     {
-        <p>No hay empleados disponibles.</p>
+        <p>No hay empleados disponibles para tu área o secretaría.</p>
     }
-
-        <thead>
-            <tr>
-                <th>Legajo</th>
-                <th>Apellido</th>
-                <th>Nombre</th>
-                <th>Categoría Salarial</th>
-                <th>Área</th>
-                <th>Secretaría</th>
-                <th>Horas 50%</th>
-                <th>Horas 100%</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var empleado in empleados)
-            {
-                <tr>
-                    <td>@empleado.Legajo</td>
-                    <td>@empleado.Apellido</td>
-                    <td>@empleado.Nombre</td>
-                    <td>@empleado.Categoria.NombreCategoria</td>
-                    <td>@empleado.Area?.NombreArea</td>
-                    <td>@empleado.Secretaria?.NombreSecretaria</td>
-                    <td>@empleado.HorasExtras.Where(h => h.TipoHora == "50%").Count()</td>
-                    <td>@empleado.HorasExtras.Where(h => h.TipoHora == "100%").Count()</td>
-                    <td>
-                        <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
 </div>
 
 <!-- Formulario flotante para agregar nuevo empleado -->
 <div class="floating-form">
     <button class="btn btn-primary" id="btnAgregarEmpleado" onclick="cargarFormulario()">Agregar Empleado</button>
     <form id="formEmpleado" class="hidden mt-3">
-        @Html.AntiForgeryToken() <!-- Esto agrega el token antifalsificación -->
+        @Html.AntiForgeryToken()
         <h4>Agregar Nuevo Empleado</h4>
 
         <!-- Campo de Legajo -->
@@ -133,17 +96,13 @@
                     <option value="">No se pudo cargar las categorías</option>
                 }
             </select>
-
         </div>
 
         <!-- Campo de Área -->
         <div class="mb-3">
             <label for="areaId" class="form-label">Área</label>
             <select class="form-select" id="areaId" name="AreaId" required>
-                @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
-                {
-                    <option value="@area.AreaId">@area.NombreArea</option>
-                }
+                <option value="" selected disabled>Seleccione un área</option>
             </select>
         </div>
 
@@ -151,10 +110,7 @@
         <div class="mb-3">
             <label for="secretariaId" class="form-label">Secretaría</label>
             <select class="form-select" id="secretariaId" name="SecretariaId" required>
-                @foreach (var secretaria in ViewData["Secretarias"] as List<ControlHorasExtras.Models.Secretaria>)
-                {
-                    <option value="@secretaria.SecretariaId">@secretaria.NombreSecretaria</option>
-                }
+                <option value="" selected disabled>Seleccione una secretaría</option>
             </select>
         </div>
 
@@ -170,9 +126,38 @@
     const btnAgregarEmpleado = document.getElementById('btnAgregarEmpleado');
 
     function cargarFormulario() {
-        formEmpleado.classList.toggle('hidden');
-        btnAgregarEmpleado.classList.toggle('hidden');
+        formEmpleado.classList.toggle("hidden");
+        btnAgregarEmpleado.classList.toggle("hidden");
+
+        if (!formEmpleado.classList.contains("hidden")) {
+            // Solicitar datos filtrados según el usuario logueado
+            fetch("/Employee/GetAreasAndSecretarias")
+                .then((response) => response.json())
+                .then((data) => {
+                    cargarOpcionesConSeleccion(data);
+                })
+                .catch((error) => console.error("Error al cargar las opciones:", error));
+        }
     }
+
+    function cargarOpcionesConSeleccion(data) {
+        // Cargar áreas
+        const areaSelect = document.getElementById("areaId");
+        areaSelect.innerHTML = '<option value="" disabled>Seleccione un área</option>';
+        data.areas.forEach((area) => {
+            const selected = data.defaultAreaId === area.id ? "selected" : "";
+            areaSelect.innerHTML += `<option value="${area.id}" ${selected}>${area.nombre}</option>`;
+        });
+
+        // Cargar secretarías
+        const secretariaSelect = document.getElementById("secretariaId");
+        secretariaSelect.innerHTML = '<option value="" disabled>Seleccione una secretaría</option>';
+        data.secretarias.forEach((secretaria) => {
+            const selected = data.defaultSecretariaId === secretaria.id ? "selected" : "";
+            secretariaSelect.innerHTML += `<option value="${secretaria.id}" ${selected}>${secretaria.nombre}</option>`;
+        });
+    }
+
 
     function toggleForm() {
         formEmpleado.classList.toggle('hidden');
@@ -218,6 +203,44 @@
             });
         });
     });
+
+    document.getElementById("legajo").addEventListener("blur", function () {
+    const legajoInput = this.value;
+
+    // Validar que sea un número de 3 dígitos
+    if (!/^\d{3}$/.test(legajoInput)) {
+        Swal.fire({
+            title: "Error",
+            text: "El legajo debe ser un número de 3 dígitos.",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+        this.value = ""; // Limpiar el campo
+        return;
+    }
+
+    // Verificar si el legajo ya existe en la base de datos
+    fetch(`/Employee/CheckLegajo?legajo=${legajoInput}`)
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.exists) {
+                Swal.fire({
+                    title: "Legajo ya registrado",
+                    html: `
+                        <p>El legajo ingresado pertenece a:</p>
+                        <p><strong>${data.empleado.Nombre} ${data.empleado.Apellido}</strong></p>
+                        <p>Área: ${data.empleado.AreaNombre}</p>
+                        <p>Secretaría: ${data.empleado.SecretariaNombre}</p>
+                    `,
+                    icon: "warning",
+                    confirmButtonText: "OK"
+                });
+                document.getElementById("legajo").value = ""; // Limpiar el campo
+            }
+        })
+        .catch((error) => console.error("Error al verificar el legajo:", error));
+    });
+
 </script>
 
 <style>

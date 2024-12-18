@@ -322,40 +322,6 @@
         btnCargarHoras.classList.toggle('hidden');
     }
 
-    // Función para actualizar los campos de área y secretaría según el empleado seleccionado
-    // function actualizarAreaYSecretaria() {
-    //     const empleadoSelect = document.getElementById('empleado');
-    //     const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
-
-    //     // Ahora extraemos correctamente el valor de EmpleadoId desde 'value'
-    //     empleadoId = selectedOption.value; // Este es el valor que debería ser el EmpleadoId
-    //     console.log("Empleado ID seleccionado:", empleadoId);  // Verifica si el ID del empleado es correcto
-
-    //     // Si no se está seleccionando correctamente, esto imprimirá 'undefined'
-    //     if (empleadoId === "undefined") {
-    //         console.log("Error: El EmpleadoId es undefined.");
-    //     }
-
-    //     // Recuperamos los datos adicionales del área y la secretaría
-    //     const areaId = selectedOption.getAttribute('data-area-id') || '';
-    //     const areaNombre = selectedOption.getAttribute('data-area-nombre') || 'Sin Área';
-    //     const secretariaId = selectedOption.getAttribute('data-secretaria-id') || '';
-    //     const secretariaNombre = selectedOption.getAttribute('data-secretaria-nombre') || 'Sin Secretaría';
-
-    //     // Actualizamos los valores del área en el select correspondiente
-    //     const areaSelect = document.getElementById('area');
-    //     areaSelect.innerHTML = `<option value="${areaId}" selected>${areaNombre}</option>`;
-    //     areaSelect.disabled = true;  // Mantener el campo como solo lectura
-
-    //     // Actualizamos los valores de la secretaría en el select correspondiente
-    //     const secretariaSelect = document.getElementById('secretaria');
-    //     secretariaSelect.innerHTML = `<option value="${secretariaId}" selected>${secretariaNombre}</option>`;
-    //     secretariaSelect.disabled = true;  // Mantener el campo como solo lectura
-
-    //     // Asegúrate de que el empleado seleccionado tenga su ID correctamente actualizado en el formulario
-    //     document.getElementById('empleado').value = empleadoId;  // Esto garantiza que el valor se actualice correctamente
-    // }
-
     function actualizarAreaYSecretaria() {
         const empleadoSelect = document.getElementById('empleado');
         const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
