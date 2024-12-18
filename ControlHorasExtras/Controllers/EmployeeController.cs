@@ -14,25 +14,6 @@ namespace ControlHorasExtras.Controllers
             _context = context;
         }
 
-        //public IActionResult Index()
-        //{
-        //    var empleados = _context.Empleados
-        //                 .Include(e => e.Area)
-        //                 .Include(e => e.Secretaria)
-        //                 .Include(e => e.Categoria)
-        //                 .ToList();
-        //    ViewData["Categorias"] = _context.CategoriasSalariales.ToList();
-        //    ViewData["Empleados"] = empleados;
-        //    ViewData["Secretarias"] = _context.Secretarias.ToList();
-        //    ViewData["Areas"] = _context.Areas.ToList();
-        //    // Verifica que 'empleados' no sea null antes de pasar a la vista
-        //    if (empleados == null || empleados.Count == 0)
-        //    {
-        //        Console.WriteLine("No hay empleados disponibles.");
-        //    }
-        //    return View();
-        //}
-
         public IActionResult Index()
         {
             var areaIdClaim = User.FindFirst("AreaId");
@@ -123,7 +104,7 @@ namespace ControlHorasExtras.Controllers
             }
 
             // Validar que el legajo sea un número de 3 dígitos
-            if (empleado.Legajo < 100 || empleado.Legajo > 999)
+            if (empleado.Legajo < 0 && empleado.Legajo > 999)
             {
                 return Json(new
                 {
@@ -131,6 +112,10 @@ namespace ControlHorasExtras.Controllers
                     message = "El número de legajo debe ser un número de 3 dígitos."
                 });
             }
+
+            ModelState.Remove("Area");
+            ModelState.Remove("Secretaria");
+            ModelState.Remove("Categoria");
 
             if (ModelState.IsValid)
             {

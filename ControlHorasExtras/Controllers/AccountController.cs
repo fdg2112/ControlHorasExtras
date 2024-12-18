@@ -34,7 +34,6 @@ namespace ControlHorasExtras.Controllers
                 var usuario = await _context.Usuarios
                     .Include(u => u.Rol)
                     .FirstOrDefaultAsync(u => u.NombreUsuario == model.NombreUsuario);
-
                 if (usuario != null && usuario.Contraseña == model.Contraseña)
                 {
                     // Auditoría de login

@@ -167,7 +167,7 @@
     formEmpleado.addEventListener('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(formEmpleado);
-        fetch('/Empleado/CreateEmpleado', {
+        fetch('/Employee/CreateEmployee', { // Cambiado el endpoint
             method: 'POST',
             body: formData,
             headers: {
@@ -175,7 +175,12 @@
                 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 Swal.fire({
@@ -194,7 +199,7 @@
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error en la solicitud:', error);
             Swal.fire({
                 title: 'Error',
                 text: 'Ocurrió un error inesperado.',
@@ -205,40 +210,45 @@
     });
 
     document.getElementById("legajo").addEventListener("blur", function () {
-    const legajoInput = this.value;
+        const legajoInput = this.value;
 
-    // Validar que sea un número de 3 dígitos
-    if (!/^\d{3}$/.test(legajoInput)) {
-        Swal.fire({
-            title: "Error",
-            text: "El legajo debe ser un número de 3 dígitos.",
-            icon: "error",
-            confirmButtonText: "OK"
-        });
-        this.value = ""; // Limpiar el campo
-        return;
-    }
+        // Validar que sea un número de 3 dígitos
+        if (!/^\d{3}$/.test(legajoInput)) {
+            Swal.fire({
+                title: "Error",
+                text: "El legajo debe ser un número de 3 dígitos.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+            this.value = ""; // Limpiar el campo
+            return;
+        }
 
-    // Verificar si el legajo ya existe en la base de datos
-    fetch(`/Employee/CheckLegajo?legajo=${legajoInput}`)
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.exists) {
-                Swal.fire({
-                    title: "Legajo ya registrado",
-                    html: `
-                        <p>El legajo ingresado pertenece a:</p>
-                        <p><strong>${data.empleado.Nombre} ${data.empleado.Apellido}</strong></p>
-                        <p>Área: ${data.empleado.AreaNombre}</p>
-                        <p>Secretaría: ${data.empleado.SecretariaNombre}</p>
-                    `,
-                    icon: "warning",
-                    confirmButtonText: "OK"
-                });
-                document.getElementById("legajo").value = ""; // Limpiar el campo
-            }
-        })
-        .catch((error) => console.error("Error al verificar el legajo:", error));
+        // Verificar si el legajo ya existe en la base de datos
+        fetch(`/Employee/CheckLegajo?legajo=${legajoInput}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.exists) {
+                    Swal.fire({
+                        title: "Legajo ya registrado",
+                        html: `
+                            <p>El legajo ingresado pertenece a:</p>
+                            <p><strong>${data.empleado.Nombre} ${data.empleado.Apellido}</strong></p>
+                            <p>Área: ${data.empleado.AreaNombre}</p>
+                            <p>Secretaría: ${data.empleado.SecretariaNombre}</p>
+                        `,
+                        icon: "warning",
+                        confirmButtonText: "OK"
+                    });
+                    document.getElementById("legajo").value = ""; // Limpiar el campo
+                }
+            })
+            .catch(error => console.error("Error al verificar el legajo:", error));
     });
 
 </script>
