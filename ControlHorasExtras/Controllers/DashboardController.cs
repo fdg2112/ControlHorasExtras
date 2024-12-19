@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 using ControlHorasExtras.Data;
 using Microsoft.AspNetCore.Authorization;
 using ControlHorasExtras.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Globalization;
 
 namespace ControlHorasExtras.Controllers
@@ -133,6 +130,12 @@ namespace ControlHorasExtras.Controllers
             // Calcular el total de gasto (50% + 100%)
             var totalGasto = gasto50 + gasto100;  // Sumar los gastos
             var totalGastoFormatted = totalGasto.ToString("C", new CultureInfo("es-AR")); // Formato monetario argentino
+            
+            var areas = await _context.Areas
+                .Where(a => a.SecretariaId == secretariaId)
+                .ToListAsync();
+
+            ViewData["Areas"] = areas;
 
             // Agrega datos al ViewData
             ViewData["Horas50"] = horas50;
@@ -147,6 +150,80 @@ namespace ControlHorasExtras.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetChartData(int? secretariaId = null, int? areaId = null)
+        {
+            // Obtener el rol del usuario logueado
+            var rol = User.FindFirst("Rol")?.Value;
+
+            // Base de datos
+            var query = _context.HorasExtras
+                .Include(h => h.Empleado)
+                .ThenInclude(e => e.Categoria)
+                .Include(h => h.Area)
+                .Include(h => h.Secretaria)
+                .AsQueryable();
+
+            // Filtrar según el rol del usuario
+            switch (rol)
+            {
+                case "Jefe de Área":
+                    var areaIdClaim = int.Parse(User.FindFirst("AreaId")?.Value ?? "0");
+                    query = query.Where(h => h.AreaId == areaIdClaim);
+                    break;
+
+                case "Secretario":
+                    var secretariaIdClaim = int.Parse(User.FindFirst("SecretariaId")?.Value ?? "0");
+                    if (areaId.HasValue)
+                        query = query.Where(h => h.AreaId == areaId.Value);
+                    else
+                        query = query.Where(h => h.SecretariaId == secretariaIdClaim);
+                    break;
+
+                case "Intendente":
+                case "Secretario de Hacienda":
+                    if (secretariaId.HasValue)
+                        query = query.Where(h => h.SecretariaId == secretariaId);
+                    if (areaId.HasValue)
+                        query = query.Where(h => h.AreaId == areaId);
+                    break;
+            }
+
+            // Calcular las horas y gastos
+            var horas = await query
+                .GroupBy(h => h.TipoHora)
+                .Select(g => new
+                {
+                    TipoHora = g.Key,
+                    TotalHoras = g.Sum(h => h.CantidadHoras)
+                })
+                .ToListAsync();
+
+            var gastos = await query
+                .Select(h => new
+                {
+                    h.TipoHora,
+                    h.CantidadHoras,
+                    ValorHora = h.TipoHora == "50%"
+                        ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+                        : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
+                })
+                .GroupBy(h => h.TipoHora)
+                .Select(g => new
+                {
+                    TipoHora = g.Key,
+                    TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                Horas50 = horas.FirstOrDefault(h => h.TipoHora == "50%")?.TotalHoras ?? 0,
+                Horas100 = horas.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0,
+                Gasto50 = gastos.FirstOrDefault(g => g.TipoHora == "50%")?.TotalGasto ?? 0,
+                Gasto100 = gastos.FirstOrDefault(g => g.TipoHora == "100%")?.TotalGasto ?? 0
+            });
+        }
 
     }
 }

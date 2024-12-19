@@ -4,8 +4,19 @@
     var gastoDelMes = ViewData["GastoDelMes"] as double? ?? 0.0;
 }
 
+<!-- Graficos -->
 <div class="container mt-4">
     <h1>Bienvenido @User.FindFirst("Nombre")?.Value</h1>
+    <div class="col-md-6">
+        <label for="areaFilter">Filtrar por área:</label>
+        <select id="areaFilter" class="form-select">
+            <option value="">Todas las áreas</option>
+            @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
+            {
+                <option value="@area.AreaId">@area.NombreArea</option>
+            }
+        </select>
+    </div>
     <div class="row">
         <!-- Gráfico de horas del mes -->
         <div class="col-md-6">
@@ -98,10 +109,7 @@
     </form>
 </div>
 
-@* 
----------------------------------------- SCRIPT GRAFICOS -----------------------------------------------
- *@
-
+<!------------ SCRIPTS GRAFICOS -------------->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
@@ -276,12 +284,26 @@
             }
         }
     });
+
+    document.getElementById('areaFilter').addEventListener('change', function () {
+        const areaId = this.value;
+
+        fetch(`/Dashboard/GetChartData?areaId=${areaId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Actualizar datos del gráfico de horas
+                horasMesChart.data.datasets[0].data = [data.Horas50, data.Horas100];
+                horasMesChart.update();
+
+                // Actualizar datos del gráfico de gastos
+                gastoMesChart.data.datasets[0].data = [data.Gasto50, data.Gasto100];
+                gastoMesChart.update();
+            })
+            .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+    });
 </script>
 
-@* 
----------------------------------------- SCRIPT CARGAR HORAS -----------------------------------------------
- *@
-
+<!---------- SCRIPTS CARGAR HORAS ------------>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Funciones relacionadas con el formulario
@@ -400,7 +422,7 @@
     formHoras.addEventListener('submit', enviarFormulario);
 </script>
 
-
+<!------------ Estilos -------------->
 <style>
     .floating-form {
         position: fixed;
