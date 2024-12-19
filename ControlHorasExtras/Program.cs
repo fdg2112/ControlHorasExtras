@@ -1,5 +1,7 @@
 using ControlHorasExtras.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Server.Circuits;
+using ControlHorasExtras.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,11 @@ builder.Services.AddAuthentication("Cookies")
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<OvertimeControlContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Agrega IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+// Agrega el servicio de CustomCircuitHandler
+builder.Services.AddSingleton<CircuitHandler, CustomCircuitHandler>();
 
 var app = builder.Build();
 

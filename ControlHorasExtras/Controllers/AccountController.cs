@@ -8,16 +8,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using ControlHorasExtras.Models;
 using ControlHorasExtras.Data;
+using Microsoft.Extensions.Logging;
 
 namespace ControlHorasExtras.Controllers
 {
     public class AccountController : Controller
     {
         private readonly OvertimeControlContext _context;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(OvertimeControlContext context)
+        public AccountController(OvertimeControlContext context, ILogger<AccountController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -31,41 +34,51 @@ namespace ControlHorasExtras.Controllers
         {
             if (ModelState.IsValid)
             {
-                var usuario = await _context.Usuarios
-                    .Include(u => u.Rol)
-                    .FirstOrDefaultAsync(u => u.NombreUsuario == model.NombreUsuario);
-                if (usuario != null && usuario.Contraseña == model.Contraseña)
+                try
                 {
-                    // Auditoría de login
-                    var auditoriaLogin = new AuditoriaLogin
+                    var usuario = await _context.Usuarios
+                        .Include(u => u.Rol)
+                        .FirstOrDefaultAsync(u => u.NombreUsuario == model.NombreUsuario);
+                    if (usuario != null && usuario.Contraseña == model.Contraseña)
                     {
-                        UsuarioId = usuario.UsuarioId,
-                        FechaHoraLogin = DateTime.Now,
-                        Ip = HttpContext.Connection.RemoteIpAddress?.ToString()
-                    };
-                    _context.AuditoriaLogins.Add(auditoriaLogin);
-                    await _context.SaveChangesAsync();
+                        // Auditoría de login
+                        var auditoriaLogin = new AuditoriaLogin
+                        {
+                            UsuarioId = usuario.UsuarioId,
+                            FechaHoraLogin = DateTime.Now,
+                            Ip = HttpContext.Connection.RemoteIpAddress?.ToString()
+                        };
+                        _context.AuditoriaLogins.Add(auditoriaLogin);
+                        await _context.SaveChangesAsync();
 
-                    // Claims para la sesión del usuario
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                        new Claim("Nombre", usuario.Nombre),
-                        new Claim("Apellido", usuario.Apellido),
-                        new Claim("UsuarioId", usuario.UsuarioId.ToString()),
-                        new Claim("Rol", usuario.Rol.NombreRol),
-                        new Claim("AreaId", usuario.AreaId.ToString()),
-                        new Claim("SecretariaId", usuario.SecretariaId.ToString())
-                    };
-                    var identity = new ClaimsIdentity(claims, "Cookies");
-                    var principal = new ClaimsPrincipal(identity);
+                        // Claims para la sesión del usuario
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, usuario.NombreUsuario),
+                            new Claim("Nombre", usuario.Nombre),
+                            new Claim("Apellido", usuario.Apellido),
+                            new Claim("UsuarioId", usuario.UsuarioId.ToString()),
+                            new Claim("Rol", usuario.Rol.NombreRol),
+                            new Claim("AreaId", usuario.AreaId.ToString()),
+                            new Claim("SecretariaId", usuario.SecretariaId.ToString())
+                        };
+                        var identity = new ClaimsIdentity(claims, "Cookies");
+                        var principal = new ClaimsPrincipal(identity);
 
-                    // Inicia sesión con el esquema de cookies
-                    await HttpContext.SignInAsync("Cookies", principal);
+                        // Inicia sesión con el esquema de cookies
+                        await HttpContext.SignInAsync("Cookies", principal);
 
-                    return RedirectToAction("Index", "Dashboard");
+                        return RedirectToAction("Index", "Dashboard");
+                    }
+                    else ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");
                 }
-                else ModelState.AddModelError("", "Nombre de usuario o contraseña incorrectos.");
+                catch (Exception ex)
+                {
+                    // Manejo de excepciones
+                    ModelState.AddModelError("", "Error al intentar iniciar sesión. Por favor, inténtelo de nuevo más tarde.");
+                    // Loguear el error
+                    _logger.LogError(ex, "Error al intentar iniciar sesión.");
+                }
             }
             return View(model);
         }
@@ -93,7 +106,6 @@ namespace ControlHorasExtras.Controllers
 
             return View();
         }
-
 
         // Logout
         public async Task<IActionResult> Logout()
