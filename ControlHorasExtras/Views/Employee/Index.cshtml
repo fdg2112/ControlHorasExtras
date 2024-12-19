@@ -120,6 +120,7 @@
 </div>
 
 <!-- Scripts -->
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const formEmpleado = document.getElementById('formEmpleado');
@@ -238,9 +239,10 @@
                         title: "Legajo ya registrado",
                         html: `
                             <p>El legajo ingresado pertenece a:</p>
-                            <p><strong>${data.empleado.Nombre} ${data.empleado.Apellido}</strong></p>
-                            <p>Área: ${data.empleado.AreaNombre}</p>
-                            <p>Secretaría: ${data.empleado.SecretariaNombre}</p>
+                            <p><strong>${data.empleado.nombre} ${data.empleado.apellido}</strong></p>
+                            <p>Área: ${data.empleado.areaNombre}</p>
+                            <p>Secretaría: ${data.empleado.secretariaNombre}</p>
+                            <p>Para agregar a este empleado tu área, debes solicitar la transferencia a su superior.</p>
                         `,
                         icon: "warning",
                         confirmButtonText: "OK"

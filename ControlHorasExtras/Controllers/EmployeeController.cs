@@ -185,8 +185,8 @@ namespace ControlHorasExtras.Controllers
                 .Where(e => e.Legajo == legajo)
                 .Select(e => new
                 {
-                    e.Nombre,
-                    e.Apellido,
+                    Nombre = e.Nombre,
+                    Apellido = e.Apellido,
                     AreaNombre = e.Area != null ? e.Area.NombreArea : "Sin Área",
                     SecretariaNombre = e.Secretaria != null ? e.Secretaria.NombreSecretaria : "Sin Secretaría"
                 })
