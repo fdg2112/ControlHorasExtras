@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ControlHorasExtras.Models;
+﻿using ControlHorasExtras.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ControlHorasExtras.Data;
@@ -28,7 +26,7 @@ public partial class OvertimeControlContext : DbContext
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=ESTA-PC\\SQLEXPRESS;Initial Catalog=ControlHorasExtras;Integrated Security=True;Encrypt=False");
+        => optionsBuilder.UseSqlServer("Data Source=ESTA-PC\\SQLEXPRESS;Initial Catalog=OvertimeControl;Integrated Security=True;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -6,19 +6,10 @@ GO
 USE OvertimeControl;
 GO
 
--- Crear tabla Intendencia
-CREATE TABLE Intendencia (
-    IntendenciaID INT PRIMARY KEY IDENTITY(1,1),
-    Nombre NVARCHAR(100) NOT NULL
-);
-
 -- Tabla Secretarías
 CREATE TABLE Secretarias (
     SecretariaID INT PRIMARY KEY IDENTITY(1,1),
-    NombreSecretaria NVARCHAR(100) NOT NULL,
-    IntendenciaID INT NOT NULL
-    CONSTRAINT FK_Secretarias_Intendencia
-    FOREIGN KEY (IntendenciaID) REFERENCES Intendencia(IntendenciaID)
+    NombreSecretaria NVARCHAR(100) NOT NULL
 );
 GO
 
@@ -29,25 +20,13 @@ CREATE TABLE Roles (
 );
 GO
 
--- Insertar roles
-INSERT INTO Roles (NombreRol)
-VALUES 
-    ('Jefe de Área'),
-    ('Secretario'),
-    ('Secretario Hacienda'),
-    ('Intendente');
-GO
-
 -- Tabla Áreas
 CREATE TABLE Areas (
     AreaID INT PRIMARY KEY IDENTITY(1,1),
     NombreArea NVARCHAR(100) NOT NULL,
     SecretariaID INT NOT NULL,
-    IntendenciaID INT NOT NULL,
     CONSTRAINT FK_Areas_Secretarias
-    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID),
-    CONSTRAINT FK_Areas_Intendencia
-    FOREIGN KEY (IntendenciaID) REFERENCES Intendencia(IntendenciaID)
+    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID)
 );
 GO
 
@@ -130,6 +109,15 @@ CREATE TABLE AuditoriaLogins (
 );
 GO
 
+-- Insertar roles
+INSERT INTO Roles (NombreRol)
+VALUES 
+    ('Jefe de Área'),
+    ('Secretario'),
+    ('Secretario Hacienda'),
+    ('Intendente');
+GO
+
 INSERT INTO Secretarias (NombreSecretaria)
 VALUES 
 ('Gobierno'),
@@ -150,7 +138,7 @@ VALUES
 -- Usuario Jefe de Área
 INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
 VALUES 
-('jefe', '23', 'Juan', 'Pérez', 1, 1, 1); -- Ordenanzas en Gobierno
+('jefe', '123', 'Juan', 'Pérez', 1, 1, 1); -- Ordenanzas en Gobierno
 
 -- Usuario Secretario
 INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
