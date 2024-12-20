@@ -334,6 +334,11 @@
         document.getElementById('secretariaId').value = secretariaId;
     }
 
+    function toggleForm() {
+        formHoras.classList.toggle('hidden');
+        btnCargarHoras.classList.toggle('hidden');
+    }
+
     // Validación y envío del formulario
     formHoras.addEventListener('submit', function (e) {
         e.preventDefault();
