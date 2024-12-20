@@ -155,7 +155,7 @@ namespace ControlHorasExtras.Controllers
         {
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
-
+            var startDate = new DateTime(currentYear, currentMonth, 1).AddMonths(-11);  // Fecha de inicio para los últimos 12 meses
             var query = _context.HorasExtras
                 .Include(h => h.Empleado)
                 .ThenInclude(e => e.Categoria)
@@ -191,8 +191,19 @@ namespace ControlHorasExtras.Controllers
                 TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
             }).ToListAsync();
 
-            // Histórico
-            var historico = await query
+            // Histórico: obtener los últimos 12 meses hasta el mes actual
+            var historicoQuery = _context.HorasExtras
+                .Include(h => h.Empleado)
+                .Include(h => h.Area)
+                .AsQueryable();
+
+            if (areaId.HasValue)
+            {
+                historicoQuery = historicoQuery.Where(h => h.AreaId == areaId);
+            }
+
+            var historico = await historicoQuery
+                .Where(h => h.FechaHoraInicio >= startDate)
                 .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
                 .Select(g => new
                 {
@@ -200,7 +211,8 @@ namespace ControlHorasExtras.Controllers
                     Anio = g.Key.Year,
                     TipoHora = g.Key.TipoHora,
                     TotalHoras = g.Sum(h => h.CantidadHoras)
-                }).ToListAsync();
+                }).OrderBy(h => h.Anio).ThenBy(h => h.Mes)
+                .ToListAsync();
 
             var historico50 = historico
                 .Where(h => h.TipoHora == "50%")
@@ -218,79 +230,9 @@ namespace ControlHorasExtras.Controllers
                 Horas100 = horas.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0,
                 Gasto50 = gastos.FirstOrDefault(g => g.TipoHora == "50%")?.TotalGasto ?? 0,
                 Gasto100 = gastos.FirstOrDefault(g => g.TipoHora == "100%")?.TotalGasto ?? 0,
-                Historico50 = historico.Where(h => h.TipoHora == "50%").Select(h => h.TotalHoras).ToList(),
-                Historico100 = historico.Where(h => h.TipoHora == "100%").Select(h => h.TotalHoras).ToList()
+                Historico50 = historico50,
+                Historico100 = historico100
             });
         }
-
-        //[HttpGet]
-        //public async Task<IActionResult> GetChartData(int? areaId = null)
-        //{
-        //    var query = _context.HorasExtras
-        //        .Include(h => h.Empleado)
-        //        .ThenInclude(e => e.Categoria)
-        //        .Include(h => h.Area)
-        //        .Include(h => h.Secretaria)
-        //        .AsQueryable();
-
-        //    if (areaId.HasValue)
-        //    {
-        //        query = query.Where(h => h.AreaId == areaId);
-        //    }
-
-        //    // Horas y gastos
-        //    var horas = await query.GroupBy(h => h.TipoHora).Select(g => new
-        //    {
-        //        TipoHora = g.Key,
-        //        TotalHoras = g.Sum(h => h.CantidadHoras)
-        //    }).ToListAsync();
-
-        //    var gastos = await query.Select(h => new
-        //    {
-        //        h.TipoHora,
-        //        h.CantidadHoras,
-        //        ValorHora = h.TipoHora == "50%"
-        //            ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
-        //            : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
-        //    }).GroupBy(h => h.TipoHora).Select(g => new
-        //    {
-        //        TipoHora = g.Key,
-        //        TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
-        //    }).ToListAsync();
-
-        //    // Histórico
-        //    var historico = await query
-        //        .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
-        //        .Select(g => new
-        //        {
-        //            Mes = g.Key.Month,
-        //            Anio = g.Key.Year,
-        //            TipoHora = g.Key.TipoHora,
-        //            TotalHoras = g.Sum(h => h.CantidadHoras)
-        //        }).ToListAsync();
-
-        //    var historico50 = historico
-        //        .Where(h => h.TipoHora == "50%")
-        //        .Select(h => h.TotalHoras)
-        //        .ToList();
-
-        //    var historico100 = historico
-        //        .Where(h => h.TipoHora == "100%")
-        //        .Select(h => h.TotalHoras)
-        //        .ToList();
-
-        //    return Json(new
-        //    {
-        //        Horas50 = horas.FirstOrDefault(h => h.TipoHora == "50%")?.TotalHoras ?? 0,
-        //        Horas100 = horas.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0,
-        //        Gasto50 = gastos.FirstOrDefault(g => g.TipoHora == "50%")?.TotalGasto ?? 0,
-        //        Gasto100 = gastos.FirstOrDefault(g => g.TipoHora == "100%")?.TotalGasto ?? 0,
-        //        Historico50 = historico.Where(h => h.TipoHora == "50%").Select(h => h.TotalHoras).ToList(),
-        //        Historico100 = historico.Where(h => h.TipoHora == "100%").Select(h => h.TotalHoras).ToList()
-        //    });
-
-        //}
-
-
     }
 }
