@@ -2,21 +2,25 @@
     ViewData["Title"] = "Dashboard";
     var horasDelMes = ViewData["HorasDelMes"] as int? ?? 0;
     var gastoDelMes = ViewData["GastoDelMes"] as double? ?? 0.0;
+    var rol = User.FindFirst("Rol")?.Value;
 }
 
 <!-- Graficos -->
 <div class="container mt-4">
     <h1>Bienvenido @User.FindFirst("Nombre")?.Value</h1>
-    <div class="col-md-6">
-        <label for="areaFilter">Filtrar por área:</label>
-        <select id="areaFilter" class="form-select">
-            <option value="">Todas las áreas</option>
-            @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
-            {
-                <option value="@area.AreaId">@area.NombreArea</option>
-            }
-        </select>
-    </div>
+    @if (rol == "Secretario" || rol == "Intendente" || rol == "Secretario de Hacienda")
+    {
+        <div class="col-md-6">
+            <label for="areaFilter">Filtrar por área:</label>
+            <select id="areaFilter" class="form-select">
+                <option value="">Todas las áreas</option>
+                @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
+                {
+                    <option value="@area.AreaId">@area.NombreArea</option>
+                }
+            </select>
+        </div>
+    }
     <div class="row">
         <!-- Gráfico de horas del mes -->
         <div class="col-md-6">
@@ -118,31 +122,34 @@
     const horas100 = @Html.Raw(Json.Serialize(ViewData["Horas100"] ?? 0));
     const gasto50 = @Html.Raw(Json.Serialize(ViewData["Gasto50"] ?? 0));
     const gasto100 = @Html.Raw(Json.Serialize(ViewData["Gasto100"] ?? 0));
-
+    // Datos del gráfico de histórico
+    const meses = @Html.Raw(Json.Serialize(ViewData["Meses"]));
+    const horas50Historico = @Html.Raw(Json.Serialize(ViewData["Horas50Historico"]));
+    const horas100Historico = @Html.Raw(Json.Serialize(ViewData["Horas100Historico"]));
     // Convertir a números en caso de que sean cadenas vacías
     const horas50Num = parseFloat(horas50) || 0;
     const horas100Num = parseFloat(horas100) || 0;
     const gasto50Num = parseFloat(gasto50) || 0;
     const gasto100Num = parseFloat(gasto100) || 0;
 
+    let horasMesChart, gastoMesChart, horasHistoricasChart;
+
     // Inicializar gráfico de horas
-    const horasMesChart = document.getElementById('horasMesChart').getContext('2d');
-    new Chart(horasMesChart, {
+    const horasMesChartCanvas = document.getElementById('horasMesChart').getContext('2d');
+    horasMesChart = new Chart(horasMesChartCanvas, {
         type: 'bar',
         data: {
             labels: ['50%', '100%'],
             datasets: [{
                 label: 'Horas Realizadas',
-                data: [horas50, horas100],
+                data: [horas50Num, horas100Num],
                 backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)']
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    display: false // Desactiva la leyenda (impide que las barras se oculten)
-                },
+                legend: { display: false },
                 datalabels: {
                     anchor: 'end', // Posición de la etiqueta
                     align: 'top',  // Alineación de la etiqueta
@@ -172,32 +179,25 @@
                 }
             }
         },
-        plugins: [ChartDataLabels] // Activar el plugin de DataLabels
+        plugins: [ChartDataLabels]
     });
 
-    // Gráfico de Gasto Mensual
-    const gastoMesChart = document.getElementById('gastoMesChart').getContext('2d');
-    new Chart(gastoMesChart, {
+    // Inicializar gráfico de gasto mensual
+    const gastoMesChartCanvas = document.getElementById('gastoMesChart').getContext('2d');
+    gastoMesChart = new Chart(gastoMesChartCanvas, {
         type: 'bar',
         data: {
             labels: ['Gasto 50%', 'Gasto 100%'],
             datasets: [{
                 label: 'Gasto Mensual',
                 data: [gasto50Num, gasto100Num],
-                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
-                borderWidth: 1
+                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)']
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                title: {
-                    display: false // Eliminar el título del gráfico
-                },
-                legend: {
-                    display: false // Desactiva la leyenda (impide que las barras se oculten)
-                },
+                legend: { display: false },
                 datalabels: {
                     anchor: 'end',
                     align: 'top',
@@ -211,37 +211,24 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        padding: 10 // Ajusta el padding para los números del eje Y
-                    }
+                    ticks: { padding: 10 } // Ajusta el padding para los números del eje Y
                 },
                 x: {
-                    ticks: {
-                        padding: 20 // Añadir espacio entre las barras y el borde superior
-                    }
+                    ticks: { padding: 20 } // Añadir espacio entre las barras y el borde superior
                 }
             },
-            layout: {
-                padding: {
-                    top: 20, // Añadir espacio en la parte superior del gráfico
-                }
+            layout: { padding: { top: 20, }  // Añadir espacio en la parte superior del gráfico
             }
         },
         plugins: [ChartDataLabels]
     });
 
-
-        // Datos del gráfico de histórico
-    const meses = @Html.Raw(Json.Serialize(ViewData["Meses"]));
-    const horas50Historico = @Html.Raw(Json.Serialize(ViewData["Horas50Historico"]));
-    const horas100Historico = @Html.Raw(Json.Serialize(ViewData["Horas100Historico"]));
-
-    // Gráfico de histórico de horas
-    const horasHistoricasChart = document.getElementById('horasHistoricasChart').getContext('2d');
-    new Chart(horasHistoricasChart, {
+    // Inicializar gráfico de histórico
+    const horasHistoricasChartCanvas = document.getElementById('horasHistoricasChart').getContext('2d');
+    horasHistoricasChart = new Chart(horasHistoricasChartCanvas, {
         type: 'line',
         data: {
-            labels: meses, // Etiquetas de los meses
+            labels: meses,
             datasets: [
                 {
                     label: 'Horas 50%',
@@ -259,48 +246,39 @@
                 }
             ]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Histórico de Horas por Mes'
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Meses'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Horas'
-                    }
-                }
-            }
-        }
+        options: { responsive: true }
     });
 
-    document.getElementById('areaFilter').addEventListener('change', function () {
+    document.getElementById('areaFilter')?.addEventListener('change', function () {
         const areaId = this.value;
 
         fetch(`/Dashboard/GetChartData?areaId=${areaId}`)
             .then(response => response.json())
             .then(data => {
-                // Actualizar datos del gráfico de horas
-                horasMesChart.data.datasets[0].data = [data.Horas50, data.Horas100];
+                // Convertir valores a números para evitar problemas
+                const horas50 = parseFloat(data.horas50) || 0;
+                const horas100 = parseFloat(data.horas100) || 0;
+                const gasto50 = parseFloat(data.gasto50) || 0;
+                const gasto100 = parseFloat(data.gasto100) || 0;
+                const historico50 = data.historico50.map(h => parseFloat(h) || 0);
+                const historico100 = data.historico100.map(h => parseFloat(h) || 0);
+
+                // Actualizar gráfico de horas
+                horasMesChart.data.datasets[0].data = [horas50, horas100];
                 horasMesChart.update();
 
-                // Actualizar datos del gráfico de gastos
-                gastoMesChart.data.datasets[0].data = [data.Gasto50, data.Gasto100];
+                // Actualizar gráfico de gastos
+                gastoMesChart.data.datasets[0].data = [gasto50, gasto100];
                 gastoMesChart.update();
+
+                // Actualizar gráfico de histórico
+                horasHistoricasChart.data.datasets[0].data = historico50;
+                horasHistoricasChart.data.datasets[1].data = historico100;
+                horasHistoricasChart.update();
             })
             .catch(error => console.error('Error al cargar los datos del gráfico:', error));
     });
+
 </script>
 
 <!---------- SCRIPTS CARGAR HORAS ------------>

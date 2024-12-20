@@ -151,12 +151,8 @@ namespace ControlHorasExtras.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetChartData(int? secretariaId = null, int? areaId = null)
+        public async Task<IActionResult> GetChartData(int? areaId = null)
         {
-            // Obtener el rol del usuario logueado
-            var rol = User.FindFirst("Rol")?.Value;
-
-            // Base de datos
             var query = _context.HorasExtras
                 .Include(h => h.Empleado)
                 .ThenInclude(e => e.Categoria)
@@ -164,66 +160,64 @@ namespace ControlHorasExtras.Controllers
                 .Include(h => h.Secretaria)
                 .AsQueryable();
 
-            // Filtrar según el rol del usuario
-            switch (rol)
+            if (areaId.HasValue)
             {
-                case "Jefe de Área":
-                    var areaIdClaim = int.Parse(User.FindFirst("AreaId")?.Value ?? "0");
-                    query = query.Where(h => h.AreaId == areaIdClaim);
-                    break;
-
-                case "Secretario":
-                    var secretariaIdClaim = int.Parse(User.FindFirst("SecretariaId")?.Value ?? "0");
-                    if (areaId.HasValue)
-                        query = query.Where(h => h.AreaId == areaId.Value);
-                    else
-                        query = query.Where(h => h.SecretariaId == secretariaIdClaim);
-                    break;
-
-                case "Intendente":
-                case "Secretario de Hacienda":
-                    if (secretariaId.HasValue)
-                        query = query.Where(h => h.SecretariaId == secretariaId);
-                    if (areaId.HasValue)
-                        query = query.Where(h => h.AreaId == areaId);
-                    break;
+                query = query.Where(h => h.AreaId == areaId);
             }
 
-            // Calcular las horas y gastos
-            var horas = await query
-                .GroupBy(h => h.TipoHora)
-                .Select(g => new
-                {
-                    TipoHora = g.Key,
-                    TotalHoras = g.Sum(h => h.CantidadHoras)
-                })
-                .ToListAsync();
+            // Horas y gastos
+            var horas = await query.GroupBy(h => h.TipoHora).Select(g => new
+            {
+                TipoHora = g.Key,
+                TotalHoras = g.Sum(h => h.CantidadHoras)
+            }).ToListAsync();
 
-            var gastos = await query
-                .Select(h => new
-                {
-                    h.TipoHora,
-                    h.CantidadHoras,
-                    ValorHora = h.TipoHora == "50%"
-                        ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
-                        : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
-                })
-                .GroupBy(h => h.TipoHora)
+            var gastos = await query.Select(h => new
+            {
+                h.TipoHora,
+                h.CantidadHoras,
+                ValorHora = h.TipoHora == "50%"
+                    ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+                    : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
+            }).GroupBy(h => h.TipoHora).Select(g => new
+            {
+                TipoHora = g.Key,
+                TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
+            }).ToListAsync();
+
+            // Histórico
+            var historico = await query
+                .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
                 .Select(g => new
                 {
-                    TipoHora = g.Key,
-                    TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
-                })
-                .ToListAsync();
+                    Mes = g.Key.Month,
+                    Anio = g.Key.Year,
+                    TipoHora = g.Key.TipoHora,
+                    TotalHoras = g.Sum(h => h.CantidadHoras)
+                }).ToListAsync();
+
+            var historico50 = historico
+                .Where(h => h.TipoHora == "50%")
+                .Select(h => h.TotalHoras)
+                .ToList();
+
+            var historico100 = historico
+                .Where(h => h.TipoHora == "100%")
+                .Select(h => h.TotalHoras)
+                .ToList();
 
             return Json(new
             {
                 Horas50 = horas.FirstOrDefault(h => h.TipoHora == "50%")?.TotalHoras ?? 0,
                 Horas100 = horas.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0,
                 Gasto50 = gastos.FirstOrDefault(g => g.TipoHora == "50%")?.TotalGasto ?? 0,
-                Gasto100 = gastos.FirstOrDefault(g => g.TipoHora == "100%")?.TotalGasto ?? 0
+                Gasto100 = gastos.FirstOrDefault(g => g.TipoHora == "100%")?.TotalGasto ?? 0,
+                Historico50 = historico.Where(h => h.TipoHora == "50%").Select(h => h.TotalHoras).ToList(),
+                Historico100 = historico.Where(h => h.TipoHora == "100%").Select(h => h.TotalHoras).ToList()
             });
+
         }
+
 
     }
 }
