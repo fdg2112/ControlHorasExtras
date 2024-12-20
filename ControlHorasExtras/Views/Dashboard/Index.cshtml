@@ -284,16 +284,15 @@
 <!---------- SCRIPTS CARGAR HORAS ------------>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Funciones relacionadas con el formulario
     const formHoras = document.getElementById('formHoras');
     const btnCargarHoras = document.getElementById('btnCargarHoras');
-    let empleadoId = null;  // Variable global para almacenar el ID del empleado
+    let empleadoId = null;
 
+    // Mostrar y ocultar el formulario de carga
     function cargarFormulario() {
         formHoras.classList.toggle('hidden');
         btnCargarHoras.classList.toggle('hidden');
         if (!formHoras.classList.contains('hidden')) {
-            // Realizar la solicitud AJAX para cargar los datos
             fetch('/Overtime/Create')
                 .then(response => response.json())
                 .then(data => cargarOpcionesFormulario(data))
@@ -301,8 +300,8 @@
         }
     }
 
+    // Cargar empleados en el formulario
     function cargarOpcionesFormulario(data) {
-        // Llenar las opciones de empleados
         const empleadoSelect = document.getElementById('empleado');
         empleadoSelect.innerHTML = '<option value="" selected disabled>Seleccione un empleado</option>';
         data.empleados.forEach(empleado => {
@@ -317,15 +316,10 @@
         });
     }
 
-    function toggleForm() {
-        formHoras.classList.toggle('hidden');
-        btnCargarHoras.classList.toggle('hidden');
-    }
-
+    // Actualizar área y secretaría en el formulario
     function actualizarAreaYSecretaria() {
         const empleadoSelect = document.getElementById('empleado');
         const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
-
         empleadoId = selectedOption.value;
 
         const areaId = selectedOption.getAttribute('data-area-id') || '';
@@ -333,19 +327,41 @@
         const secretariaId = selectedOption.getAttribute('data-secretaria-id') || '';
         const secretariaNombre = selectedOption.getAttribute('data-secretaria-nombre') || 'Sin Secretaría';
 
-        // Actualizar los selects visibles
         document.getElementById('area').innerHTML = `<option value="${areaId}" selected>${areaNombre}</option>`;
         document.getElementById('secretaria').innerHTML = `<option value="${secretariaId}" selected>${secretariaNombre}</option>`;
 
-        // Actualizar los campos ocultos que se envían al servidor
         document.getElementById('areaId').value = areaId;
         document.getElementById('secretariaId').value = secretariaId;
     }
 
-
-    // Manejador del envío del formulario
-    function enviarFormulario(e) {
+    // Validación y envío del formulario
+    formHoras.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        const fechaInicio = new Date(document.getElementById('fechaInicio').value);
+        const fechaFin = new Date(document.getElementById('fechaFin').value);
+
+        // Validar fechas
+        if (!fechaInicio || !fechaFin) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe completar las fechas de inicio y fin.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        if (fechaInicio >= fechaFin) {
+            Swal.fire({
+                title: 'Error',
+                text: 'La fecha y hora de inicio deben ser anteriores a la fecha y hora de fin.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         if (!empleadoId) {
             Swal.fire({
                 title: 'Error',
@@ -355,9 +371,8 @@
             });
             return;
         }
-        // Preparar los datos para enviar
+
         const formData = new FormData(formHoras);
-        console.log("EmpleadoId desde submit:", empleadoId);  // Verifica si el ID se captura correctamente
 
         fetch('/Overtime/Create', {
             method: 'POST',
@@ -375,7 +390,7 @@
                     text: data.message,
                     icon: 'success',
                     confirmButtonText: 'OK'
-                }).then(() => location.reload()); // Recargar la página
+                }).then(() => location.reload());
             } else {
                 Swal.fire({
                     title: 'Error',
@@ -394,10 +409,7 @@
                 confirmButtonText: 'OK'
             });
         });
-    }
-
-    // Asociar el manejador del formulario a la función 'enviarFormulario'
-    formHoras.addEventListener('submit', enviarFormulario);
+    });
 </script>
 
 <!------------ Estilos -------------->

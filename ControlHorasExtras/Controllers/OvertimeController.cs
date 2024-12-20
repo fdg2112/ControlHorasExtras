@@ -89,6 +89,15 @@ namespace ControlHorasExtras.Controllers
             ModelState.Remove("Secretaria");
             ModelState.Remove("Empleado");
 
+            if (horasExtra.FechaHoraInicio >= horasExtra.FechaHoraFin)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "La fecha y hora de inicio deben ser anteriores a la fecha y hora de fin."
+                });
+            }
+
             if (ModelState.IsValid)
             {
                 // Obtener área y secretaría del empleado
@@ -130,6 +139,7 @@ namespace ControlHorasExtras.Controllers
                 return Json(new { success = false, message = "Error al guardar las horas extras. Por favor, revise los datos ingresados." });
             }
         }
+
 
     }
 }
