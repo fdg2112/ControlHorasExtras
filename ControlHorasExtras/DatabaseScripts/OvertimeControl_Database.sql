@@ -267,6 +267,69 @@ VALUES
 (3, '2024-11-20 10:00', '192.168.1.14'),
 (4, '2024-11-20 11:30', '192.168.1.16');
 
+-- Insertar horas aleatorias para areas de gobierno
+-- Crear horas extras al 50% y 100% para empleados de la Secretaría de Gobierno en 2024
+DECLARE @StartDate DATETIME = '2024-01-01 00:00:00';
+DECLARE @EndDate DATETIME = '2024-12-31 23:59:59';
+
+-- Parámetros generales
+DECLARE @SecretariaID INT = 1; -- ID de Secretaría de Gobierno
+DECLARE @MaxHoursPerDay INT = 8; -- Máximo de horas por día
+DECLARE @EmpleadoID INT;
+DECLARE @AreaID INT;
+DECLARE @CurrentDate DATETIME;
+DECLARE @RandomHours INT;
+DECLARE @StartTime DATETIME;
+DECLARE @EndTime DATETIME;
+DECLARE @HourType NVARCHAR(50);
+
+-- Cursor para recorrer empleados de la Secretaría
+DECLARE EmployeeCursor CURSOR FOR
+SELECT e.EmpleadoID, e.AreaID
+FROM Empleados e
+JOIN Areas a ON e.AreaID = a.AreaID
+WHERE a.SecretariaID = @SecretariaID;
+
+OPEN EmployeeCursor;
+FETCH NEXT FROM EmployeeCursor INTO @EmpleadoID, @AreaID;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @CurrentDate = @StartDate;
+
+    WHILE @CurrentDate <= @EndDate
+    BEGIN
+        -- Generar horas de trabajo aleatorias
+        SET @RandomHours = FLOOR(RAND() * (@MaxHoursPerDay - 1) + 1);
+        SET @StartTime = DATEADD(HOUR, FLOOR(RAND() * 12), @CurrentDate); -- Inicio aleatorio entre 00:00 y 12:00
+        SET @EndTime = DATEADD(HOUR, @RandomHours, @StartTime); -- Hora fin calculada
+
+        -- Determinar el tipo de hora
+        IF DATEPART(WEEKDAY, @CurrentDate) IN (1, 7) -- Domingo y sábado
+        BEGIN
+            SET @HourType = '100%';
+        END
+        ELSE
+        BEGIN
+            SET @HourType = '50%';
+        END
+
+        -- Insertar horas extras
+        INSERT INTO HorasExtras (EmpleadoID, AreaID, SecretariaID, FechaHoraInicio, FechaHoraFin, TipoHora)
+        VALUES (@EmpleadoID, @AreaID, @SecretariaID, @StartTime, @EndTime, @HourType);
+
+        -- Avanzar al día siguiente
+        SET @CurrentDate = DATEADD(DAY, 1, @CurrentDate);
+    END
+
+    FETCH NEXT FROM EmployeeCursor INTO @EmpleadoID, @AreaID;
+END
+
+CLOSE EmployeeCursor;
+DEALLOCATE EmployeeCursor;
+
+
+
 -- Trigger para validar la coherencia entre AreaID y SecretariaID en la tabla Empleados
 GO
 CREATE TRIGGER trg_ValidarAreaSecretaria_Empleado
