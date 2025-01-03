@@ -1,0 +1,43 @@
+﻿body {
+}
+
+.floating-form {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 350px; /* Tamaño reducido */
+    z-index: 9999;
+    font-size: 0.9rem; /* Fuente más pequeña */
+}
+
+    .floating-form h4 {
+        font-size: 1rem; /* Reducir título */
+        margin-bottom: 8px; /* Espacio más pequeño */
+    }
+
+    .floating-form .form-label {
+        font-size: 0.85rem; /* Reducir el tamaño de los labels */
+        margin-bottom: 4px; /* Menos espacio debajo de los labels */
+    }
+
+    .floating-form .form-control,
+    .floating-form .form-select {
+        font-size: 0.8rem; /* Reducir el tamaño de los inputs/selects */
+        padding: 6px; /* Menos padding para que quede más compacto */
+        height: 30px; /* Reducir la altura de los campos */
+    }
+
+    .floating-form button {
+        font-size: 0.85rem; /* Reducir tamaño de los botones */
+        padding: 6px 12px; /* Menos padding para el botón */
+        margin-top: 10px; /* Espacio arriba del botón */
+    }
+
+.hidden {
+    display: none;
+}
+
