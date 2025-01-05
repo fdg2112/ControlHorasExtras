@@ -8,30 +8,39 @@
 <!-- Graficos -->
 <div class="container mt-4">
     <h1>Bienvenido @User.FindFirst("Nombre")?.Value</h1>
-    @if (rol == "Secretario" || rol == "Intendente" || rol == "Secretario de Hacienda")
-    {
-        <div class="col-md-6">
-            <label for="areaFilter">Filtrar por área:</label>
-            <select id="areaFilter" class="form-select">
-                <option value="">Todas las áreas</option>
-                @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
-                {
-                    <option value="@area.AreaId">@area.NombreArea</option>
-                }
-            </select>
-        </div>
-    }
     <div class="row">
-        <!-- Gráfico de horas del mes -->
-        <div class="col-md-6">
-            <h3>Horas realizadas en el mes</h3>
-            <canvas id="horasMesChart"></canvas>
-        </div>
+        @if (rol == "Intendente" || rol == "Secretario Hacienda")
+        {
+            <div class="col-md-6">
+                <label for="secretariaFilter">Filtrar por Secretaria:</label>
+                <select id="secretariaFilter" class="form-select">
+                    <option value="">Todas las secretarias</option>
+                    @foreach (var area in ViewData["Secretarias"] as List<ControlHorasExtras.Models.Secretaria>)
+                    {
+                        <option value="@area.SecretariaId">@area.NombreSecretaria</option>
+                    }
+                </select>
+            </div>
+        }
+        @if (rol == "Secretario" || rol == "Intendente" || rol == "Secretario Hacienda")
+        {
+            <div class="col-md-6">
+                <label for="areaFilter">Filtrar por área:</label>
+                <select id="areaFilter" class="form-select">
+                    <option value="">Todas las áreas</option>
+                    @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
+                    {
+                        <option value="@area.AreaId">@area.NombreArea</option>
+                    }
+                </select>
+            </div>
+        }
+    </div>
 
-        <!-- Gráfico de gasto -->
-        <div class="col-md-6">
-            <h3>Gasto en horas extras: <span id="totalGasto" class="font-weight-bold">@ViewData["GastoTotalFormatted"]</span></h3>
-            <canvas id="gastoMesChart"></canvas>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Horas y Gasto Mensual</h3>
+            <canvas id="horasYGastoChart"></canvas>
         </div>
     </div>
 
@@ -118,8 +127,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="~/js/Dashboard.js"></script>
 
+
+<script src="~/js/Dashboard.js"></script>
 <script>
     window.dashboardData = {
         horas50: @Html.Raw(Json.Serialize(ViewData["Horas50"] ?? 0)),

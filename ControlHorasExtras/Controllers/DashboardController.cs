@@ -16,7 +16,6 @@ namespace ControlHorasExtras.Controllers
         {
             _context = context;
         }
-
         public async Task<IActionResult> Index()
         {
             // Obtener los claims del usuario logueado
@@ -38,9 +37,9 @@ namespace ControlHorasExtras.Controllers
 
             // Incluir relaciones necesarias
             IQueryable<HorasExtra> query = _context.HorasExtras
-                .Include(h => h.Area) // Incluye datos del área
-                .Include(h => h.Empleado) // Incluye datos del empleado
-                .Include(h => h.Secretaria) // Incluye datos de la secretaría
+                .Include(h => h.Area)
+                .Include(h => h.Empleado)
+                .Include(h => h.Secretaria)
                 .AsQueryable();
 
             // Filtrar por rol
@@ -52,28 +51,32 @@ namespace ControlHorasExtras.Controllers
             {
                 query = query.Where(h => h.SecretariaId == secretariaId);
             }
+            else if (rol == "Intendente" || rol == "Secretario Hacienda")
+            {
+                var secretarias = await _context.Secretarias.ToListAsync();
+                ViewData["Secretarias"] = secretarias;
+            }
 
-            // Obtener el mes y año actuales
+            // Obtener los últimos 12 meses
             var mesActual = DateTime.Now.Month;
             var anioActual = DateTime.Now.Year;
-            // Obtener los últimos 12 meses
             var fechaInicio = DateTime.Now.AddMonths(-11);
-            var fechaFin = DateTime.Now;
 
+            // Datos del mes actual
             var horasDelMes = await query
                 .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
                 .GroupBy(h => h.TipoHora)
                 .Select(g => new
                 {
-                    TipoHora = g.Key, // 50% o 100%
+                    TipoHora = g.Key,
                     TotalHoras = g.Sum(h => h.CantidadHoras)
                 })
                 .ToListAsync();
-            // Procesa el resultado para obtener valores por separado
+
             var horas50 = horasDelMes.FirstOrDefault(h => h.TipoHora == "50%")?.TotalHoras ?? 0;
             var horas100 = horasDelMes.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0;
 
-            // Calcular el gasto mensual
+            // Gasto del mes actual
             var gastoDelMes = await query
                 .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
                 .Select(h => new
@@ -91,25 +94,25 @@ namespace ControlHorasExtras.Controllers
                     TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
                 })
                 .ToListAsync();
-            // Procesa el resultado para obtener valores por separado
+
             var gasto50 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "50%")?.TotalGasto ?? 0;
             var gasto100 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "100%")?.TotalGasto ?? 0;
 
+            // Histórico
             var historicoHoras = await query
-            .Where(h => h.FechaHoraInicio >= fechaInicio && h.FechaHoraInicio <= fechaFin)
-            .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
-            .Select(g => new
-            {
-                Mes = g.Key.Month,
-                Anio = g.Key.Year,
-                TipoHora = g.Key.TipoHora,
-                TotalHoras = g.Sum(h => h.CantidadHoras)
-            })
-            .OrderBy(h => h.Anio)
-            .ThenBy(h => h.Mes)
-            .ToListAsync();
+                .Where(h => h.FechaHoraInicio >= fechaInicio)
+                .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
+                .Select(g => new
+                {
+                    Mes = g.Key.Month,
+                    Anio = g.Key.Year,
+                    TipoHora = g.Key.TipoHora,
+                    TotalHoras = g.Sum(h => h.CantidadHoras)
+                })
+                .OrderBy(h => h.Anio)
+                .ThenBy(h => h.Mes)
+                .ToListAsync();
 
-            // Agrupar datos para el gráfico
             var meses = historicoHoras
                 .Select(h => $"{h.Mes:00}/{h.Anio}")
                 .Distinct()
@@ -127,25 +130,23 @@ namespace ControlHorasExtras.Controllers
                     .Sum(h => h.TotalHoras))
                 .ToList();
 
-            // Calcular el total de gasto (50% + 100%)
-            var totalGasto = gasto50 + gasto100;  // Sumar los gastos
-            var totalGastoFormatted = totalGasto.ToString("C", new CultureInfo("es-AR")); // Formato monetario argentino
-            
+            // Obtener las áreas y secretarías según el rol
             var areas = await _context.Areas
-                .Where(a => a.SecretariaId == secretariaId)
+                .Where(a => rol == "Secretario" ? a.SecretariaId == secretariaId : true)
                 .ToListAsync();
 
             ViewData["Areas"] = areas;
 
-            // Agrega datos al ViewData
+
+
             ViewData["Horas50"] = horas50;
             ViewData["Horas100"] = horas100;
-            ViewData["Gasto50"] = Math.Round(gasto50, 2); // Redondear a dos decimales
+            ViewData["Gasto50"] = Math.Round(gasto50, 2);
             ViewData["Gasto100"] = Math.Round(gasto100, 2);
             ViewData["Meses"] = meses;
             ViewData["Horas50Historico"] = horas50Historico;
             ViewData["Horas100Historico"] = horas100Historico;
-            ViewData["GastoTotalFormatted"] = totalGastoFormatted; // Pasar el total formateado a la vista
+            ViewData["GastoTotalFormatted"] = (gasto50 + gasto100).ToString("C", new CultureInfo("es-AR"));
 
             return View();
         }
@@ -234,5 +235,17 @@ namespace ControlHorasExtras.Controllers
                 Historico100 = historico100
             });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAreasBySecretaria(int? secretariaId)
+        {
+            var areas = await _context.Areas
+                .Where(a => !secretariaId.HasValue || a.SecretariaId == secretariaId.Value)
+                .Select(a => new { a.AreaId, a.NombreArea })
+                .ToListAsync();
+
+            return Json(areas);
+        }
+
     }
 }

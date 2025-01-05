@@ -121,39 +121,61 @@ GO
 INSERT INTO Secretarias (NombreSecretaria)
 VALUES 
 ('Gobierno'),
-('Obras y Servicios Públicos');
+('Obras y Servicios Públicos'),
+('Hacienda'),
+('Accion Social'),
+('Cultura y Educación'),
+('Deportes'),
+('RRHH');
 
 INSERT INTO Areas (NombreArea, SecretariaID)
 VALUES 
-('Ordenanzas', 1), -- Relacionada con Gobierno
-('Control de Despachos', 1), -- Relacionada con Gobierno
-('Tránsito', 1), -- Relacionada con Gobierno
-('Taller', 2), -- Relacionada con Obras y Servicios Públicos
-('Obras Públicas', 2), -- Relacionada con Obras y Servicios Públicos
-('Obras Privadas', 2), -- Relacionada con Obras y Servicios Públicos
-('Servicios Públicos', 2), -- Relacionada con Obras y Servicios Públicos
-('Administración', 2); -- Relacionada con Obras y Servicios Públicos
+('Ordenanzas', 1),
+('Control de Despachos', 1),
+('Tránsito', 1),
+('Taller', 2),
+('Obras Públicas', 2),
+('Obras Privadas', 2),
+('Servicios Públicos', 2),
+('Rentas', 3),
+('Comercio', 3),
+('Contabilidad', 3),
+('Tesoreria', 3),
+('Liquidaciones', 3),
+('Asistencia Social', 4),
+('Administración', 4); 
 
 -- Insertar usuarios con roles específicos
 -- Usuario Jefe de Área
 INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
 VALUES 
-('jefe', '123', 'Juan', 'Pérez', 1, 1, 1); -- Ordenanzas en Gobierno
+('jefeOrd', '123', 'Juan', 'Pérez', 1, 1, 1), -- Ordenanzas en Gobierno
+('jefeDesp', '123', 'Vane', 'Acosta', 1, 2, 1), -- Despacho en Gobierno
+('jefeTrans', '123', 'Luis', 'Gómez', 1, 3, 1), -- Tránsito en Gobierno
+('jefeTaller', '123', 'Marta', 'García', 1, 4, 2), -- Taller en Servicios Públicos
+('jefeObrasP', '123', 'Carlos', 'Martínez', 1, 5, 2), -- Obras Públicas en Servicios Públicos
+('jefeObrasPriv', '123', 'Ana', 'Fernández', 1, 6, 2), -- Obras Privadas en Servicios Públicos
+('jefeServP', '123', 'Pedro', 'González', 1, 7, 2), -- Servicios Públicos en Servicios Públicos
+('jefeRentas', '123', 'Ricardo', 'Díaz', 1, 8, 3), -- Rentas en Hacienda
+('jefeComercio', '123', 'Sofía', 'Paredes', 1, 9, 3), -- Comercio en Hacienda
+('jefeCont', '123', 'Javier', 'Vázquez', 1, 10, 3), -- Contabilidad en Hacienda
+('jefeTesoreria', '123', 'Verónica', 'Serrano', 1, 11, 3), -- Tesorería en Hacienda
+('jefeLiq', '123', 'Carlos', 'Romero', 1, 12, 3), -- Liquidaciones en Hacienda
+('jefeAsistSoc', '123', 'Juliana', 'Moreno', 1, 13, 4), -- Asistencia Social en Acción Social
+('jefeAdmin', '123', 'Marta', 'Reyes', 1, 14, 4); -- Administración en Acción Social
 
--- Usuario Secretario
+-- Usuarios Secretarios
 INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
 VALUES 
-('secretario', '123', 'Pedro', 'Gómez', 2, NULL, 1); -- Gobierno
+('secGob', '123', 'Daniel', 'Rinaldi', 2, NULL, 1), -- Gobierno
+('secServP', '123', 'Dario', 'Tovani', 2, NULL, 2), -- Servicios Públicos
+('secAccSoc', '123', 'Claudia', 'Tachi', 2, NULL, 4); -- Acción Social
 
--- Usuario Secretario de Hacienda
+-- Usuario Secretario de Hacienda e  Intendente
 INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
 VALUES 
-('hacienda', '123', 'Ruben', 'Buson', 3, NULL, NULL); -- No asociado a área ni secretaría
-
--- Usuario Intendente
-INSERT INTO Usuarios (NombreUsuario, Contraseña, Nombre, Apellido, RolID, AreaID, SecretariaID)
-VALUES 
-('intendente', '123', 'Hernan', 'Besel', 4, NULL, NULL); -- No asociado a área ni secretaría
+('AdminHac', '123', 'Ruben', 'Buson', 3, NULL, NULL),
+('intendente', '123', 'Hernan', 'Besel', 4, NULL, NULL); -- No asociados a área ni secretaría
 
 -- Insertar Categorías Salariales con la escala salarial actual
 INSERT INTO CategoriasSalariales (NombreCategoria, SueldoBasico, DesdeMes, HastaMes)
@@ -170,49 +192,142 @@ VALUES
 (10, 342373.41, '2024-01-01', NULL);
 
 -- Insertar empleados con áreas y categorías salariales
+
+-- Área 1: Ordenanzas
 INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
 VALUES
 (201, 'Carlos', 'Pérez', 1, 1, 1, '2020-02-20'),
-(202, 'Marta', 'González', 2, 1, 2, '2021-03-15'),
-(203, 'Luis', 'Ramírez', 3, 1, 3, '2022-04-10'),
-(204, 'Ana', 'Fernández', 4, 2, 4, '2022-05-12'),
-(205, 'Juan', 'Sánchez', 5, 2, 5, '2023-06-25'),
-(206, 'Julia', 'Martínez', 6, 2, 6, '2022-07-02'),
-(207, 'David', 'Hernández', 7, 2, 7, '2021-08-14'),
-(208, 'Elena', 'Lopez', 8, 2, 8, '2023-09-05'),
 (209, 'Pedro', 'González', 1, 1, 9, '2021-10-01'),
-(210, 'Ricardo', 'Díaz', 2, 1, 10, '2020-11-15'),
-(211, 'Sofía', 'Paredes', 3, 1, 1, '2022-01-20'),
-(212, 'Javier', 'Vázquez', 4, 2, 2, '2023-04-30'),
-(213, 'Verónica', 'Serrano', 5, 2, 3, '2021-05-10'),
-(214, 'Carlos', 'Romero', 6, 2, 4, '2022-08-15'),
-(215, 'Juliana', 'Moreno', 7, 2, 5, '2023-01-10'),
-(216, 'Marta', 'Reyes', 8, 2, 6, '2021-07-07'),
 (217, 'Roberto', 'Vega', 1, 1, 7, '2020-09-18'),
-(218, 'Daniel', 'Hernández', 2, 1, 8, '2022-10-21'),
-(219, 'Pedro', 'Salazar', 3, 1, 9, '2021-11-13'),
-(220, 'Raúl', 'Cordero', 4, 2, 10, '2023-01-23'),
-(221, 'Victoria', 'Gómez', 5, 2, 1, '2020-08-14'),
-(222, 'Mauricio', 'Rodríguez', 6, 2, 2, '2022-02-05'),
-(223, 'Mariana', 'López', 7, 2, 3, '2021-03-17'),
-(224, 'Felipe', 'González', 8, 2, 4, '2023-06-07'),
 (225, 'Ana', 'Santiago', 1, 1, 5, '2021-12-01'),
+(233, 'Ricardo', 'Sánchez', 1, 1, 3, '2022-02-26');
+
+-- Área 2: Control de Despachos
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(202, 'Marta', 'González', 2, 1, 2, '2021-03-15'),
+(210, 'Ricardo', 'Díaz', 2, 1, 10, '2020-11-15'),
+(218, 'Daniel', 'Hernández', 2, 1, 8, '2022-10-21'),
 (226, 'Adrián', 'Molina', 2, 1, 6, '2022-03-23'),
+(234, 'Pablo', 'Reyes', 2, 1, 4, '2023-07-22');
+
+-- Área 3: Tránsito
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(203, 'Luis', 'Ramírez', 3, 1, 3, '2022-04-10'),
+(211, 'Sofía', 'Paredes', 3, 1, 1, '2022-01-20'),
+(219, 'Pedro', 'Salazar', 3, 1, 9, '2021-11-13'),
 (227, 'Gabriela', 'Cabrera', 3, 1, 7, '2023-05-18'),
-(228, 'Luis', 'Méndez', 4, 2, 8, '2021-07-23'),
-(229, 'Laura', 'Ríos', 5, 2, 9, '2022-12-10'),
-(230, 'Pedro', 'Carrera', 6, 2, 10, '2023-08-13'),
-(231, 'Andrés', 'Pérez', 7, 2, 1, '2020-05-19'),
-(232, 'Cecilia', 'Jiménez', 8, 2, 2, '2021-01-14'),
-(233, 'Ricardo', 'Sánchez', 1, 1, 3, '2022-02-26'),
-(234, 'Pablo', 'Reyes', 2, 1, 4, '2023-07-22'),
-(235, 'Verónica', 'Torres', 3, 1, 5, '2020-06-17'),
-(236, 'Martín', 'Díaz', 4, 2, 6, '2022-09-04'),
-(237, 'Tomás', 'Lopez', 5, 2, 7, '2021-02-16'),
-(238, 'Claudia', 'Pérez', 6, 2, 8, '2023-11-07'),
-(239, 'Patricia', 'Cano', 7, 2, 9, '2022-12-18'),
-(240, 'Luis', 'Pardo', 8, 2, 10, '2021-03-30'),
-(250, 'Carlos', 'Martínez', 1, 1, 10, '2020-10-10');
+(235, 'Verónica', 'Torres', 3, 1, 5, '2020-06-17');
+
+-- Área 4: Taller
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(241, 'Laura', 'González', 4, 2, 1, '2023-01-01'),
+(242, 'Santiago', 'Martín', 4, 2, 2, '2023-02-20'),
+(243, 'Nicolás', 'Ríos', 4, 2, 3, '2023-03-15'),
+(244, 'Beatriz', 'Torres', 4, 2, 4, '2023-04-10'),
+(245, 'Ricardo', 'Jiménez', 4, 2, 5, '2023-05-05');
+
+-- Área 5: Obras Públicas
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(246, 'Marta', 'González', 5, 2, 6, '2023-06-20'),
+(247, 'Francisco', 'Pérez', 5, 2, 7, '2023-07-15'),
+(248, 'Juan', 'López', 5, 2, 8, '2023-08-25'),
+(249, 'Paula', 'Reyes', 5, 2, 9, '2023-09-18'),
+(250, 'Adrián', 'Moreno', 5, 2, 10, '2023-10-30');
+
+-- Área 6: Obras Privadas
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(251, 'Ana', 'Fernández', 6, 2, 1, '2023-02-15'),
+(252, 'Carlos', 'Paredes', 6, 2, 2, '2023-03-20'),
+(253, 'Héctor', 'Serrano', 6, 2, 3, '2023-04-05'),
+(254, 'Rosa', 'Martínez', 6, 2, 4, '2023-05-25'),
+(255, 'Marcelo', 'López', 6, 2, 5, '2023-06-10');
+
+-- Área 7: Servicios Públicos
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(256, 'Carlos', 'Pérez', 7, 2, 6, '2023-07-30'),
+(257, 'Lucía', 'González', 7, 2, 7, '2023-08-20'),
+(258, 'Pedro', 'Torres', 7, 2, 8, '2023-09-10'),
+(259, 'Marta', 'Sánchez', 7, 2, 9, '2023-10-01'),
+(260, 'José', 'Rodríguez', 7, 2, 10, '2023-11-05');
+
+-- Área 8: Administración
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(261, 'Patricia', 'López', 8, 2, 1, '2023-05-25'),
+(262, 'Luis', 'Gómez', 8, 2, 2, '2023-06-10'),
+(263, 'Claudia', 'Díaz', 8, 2, 3, '2023-07-05'),
+(264, 'Ricardo', 'Martínez', 8, 2, 4, '2023-08-15'),
+(265, 'Gabriela', 'Reyes', 8, 2, 5, '2023-09-12');
+
+-- Área 9: Rentas
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(266, 'Laura', 'Martínez', 9, 3, 1, '2023-01-10'),
+(267, 'Esteban', 'Gómez', 9, 3, 2, '2023-02-14'),
+(268, 'Patricia', 'Díaz', 9, 3, 3, '2023-03-25'),
+(269, 'Fernando', 'Paredes', 9, 3, 4, '2023-04-30'),
+(270, 'Ricardo', 'Serrano', 9, 3, 5, '2023-05-18');
+
+-- Área 10: Comercio
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(271, 'Carlos', 'Reyes', 10, 3, 6, '2023-06-01'),
+(272, 'Marta', 'González', 10, 3, 7, '2023-07-10'),
+(273, 'Verónica', 'Lopez', 10, 3, 8, '2023-08-20'),
+(274, 'Luis', 'Rodríguez', 10, 3, 9, '2023-09-05'),
+(275, 'Juan', 'Fernández', 10, 3, 10, '2023-10-15');
+
+-- Área 11: Contabilidad
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(276, 'Claudia', 'Serrano', 11, 3, 1, '2023-04-20'),
+(277, 'José', 'Molina', 11, 3, 2, '2023-05-25'),
+(278, 'Carlos', 'Torres', 11, 3, 3, '2023-06-30'),
+(279, 'Martín', 'López', 11, 3, 4, '2023-07-15'),
+(280, 'Raúl', 'Gómez', 11, 3, 5, '2023-08-10');
+
+-- Área 12: Tesorería
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(281, 'Felipe', 'González', 12, 3, 6, '2023-06-01'),
+(282, 'Patricia', 'Martínez', 12, 3, 7, '2023-07-07'),
+(283, 'Gabriela', 'Romero', 12, 3, 8, '2023-08-12'),
+(284, 'Ricardo', 'Vega', 12, 3, 9, '2023-09-10'),
+(285, 'Fernando', 'Sánchez', 12, 3, 10, '2023-10-05');
+
+-- Área 13: Liquidaciones
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(286, 'Juan', 'Ramírez', 13, 3, 1, '2023-01-18'),
+(287, 'Claudia', 'Díaz', 13, 3, 2, '2023-02-22'),
+(288, 'Tomás', 'Martínez', 13, 3, 3, '2023-03-05'),
+(289, 'Ana', 'González', 13, 3, 4, '2023-04-10'),
+(290, 'Ricardo', 'Hernández', 13, 3, 5, '2023-05-15');
+
+-- Área 14: Asistencia Social
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(291, 'Felipe', 'Torres', 14, 4, 6, '2023-06-15'),
+(292, 'Sofía', 'Moreno', 14, 4, 7, '2023-07-01'),
+(293, 'Carlos', 'López', 14, 4, 8, '2023-08-12'),
+(294, 'Pablo', 'Reyes', 14, 4, 9, '2023-09-25'),
+(295, 'Victoria', 'Gómez', 14, 4, 10, '2023-10-10');
+
+-- Área 15: Administración (Secretaría 4)
+INSERT INTO Empleados (Legajo, Nombre, Apellido, AreaID, SecretariaID, CategoriaID, FechaIngreso)
+VALUES
+(296, 'Cecilia', 'Martínez', 15, 4, 1, '2023-01-20'),
+(297, 'Ricardo', 'Pérez', 15, 4, 2, '2023-02-15'),
+(298, 'Gabriela', 'Vega', 15, 4, 3, '2023-03-05'),
+(299, 'Martín', 'Torres', 15, 4, 4, '2023-04-10'),
+(300, 'Laura', 'Salazar', 15, 4, 5, '2023-05-01');
+
 
 -- Insertar Topes de Horas
 INSERT INTO TopesHoras (Mes, Año, AreaID, TopeHoras)
@@ -267,68 +382,6 @@ VALUES
 (3, '2024-11-20 10:00', '192.168.1.14'),
 (4, '2024-11-20 11:30', '192.168.1.16');
 
--- Insertar horas aleatorias para areas de gobierno
--- Crear horas extras al 50% y 100% para empleados de la Secretaría de Gobierno en 2024
-DECLARE @StartDate DATETIME = '2024-01-01 00:00:00';
-DECLARE @EndDate DATETIME = '2024-12-31 23:59:59';
-
--- Parámetros generales
-DECLARE @SecretariaID INT = 1; -- ID de Secretaría de Gobierno
-DECLARE @MaxHoursPerDay INT = 8; -- Máximo de horas por día
-DECLARE @EmpleadoID INT;
-DECLARE @AreaID INT;
-DECLARE @CurrentDate DATETIME;
-DECLARE @RandomHours INT;
-DECLARE @StartTime DATETIME;
-DECLARE @EndTime DATETIME;
-DECLARE @HourType NVARCHAR(50);
-
--- Cursor para recorrer empleados de la Secretaría
-DECLARE EmployeeCursor CURSOR FOR
-SELECT e.EmpleadoID, e.AreaID
-FROM Empleados e
-JOIN Areas a ON e.AreaID = a.AreaID
-WHERE a.SecretariaID = @SecretariaID;
-
-OPEN EmployeeCursor;
-FETCH NEXT FROM EmployeeCursor INTO @EmpleadoID, @AreaID;
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    SET @CurrentDate = @StartDate;
-
-    WHILE @CurrentDate <= @EndDate
-    BEGIN
-        -- Generar horas de trabajo aleatorias
-        SET @RandomHours = FLOOR(RAND() * (@MaxHoursPerDay - 1) + 1);
-        SET @StartTime = DATEADD(HOUR, FLOOR(RAND() * 12), @CurrentDate); -- Inicio aleatorio entre 00:00 y 12:00
-        SET @EndTime = DATEADD(HOUR, @RandomHours, @StartTime); -- Hora fin calculada
-
-        -- Determinar el tipo de hora
-        IF DATEPART(WEEKDAY, @CurrentDate) IN (1, 7) -- Domingo y sábado
-        BEGIN
-            SET @HourType = '100%';
-        END
-        ELSE
-        BEGIN
-            SET @HourType = '50%';
-        END
-
-        -- Insertar horas extras
-        INSERT INTO HorasExtras (EmpleadoID, AreaID, SecretariaID, FechaHoraInicio, FechaHoraFin, TipoHora)
-        VALUES (@EmpleadoID, @AreaID, @SecretariaID, @StartTime, @EndTime, @HourType);
-
-        -- Avanzar al día siguiente
-        SET @CurrentDate = DATEADD(DAY, 1, @CurrentDate);
-    END
-
-    FETCH NEXT FROM EmployeeCursor INTO @EmpleadoID, @AreaID;
-END
-
-CLOSE EmployeeCursor;
-DEALLOCATE EmployeeCursor;
-
-
 
 -- Trigger para validar la coherencia entre AreaID y SecretariaID en la tabla Empleados
 GO
@@ -370,3 +423,67 @@ BEGIN
 END;
 GO
 
+-- Insertar horas aleatorias para todos los empleados
+-- Crear horas extras al 50% y 100% para empleados en 2025
+DECLARE @StartDate DATETIME = '2025-01-01 00:00:00';
+DECLARE @EndDate DATETIME = '2025-12-31 23:59:59';
+
+-- Parámetros generales
+DECLARE @MaxHours50 INT = 10; -- Máximo de horas al 50%
+DECLARE @MaxHours100 INT = 5; -- Máximo de horas al 100%
+DECLARE @EmpleadoID INT;
+DECLARE @AreaID INT;
+DECLARE @SecretariaID INT;
+DECLARE @CurrentDate DATETIME;
+DECLARE @RandomHours INT;
+DECLARE @StartTime DATETIME;
+DECLARE @EndTime DATETIME;
+DECLARE @HourType NVARCHAR(50);
+
+-- Cursor para recorrer todos los empleados
+DECLARE EmployeeCursor CURSOR FOR
+SELECT e.EmpleadoID, e.AreaID, e.SecretariaID
+FROM Empleados e;
+
+OPEN EmployeeCursor;
+FETCH NEXT FROM EmployeeCursor INTO @EmpleadoID, @AreaID, @SecretariaID;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @CurrentDate = @StartDate;
+
+    WHILE @CurrentDate <= @EndDate
+    BEGIN
+        -- Generar horas de trabajo aleatorias
+        SET @RandomHours = FLOOR(RAND() * (@MaxHours50 + 1)); -- Horas al 50% entre 0 y 10
+        IF @RandomHours > @MaxHours100 
+        BEGIN
+            SET @RandomHours = @MaxHours100; -- Limitar máximo a 5 horas al 100%
+        END
+
+        SET @StartTime = DATEADD(HOUR, FLOOR(RAND() * 12), @CurrentDate); -- Inicio aleatorio entre 00:00 y 12:00
+        SET @EndTime = DATEADD(HOUR, @RandomHours, @StartTime); -- Hora fin calculada
+
+        -- Determinar el tipo de hora
+        IF DATEPART(WEEKDAY, @CurrentDate) IN (1, 7) -- Domingo y sábado
+        BEGIN
+            SET @HourType = '100%';
+        END
+        ELSE
+        BEGIN
+            SET @HourType = '50%';
+        END
+
+        -- Insertar horas extras
+        INSERT INTO HorasExtras (EmpleadoID, AreaID, SecretariaID, FechaHoraInicio, FechaHoraFin, TipoHora)
+        VALUES (@EmpleadoID, @AreaID, @SecretariaID, @StartTime, @EndTime, @HourType);
+
+        -- Avanzar al día siguiente
+        SET @CurrentDate = DATEADD(DAY, 1, @CurrentDate);
+    END
+
+    FETCH NEXT FROM EmployeeCursor INTO @EmpleadoID, @AreaID, @SecretariaID;
+END
+
+CLOSE EmployeeCursor;
+DEALLOCATE EmployeeCursor;

@@ -1,44 +1,207 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-    // Datos iniciales pasados desde el servidor
+﻿const formHoras = document.getElementById('formHoras');
+const btnCargarHoras = document.getElementById('btnCargarHoras');
+let empleadoId = null;
+
+// Mostrar y ocultar el formulario de carga
+function cargarFormulario() {
+    formHoras.classList.toggle('hidden');
+    btnCargarHoras.classList.toggle('hidden');
+    if (!formHoras.classList.contains('hidden')) {
+        fetch('/Overtime/Create')
+            .then(response => response.json())
+            .then(data => cargarOpcionesFormulario(data))
+            .catch(error => console.error('Error al cargar los datos:', error));
+    }
+}
+
+// Cargar empleados en el formulario
+function cargarOpcionesFormulario(data) {
+    const empleadoSelect = document.getElementById('empleado');
+    empleadoSelect.innerHTML = '<option value="" selected disabled>Seleccione un empleado</option>';
+    data.empleados.forEach(empleado => {
+        empleadoSelect.innerHTML += `
+                <option value="${empleado.empleadoId}"
+                        data-area-id="${empleado.areaId}"
+                        data-area-nombre="${empleado.areaNombre}"
+                        data-secretaria-id="${empleado.secretariaId}"
+                        data-secretaria-nombre="${empleado.secretariaNombre}">
+                    ${empleado.legajo} - ${empleado.nombre} ${empleado.apellido}
+                </option>`;
+    });
+}
+
+// Actualizar área y secretaría en el formulario
+function actualizarAreaYSecretaria() {
+    const empleadoSelect = document.getElementById('empleado');
+    const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
+    empleadoId = selectedOption.value;
+
+    const areaId = selectedOption.getAttribute('data-area-id') || '';
+    const areaNombre = selectedOption.getAttribute('data-area-nombre') || 'Sin Área';
+    const secretariaId = selectedOption.getAttribute('data-secretaria-id') || '';
+    const secretariaNombre = selectedOption.getAttribute('data-secretaria-nombre') || 'Sin Secretaría';
+
+    document.getElementById('area').innerHTML = `<option value="${areaId}" selected>${areaNombre}</option>`;
+    document.getElementById('secretaria').innerHTML = `<option value="${secretariaId}" selected>${secretariaNombre}</option>`;
+
+    document.getElementById('areaId').value = areaId;
+    document.getElementById('secretariaId').value = secretariaId;
+}
+
+function toggleForm() {
+    formHoras.classList.toggle('hidden');
+    btnCargarHoras.classList.toggle('hidden');
+}
+
+// Validación y envío del formulario
+formHoras.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const fechaInicio = new Date(document.getElementById('fechaInicio').value);
+    const fechaFin = new Date(document.getElementById('fechaFin').value);
+
+    // Validar fechas
+    if (!fechaInicio || !fechaFin) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Debe completar las fechas de inicio y fin.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    if (fechaInicio >= fechaFin) {
+        Swal.fire({
+            title: 'Error',
+            text: 'La fecha y hora de inicio deben ser anteriores a la fecha y hora de fin.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    if (!empleadoId) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Debe seleccionar un empleado.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    const formData = new FormData(formHoras);
+
+    fetch('/Overtime/Create', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Éxito',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Ocurrió un error inesperado.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
     const { horas50, horas100, gasto50, gasto100, meses, horas50Historico, horas100Historico } = window.dashboardData;
 
-    let horasMesChart, gastoMesChart, horasHistoricasChart;
+    let horasYGastoChart, horasMesChart, gastoMesChart, horasHistoricasChart;
 
     // 1. Inicializar gráficos
     function initCharts() {
-        // Gráfico de horas realizadas
-        const horasMesChartCanvas = document.getElementById('horasMesChart').getContext('2d');
-        horasMesChart = new Chart(horasMesChartCanvas, {
+        const ctx = document.getElementById('horasYGastoChart').getContext('2d');
+        horasYGastoChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['50%', '100%'],
-                datasets: [{
-                    label: 'Horas Realizadas',
-                    data: [horas50, horas100],
-                    backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)']
-                }]
+                datasets: [
+                    {
+                        label: 'Horas Realizadas',
+                        data: [horas50, horas100],
+                        backgroundColor: ['rgba(173, 216, 230, 0.8)', 'rgba(135, 206, 250, 0.8)'], // Celeste y azul claro
+                        yAxisID: 'y-horas',
+                    },
+                    {
+                        label: 'Gasto Mensual',
+                        data: [gasto50, gasto100],
+                        backgroundColor: ['rgba(135, 206, 250, 0.8)', 'rgba(173, 216, 230, 0.8)'], // Azul claro y celeste
+                        yAxisID: 'y-gasto',
+                    }
+                ]
             },
-            options: getBarChartOptions(),
+            options: {
+                responsive: true,
+                scales: {
+                    'y-horas': {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Horas',
+                        },
+                    },
+                    'y-gasto': {
+                        type: 'linear',
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Gasto ($)',
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value, ctx) => {
+                            if (ctx.dataset.label === 'Gasto Mensual') {
+                                return `$${value.toLocaleString('es-AR')}`;
+                            }
+                            return value;
+                        },
+                        font: {
+                            weight: 'bold',
+                        }
+                    }
+                }
+            },
             plugins: [ChartDataLabels]
         });
 
-        // Gráfico de gasto mensual
-        const gastoMesChartCanvas = document.getElementById('gastoMesChart').getContext('2d');
-        gastoMesChart = new Chart(gastoMesChartCanvas, {
-            type: 'bar',
-            data: {
-                labels: ['Gasto 50%', 'Gasto 100%'],
-                datasets: [{
-                    label: 'Gasto Mensual',
-                    data: [gasto50, gasto100],
-                    backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)']
-                }]
-            },
-            options: getBarChartOptions(true),
-            plugins: [ChartDataLabels]
-        });
-
-        // Gráfico de histórico
         const horasHistoricasChartCanvas = document.getElementById('horasHistoricasChart').getContext('2d');
         horasHistoricasChart = new Chart(horasHistoricasChartCanvas, {
             type: 'line',
@@ -85,13 +248,10 @@
         const historico50 = data.historico50.map(h => parseFloat(h) || 0);
         const historico100 = data.historico100.map(h => parseFloat(h) || 0);
 
-        // Actualizar gráfico de horas
-        horasMesChart.data.datasets[0].data = [horas50, horas100];
-        horasMesChart.update();
-
-        // Actualizar gráfico de gasto
-        gastoMesChart.data.datasets[0].data = [gasto50, gasto100];
-        gastoMesChart.update();
+        // Actualizar gráfico de horas y gasto
+        horasYGastoChart.data.datasets[0].data = [horas50, horas100]; // Actualizar las horas
+        horasYGastoChart.data.datasets[1].data = [gasto50, gasto100]; // Actualizar el gasto
+        horasYGastoChart.update();
 
         // Actualizar gráfico histórico
         horasHistoricasChart.data.datasets[0].data = historico50;
@@ -99,52 +259,45 @@
         horasHistoricasChart.update();
     }
 
-    // 4. Manejador del filtro de áreas
-    function handleAreaFilterChange() {
+    // 4. Manejador del filtro de áreas y secretarías
+    function handleFilters() {
+        const secretariaFilter = document.getElementById('secretariaFilter');
         const areaFilter = document.getElementById('areaFilter');
-        areaFilter?.addEventListener('change', () => {
-            const areaId = areaFilter.value;
 
-            fetch(`/Dashboard/GetChartData?areaId=${areaId}`)
+        // Actualizar áreas según la secretaría seleccionada
+        secretariaFilter?.addEventListener('change', () => {
+            const secretariaId = secretariaFilter.value;
+
+            fetch(`/Dashboard/GetAreasBySecretaria?secretariaId=${secretariaId}`)
                 .then(response => response.json())
-                .then(updateCharts)
-                .catch(error => console.error('Error al cargar los datos del gráfico:', error));
-        });
-    }
-
-    // 5. Inicializar lógica de carga de horas
-    function initFormLogic() {
-        const formHoras = document.getElementById('formHoras');
-        const btnCargarHoras = document.getElementById('btnCargarHoras');
-
-        btnCargarHoras?.addEventListener('click', () => {
-            formHoras.classList.toggle('hidden');
-            btnCargarHoras.classList.toggle('hidden');
-        });
-
-        formHoras?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(formHoras);
-
-            fetch('/Overtime/Create', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) location.reload();
-                    else alert(data.message);
+                .then(areas => {
+                    areaFilter.innerHTML = '<option value="">Todas las áreas</option>';
+                    areas.forEach(area => {
+                        areaFilter.innerHTML += `<option value="${area.areaId}">${area.nombreArea}</option>`;
+                    });
+                    // Actualizar los gráficos si corresponde
+                    fetchChartData();
                 })
-                .catch(console.error);
+                .catch(error => console.error('Error al cargar las áreas:', error));
         });
+
+        // Filtrar datos según el área seleccionada
+        areaFilter?.addEventListener('change', fetchChartData);
     }
+
+    function fetchChartData() {
+        const areaId = document.getElementById('areaFilter')?.value || '';
+        const secretariaId = document.getElementById('secretariaFilter')?.value || '';
+
+        fetch(`/Dashboard/GetChartData?areaId=${areaId}&secretariaId=${secretariaId}`)
+            .then(response => response.json())
+            .then(updateCharts)
+            .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+    }
+
+    //// 5. Lógica de carga de horas
 
     // 6. Ejecutar inicializaciones
     initCharts();
-    handleAreaFilterChange();
-    initFormLogic();
+    handleFilters();
 });
