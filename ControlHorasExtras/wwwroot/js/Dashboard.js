@@ -133,7 +133,7 @@ formHoras.addEventListener('submit', function (e) {
 document.addEventListener('DOMContentLoaded', () => {
     const { horas50, horas100, gasto50, gasto100, meses, horas50Historico, horas100Historico } = window.dashboardData;
 
-    let horasYGastoChart, horasMesChart, gastoMesChart, horasHistoricasChart;
+    let horasYGastoChart, horasHistoricasChart;
 
     // 1. Inicializar gráficos
     function initCharts() {
@@ -146,13 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Horas Realizadas',
                         data: [horas50, horas100],
-                        backgroundColor: ['rgba(173, 216, 230, 0.8)', 'rgba(135, 206, 250, 0.8)'], // Celeste y azul claro
+                        backgroundColor: ['rgba(173, 216, 230, 0.8)'], // Celeste y azul claro
                         yAxisID: 'y-horas',
                     },
                     {
                         label: 'Gasto Mensual',
                         data: [gasto50, gasto100],
-                        backgroundColor: ['rgba(135, 206, 250, 0.8)', 'rgba(173, 216, 230, 0.8)'], // Azul claro y celeste
+                        backgroundColor: ['rgba(135, 206, 250, 0.8)'], // Azul claro y celeste
                         yAxisID: 'y-gasto',
                     }
                 ]
@@ -216,29 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Opciones para los gráficos
-    function getBarChartOptions(isCurrency = false) {
-        return {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    anchor: 'end',
-                    align: 'top',
-                    formatter: isCurrency
-                        ? value => value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })
-                        : Math.round,
-                    font: { weight: 'bold', size: 12 }
-                }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { padding: 10 } },
-                x: { ticks: { padding: 20 } }
-            },
-            layout: { padding: { top: 20 } }
-        };
-    }
-
     // 3. Actualización de los gráficos
     function updateCharts(data) {
         const horas50 = parseFloat(data.horas50) || 0;
@@ -294,10 +271,55 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(updateCharts)
             .catch(error => console.error('Error al cargar los datos del gráfico:', error));
     }
-
-    //// 5. Lógica de carga de horas
-
     // 6. Ejecutar inicializaciones
     initCharts();
     handleFilters();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const areaFilter = document.getElementById('areaFilter');
+
+    // Llamada inicial para cargar empleados según el área o secretaría del usuario
+    fetchEmpleados();
+
+    // Evento para actualizar empleados según el área seleccionada
+    areaFilter?.addEventListener('change', fetchEmpleados);
+});
+
+function fetchEmpleados() {
+    const areaId = document.getElementById('areaFilter')?.value || '';
+
+    fetch(`/Dashboard/GetEmpleadosPorArea?areaId=${areaId}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('#empleadosTable tbody');
+            tbody.innerHTML = ''; // Limpiar la tabla
+            data.forEach(emp => {
+                const tendencia50 = calcularTendencia(emp.horas50Actual, emp.horas50Anterior);
+                const tendencia100 = calcularTendencia(emp.horas100Actual, emp.horas100Anterior);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${emp.legajo}</td>
+                        <td>${emp.apellido}</td>
+                        <td>${emp.nombre}</td>
+                        <td>${tendencia50}  ${emp.horas50Actual}</td>
+                        <td>${tendencia100}  ${emp.horas100Actual}</td>
+                    </tr>
+                `;
+            });
+        })
+        .catch(error => console.error('Error al cargar empleados:', error));
+}
+
+function calcularTendencia(actual, anterior) {
+    if (actual > anterior) {
+        return '<span style="color: red;">▲</span>'; // Flecha roja hacia arriba
+    } else if (actual < anterior) {
+        return '<span style="color: green;">▼</span>'; // Flecha verde hacia abajo
+    } else {
+        return '<span style="color: black;">–</span>'; // Guion negro
+    }
+}
+
+

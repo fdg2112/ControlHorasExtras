@@ -38,18 +38,33 @@
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6 col-sm-12">
             <h3>Horas y Gasto Mensual</h3>
             <canvas id="horasYGastoChart"></canvas>
         </div>
-    </div>
-
-    <div class="row mt-5">
-        <div class="col-12">
+        <div class="col-md-6 col-sm-12">
             <h3>Histórico de Horas por Mes</h3>
             <canvas id="horasHistoricasChart"></canvas>
         </div>
     </div>
+</div>
+
+<!--Tabla empleados-->
+<div class="table-responsive mt-4">
+    <table class="table table-striped" id="empleadosTable">
+        <thead>
+            <tr>
+                <th>Legajo</th>
+                <th>Apellido</th>
+                <th>Nombre</th>
+                <th>Horas 50%</th>
+                <th>Horas 100%</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aquí se insertarán las filas dinámicamente -->
+        </tbody>
+    </table>
 </div>
 
 <!-- Formulario flotante para cargar horas -->
@@ -127,8 +142,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
 <script src="~/js/Dashboard.js"></script>
 <script>
     window.dashboardData = {
@@ -141,3 +154,4 @@
         horas100Historico: @Html.Raw(Json.Serialize(ViewData["Horas100Historico"]))
     };
 </script>
+

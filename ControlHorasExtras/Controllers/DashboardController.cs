@@ -154,9 +154,15 @@ namespace ControlHorasExtras.Controllers
         [HttpGet]
         public async Task<IActionResult> GetChartData(int? areaId = null)
         {
+            // Obtener el rol y la secretaría del usuario logueado
+            var rol = User.FindFirst("Rol")?.Value;
+            var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
+            int? secretariaId = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
+
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
-            var startDate = new DateTime(currentYear, currentMonth, 1).AddMonths(-11);  // Fecha de inicio para los últimos 12 meses
+            var startDate = new DateTime(currentYear, currentMonth, 1).AddMonths(-11);
+
             var query = _context.HorasExtras
                 .Include(h => h.Empleado)
                 .ThenInclude(e => e.Categoria)
@@ -164,9 +170,14 @@ namespace ControlHorasExtras.Controllers
                 .Include(h => h.Secretaria)
                 .AsQueryable();
 
+            // Aplicar filtros según el rol del usuario
             if (areaId.HasValue)
             {
-                query = query.Where(h => h.AreaId == areaId);
+                query = query.Where(h => h.AreaId == areaId.Value);
+            }
+            else if (rol == "Secretario" && secretariaId.HasValue)
+            {
+                query = query.Where(h => h.SecretariaId == secretariaId.Value);
             }
 
             // Filtrar solo las horas del mes actual
@@ -192,7 +203,7 @@ namespace ControlHorasExtras.Controllers
                 TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
             }).ToListAsync();
 
-            // Histórico: obtener los últimos 12 meses hasta el mes actual
+            // Histórico
             var historicoQuery = _context.HorasExtras
                 .Include(h => h.Empleado)
                 .Include(h => h.Area)
@@ -200,7 +211,11 @@ namespace ControlHorasExtras.Controllers
 
             if (areaId.HasValue)
             {
-                historicoQuery = historicoQuery.Where(h => h.AreaId == areaId);
+                historicoQuery = historicoQuery.Where(h => h.AreaId == areaId.Value);
+            }
+            else if (rol == "Secretario" && secretariaId.HasValue)
+            {
+                historicoQuery = historicoQuery.Where(h => h.SecretariaId == secretariaId.Value);
             }
 
             var historico = await historicoQuery
@@ -236,6 +251,7 @@ namespace ControlHorasExtras.Controllers
             });
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetAreasBySecretaria(int? secretariaId)
         {
@@ -245,6 +261,129 @@ namespace ControlHorasExtras.Controllers
                 .ToListAsync();
 
             return Json(areas);
+        }
+
+        //[HttpGet]
+        //public async Task<IActionResult> GetEmpleadosPorArea(int? areaId = null)
+        //{
+        //    // Obtener datos del usuario logueado
+        //    var rol = User.FindFirst("Rol")?.Value;
+        //    var areaIdClaim = User.FindFirst("AreaId")?.Value;
+        //    var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
+
+        //    int? areaIdUsuario = string.IsNullOrEmpty(areaIdClaim) ? null : int.Parse(areaIdClaim);
+        //    int? secretariaIdUsuario = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
+
+        //    var mesActual = DateTime.Now.Month;
+        //    var anioActual = DateTime.Now.Year;
+
+        //    var empleadosQuery = _context.Empleados.AsQueryable();
+
+        //    // Filtrar según el rol del usuario
+        //    if (rol == "Jefe de Área" && areaIdUsuario.HasValue)
+        //    {
+        //        empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaIdUsuario.Value);
+        //    }
+        //    else if (rol == "Secretario" && secretariaIdUsuario.HasValue)
+        //    {
+        //        empleadosQuery = empleadosQuery.Where(e => e.Area.SecretariaId == secretariaIdUsuario.Value);
+        //    }
+        //    else if (rol == "Intendente" || rol == "Secretario Hacienda")
+        //    {
+        //        // Intendentes y Secretarios de Hacienda no tienen filtro inicial
+        //    }
+        //    else if (areaId.HasValue)
+        //    {
+        //        empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaId.Value);
+        //    }
+
+        //    var empleados = await empleadosQuery
+        //        .Select(e => new
+        //        {
+        //            e.Legajo,
+        //            e.Apellido,
+        //            e.Nombre,
+        //            Horas50 = e.HorasExtras
+        //                .Where(h => h.FechaHoraInicio.Month == mesActual &&
+        //                            h.FechaHoraInicio.Year == anioActual &&
+        //                            h.TipoHora == "50%")
+        //                .Sum(h => h.CantidadHoras),
+        //            Horas100 = e.HorasExtras
+        //                .Where(h => h.FechaHoraInicio.Month == mesActual &&
+        //                            h.FechaHoraInicio.Year == anioActual &&
+        //                            h.TipoHora == "100%")
+        //                .Sum(h => h.CantidadHoras)
+        //        })
+        //        .ToListAsync();
+
+        //    return Json(empleados);
+        //}
+        [HttpGet]
+        public async Task<IActionResult> GetEmpleadosPorArea(int? areaId = null)
+        {
+            // Obtener datos del usuario logueado
+            var rol = User.FindFirst("Rol")?.Value;
+            var areaIdClaim = User.FindFirst("AreaId")?.Value;
+            var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
+
+            int? areaIdUsuario = string.IsNullOrEmpty(areaIdClaim) ? null : int.Parse(areaIdClaim);
+            int? secretariaIdUsuario = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
+
+            var mesActual = DateTime.Now.Month;
+            var anioActual = DateTime.Now.Year;
+            var mesAnterior = mesActual == 1 ? 12 : mesActual - 1;
+            var anioMesAnterior = mesActual == 1 ? anioActual - 1 : anioActual;
+
+            var empleadosQuery = _context.Empleados.AsQueryable();
+
+            // Filtrar según el rol del usuario
+            if (rol == "Jefe de Área" && areaIdUsuario.HasValue)
+            {
+                empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaIdUsuario.Value);
+            }
+            else if (rol == "Secretario" && secretariaIdUsuario.HasValue)
+            {
+                empleadosQuery = empleadosQuery.Where(e => e.Area.SecretariaId == secretariaIdUsuario.Value);
+            }
+            else if (rol == "Intendente" || rol == "Secretario Hacienda")
+            {
+                // Intendentes y Secretarios de Hacienda no tienen filtro inicial
+            }
+            else if (areaId.HasValue)
+            {
+                empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaId.Value);
+            }
+
+            var empleados = await empleadosQuery
+                .Select(e => new
+                {
+                    e.Legajo,
+                    e.Apellido,
+                    e.Nombre,
+                    Horas50Actual = e.HorasExtras
+                        .Where(h => h.FechaHoraInicio.Month == mesActual &&
+                                    h.FechaHoraInicio.Year == anioActual &&
+                                    h.TipoHora == "50%")
+                        .Sum(h => h.CantidadHoras),
+                    Horas100Actual = e.HorasExtras
+                        .Where(h => h.FechaHoraInicio.Month == mesActual &&
+                                    h.FechaHoraInicio.Year == anioActual &&
+                                    h.TipoHora == "100%")
+                        .Sum(h => h.CantidadHoras),
+                    Horas50Anterior = e.HorasExtras
+                        .Where(h => h.FechaHoraInicio.Month == mesAnterior &&
+                                    h.FechaHoraInicio.Year == anioMesAnterior &&
+                                    h.TipoHora == "50%")
+                        .Sum(h => h.CantidadHoras),
+                    Horas100Anterior = e.HorasExtras
+                        .Where(h => h.FechaHoraInicio.Month == mesAnterior &&
+                                    h.FechaHoraInicio.Year == anioMesAnterior &&
+                                    h.TipoHora == "100%")
+                        .Sum(h => h.CantidadHoras)
+                })
+                .ToListAsync();
+
+            return Json(empleados);
         }
 
     }
