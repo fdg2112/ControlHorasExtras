@@ -1,0 +1,53 @@
+﻿body {
+}
+
+.floating-form {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 350px;
+    z-index: 9999;
+    font-size: 0.9rem;
+}
+
+    .floating-form h4 {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .floating-form .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+
+    .floating-form .form-control,
+    .floating-form .form-select {
+        font-size: 0.8rem;
+        padding: 6px;
+        height: 30px;
+    }
+
+    .floating-form button {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        margin-top: 10px;
+    }
+
+.hidden {
+    display: none;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+    .pagination-container button {
+        margin: 0 5px;
+    }

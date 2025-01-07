@@ -130,6 +130,7 @@ formHoras.addEventListener('submit', function (e) {
         });
 });
 
+// GRAFICOS
 document.addEventListener('DOMContentLoaded', () => {
     const { horas50, horas100, gasto50, gasto100, meses, horas50Historico, horas100Historico } = window.dashboardData;
 
@@ -276,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     handleFilters();
 });
 
+// TABLA DE EMPLEADOS
 document.addEventListener('DOMContentLoaded', () => {
     const areaFilter = document.getElementById('areaFilter');
 
@@ -288,10 +290,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function fetchEmpleados() {
     const areaId = document.getElementById('areaFilter')?.value || '';
+    console.log("Área seleccionada:", areaId); // Verifica el valor de área
 
     fetch(`/Dashboard/GetEmpleadosPorArea?areaId=${areaId}`)
         .then(response => response.json())
         .then(data => {
+            console.log("Empleados recibidos:", data); // Verifica los datos recibidos
             const tbody = document.querySelector('#empleadosTable tbody');
             tbody.innerHTML = ''; // Limpiar la tabla
             data.forEach(emp => {
@@ -311,6 +315,7 @@ function fetchEmpleados() {
         })
         .catch(error => console.error('Error al cargar empleados:', error));
 }
+
 
 function calcularTendencia(actual, anterior) {
     if (actual > anterior) {

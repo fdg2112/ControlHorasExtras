@@ -263,61 +263,6 @@ namespace ControlHorasExtras.Controllers
             return Json(areas);
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetEmpleadosPorArea(int? areaId = null)
-        //{
-        //    // Obtener datos del usuario logueado
-        //    var rol = User.FindFirst("Rol")?.Value;
-        //    var areaIdClaim = User.FindFirst("AreaId")?.Value;
-        //    var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
-
-        //    int? areaIdUsuario = string.IsNullOrEmpty(areaIdClaim) ? null : int.Parse(areaIdClaim);
-        //    int? secretariaIdUsuario = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
-
-        //    var mesActual = DateTime.Now.Month;
-        //    var anioActual = DateTime.Now.Year;
-
-        //    var empleadosQuery = _context.Empleados.AsQueryable();
-
-        //    // Filtrar según el rol del usuario
-        //    if (rol == "Jefe de Área" && areaIdUsuario.HasValue)
-        //    {
-        //        empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaIdUsuario.Value);
-        //    }
-        //    else if (rol == "Secretario" && secretariaIdUsuario.HasValue)
-        //    {
-        //        empleadosQuery = empleadosQuery.Where(e => e.Area.SecretariaId == secretariaIdUsuario.Value);
-        //    }
-        //    else if (rol == "Intendente" || rol == "Secretario Hacienda")
-        //    {
-        //        // Intendentes y Secretarios de Hacienda no tienen filtro inicial
-        //    }
-        //    else if (areaId.HasValue)
-        //    {
-        //        empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaId.Value);
-        //    }
-
-        //    var empleados = await empleadosQuery
-        //        .Select(e => new
-        //        {
-        //            e.Legajo,
-        //            e.Apellido,
-        //            e.Nombre,
-        //            Horas50 = e.HorasExtras
-        //                .Where(h => h.FechaHoraInicio.Month == mesActual &&
-        //                            h.FechaHoraInicio.Year == anioActual &&
-        //                            h.TipoHora == "50%")
-        //                .Sum(h => h.CantidadHoras),
-        //            Horas100 = e.HorasExtras
-        //                .Where(h => h.FechaHoraInicio.Month == mesActual &&
-        //                            h.FechaHoraInicio.Year == anioActual &&
-        //                            h.TipoHora == "100%")
-        //                .Sum(h => h.CantidadHoras)
-        //        })
-        //        .ToListAsync();
-
-        //    return Json(empleados);
-        //}
         [HttpGet]
         public async Task<IActionResult> GetEmpleadosPorArea(int? areaId = null)
         {
@@ -344,6 +289,10 @@ namespace ControlHorasExtras.Controllers
             else if (rol == "Secretario" && secretariaIdUsuario.HasValue)
             {
                 empleadosQuery = empleadosQuery.Where(e => e.Area.SecretariaId == secretariaIdUsuario.Value);
+                if (areaId.HasValue)
+                {
+                    empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaId.Value);
+                }
             }
             else if (rol == "Intendente" || rol == "Secretario Hacienda")
             {
