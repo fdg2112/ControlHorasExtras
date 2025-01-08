@@ -49,22 +49,32 @@
     </div>
 </div>
 
-<!--Tabla empleados-->
-<div class="table-responsive mt-4">
-    <table class="table table-striped" id="empleadosTable">
-        <thead>
-            <tr>
-                <th>Legajo</th>
-                <th>Apellido</th>
-                <th>Nombre</th>
-                <th>Horas 50%</th>
-                <th>Horas 100%</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Aquí se insertarán las filas dinámicamente -->
-        </tbody>
-    </table>
+<!-- Tabla empleados con búsqueda y paginación -->
+<div class="container mt-4">
+    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Buscar empleados...">
+
+    <div class="table-responsive">
+        <table class="table table-striped" id="empleadosTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Legajo</th>
+                    <th onclick="sortTable(1)">Apellido</th>
+                    <th onclick="sortTable(2)">Nombre</th>
+                    <th onclick="sortTable(3)">Horas 50%</th>
+                    <th onclick="sortTable(4)">Horas 100%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas se agregarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-container text-center mt-3">
+        <button class="btn btn-primary" onclick="prevPage()">&#171;</button>
+        <span id="pageInfo"></span>
+        <button class="btn btn-primary" onclick="nextPage()">&#187;</button>
+    </div>
 </div>
 
 <!-- Formulario flotante para cargar horas -->

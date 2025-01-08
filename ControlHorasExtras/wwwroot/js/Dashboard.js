@@ -279,52 +279,108 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // TABLA DE EMPLEADOS
 document.addEventListener('DOMContentLoaded', () => {
-    const areaFilter = document.getElementById('areaFilter');
+    let empleadosData = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
 
-    // Llamada inicial para cargar empleados según el área o secretaría del usuario
+    // Llamada inicial para cargar empleados
     fetchEmpleados();
 
-    // Evento para actualizar empleados según el área seleccionada
-    areaFilter?.addEventListener('change', fetchEmpleados);
-});
+    // Evento para búsqueda
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        const searchValue = this.value.toLowerCase();
+        const filteredData = empleadosData.filter(emp =>
+            `${emp.legajo} ${emp.apellido} ${emp.nombre}`.toLowerCase().includes(searchValue)
+        );
+        renderTable(filteredData);
+    });
 
-function fetchEmpleados() {
-    const areaId = document.getElementById('areaFilter')?.value || '';
-    console.log("Área seleccionada:", areaId); // Verifica el valor de área
+    // Función para obtener empleados según el área seleccionada
+    function fetchEmpleados() {
+        const areaId = document.getElementById('areaFilter')?.value || '';
 
-    fetch(`/Dashboard/GetEmpleadosPorArea?areaId=${areaId}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("Empleados recibidos:", data); // Verifica los datos recibidos
-            const tbody = document.querySelector('#empleadosTable tbody');
-            tbody.innerHTML = ''; // Limpiar la tabla
-            data.forEach(emp => {
-                const tendencia50 = calcularTendencia(emp.horas50Actual, emp.horas50Anterior);
-                const tendencia100 = calcularTendencia(emp.horas100Actual, emp.horas100Anterior);
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${emp.legajo}</td>
-                        <td>${emp.apellido}</td>
-                        <td>${emp.nombre}</td>
-                        <td>${tendencia50}  ${emp.horas50Actual}</td>
-                        <td>${tendencia100}  ${emp.horas100Actual}</td>
-                    </tr>
-                `;
-            });
-        })
-        .catch(error => console.error('Error al cargar empleados:', error));
-}
-
-
-function calcularTendencia(actual, anterior) {
-    if (actual > anterior) {
-        return '<span style="color: red;">▲</span>'; // Flecha roja hacia arriba
-    } else if (actual < anterior) {
-        return '<span style="color: green;">▼</span>'; // Flecha verde hacia abajo
-    } else {
-        return '<span style="color: black;">–</span>'; // Guion negro
+        fetch(`/Dashboard/GetEmpleadosPorArea?areaId=${areaId}`)
+            .then(response => response.json())
+            .then(data => {
+                empleadosData = data;
+                renderTable(empleadosData);
+            })
+            .catch(error => console.error('Error al cargar empleados:', error));
     }
-}
 
+    // Renderizar la tabla con los datos
+    function renderTable(data) {
+        const tbody = document.querySelector('#empleadosTable tbody');
+        tbody.innerHTML = '';
 
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedData = data.slice(start, end);
+
+        paginatedData.forEach(emp => {
+            const tendencia50 = calcularTendencia(emp.horas50Actual, emp.horas50Anterior);
+            const tendencia100 = calcularTendencia(emp.horas100Actual, emp.horas100Anterior);
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${emp.legajo}</td>
+                    <td>${emp.apellido}</td>
+                    <td>${emp.nombre}</td>
+                    <td>${tendencia50} ${emp.horas50Actual}</td>
+                    <td>${tendencia100} ${emp.horas100Actual}</td>
+                </tr>
+            `;
+        });
+
+        updatePagination(data.length);
+    }
+
+    // Actualizar controles de paginación
+    function updatePagination(totalRows) {
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+        document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+    }
+
+    // Funciones de paginación
+    window.prevPage = function () {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(empleadosData);
+        }
+    };
+
+    window.nextPage = function () {
+        const totalPages = Math.ceil(empleadosData.length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable(empleadosData);
+        }
+    };
+
+    // Función para ordenar la tabla
+    window.sortTable = function (columnIndex) {
+        const direction = document.querySelectorAll('#empleadosTable th')[columnIndex].dataset.direction === 'asc' ? 'desc' : 'asc';
+        document.querySelectorAll('#empleadosTable th').forEach(th => th.removeAttribute('data-direction'));
+        document.querySelectorAll('#empleadosTable th')[columnIndex].setAttribute('data-direction', direction);
+
+        empleadosData.sort((a, b) => {
+            const aValue = Object.values(a)[columnIndex];
+            const bValue = Object.values(b)[columnIndex];
+            if (direction === 'asc') return aValue > bValue ? 1 : -1;
+            return aValue < bValue ? 1 : -1;
+        });
+
+        renderTable(empleadosData);
+    };
+
+    // Función para calcular tendencia
+    function calcularTendencia(actual, anterior) {
+        if (actual > anterior) {
+            return '<span style="color: red;">▲</span>';
+        } else if (actual < anterior) {
+            return '<span style="color: green;">▼</span>';
+        } else {
+            return '<span style="color: black;">–</span>';
+        }
+    }
+});
