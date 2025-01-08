@@ -57,13 +57,24 @@
         <table class="table table-striped" id="empleadosTable">
             <thead>
                 <tr>
-                    <th onclick="sortTable(0)">Legajo</th>
-                    <th onclick="sortTable(1)">Apellido</th>
-                    <th onclick="sortTable(2)">Nombre</th>
-                    <th onclick="sortTable(3)">Horas 50%</th>
-                    <th onclick="sortTable(4)">Horas 100%</th>
+                    <th onclick="sortTable(0)" class="sortable">
+                        Legajo <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(1)" class="sortable">
+                        Apellido <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(2)" class="sortable">
+                        Nombre <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(3)" class="sortable">
+                        Horas 50% <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(4)" class="sortable">
+                        Horas 100% <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
                 </tr>
             </thead>
+
             <tbody>
                 <!-- Filas se agregarán dinámicamente -->
             </tbody>

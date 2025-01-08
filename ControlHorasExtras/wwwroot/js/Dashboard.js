@@ -311,28 +311,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Renderizar la tabla con los datos
     function renderTable(data) {
         const tbody = document.querySelector('#empleadosTable tbody');
-        tbody.innerHTML = '';
-
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-        const paginatedData = data.slice(start, end);
 
-        paginatedData.forEach(emp => {
+        tbody.innerHTML = ''; // Limpiar contenido previo
+
+        // Renderizar solo los empleados de la página actual
+        const currentData = data.slice(start, end);
+        currentData.forEach(emp => {
             const tendencia50 = calcularTendencia(emp.horas50Actual, emp.horas50Anterior);
             const tendencia100 = calcularTendencia(emp.horas100Actual, emp.horas100Anterior);
 
             tbody.innerHTML += `
-                <tr>
-                    <td>${emp.legajo}</td>
-                    <td>${emp.apellido}</td>
-                    <td>${emp.nombre}</td>
-                    <td>${tendencia50} ${emp.horas50Actual}</td>
-                    <td>${tendencia100} ${emp.horas100Actual}</td>
-                </tr>
-            `;
+            <tr>
+                <td>${emp.legajo}</td>
+                <td>${emp.apellido}</td>
+                <td>${emp.nombre}</td>
+                <td>${tendencia50}  ${emp.horas50Actual}</td>
+                <td>${tendencia100}  ${emp.horas100Actual}</td>
+            </tr>
+        `;
         });
 
-        updatePagination(data.length);
+        // Actualizar información de paginación
+        document.getElementById("pageInfo").innerText = `Página ${currentPage} de ${Math.ceil(data.length / rowsPerPage)}`;
     }
 
     // Actualizar controles de paginación
@@ -359,19 +361,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para ordenar la tabla
     window.sortTable = function (columnIndex) {
-        const direction = document.querySelectorAll('#empleadosTable th')[columnIndex].dataset.direction === 'asc' ? 'desc' : 'asc';
-        document.querySelectorAll('#empleadosTable th').forEach(th => th.removeAttribute('data-direction'));
-        document.querySelectorAll('#empleadosTable th')[columnIndex].setAttribute('data-direction', direction);
+        // Determinar dirección de orden
+        const ths = document.querySelectorAll('#empleadosTable th');
+        const direction = ths[columnIndex].dataset.direction === 'asc' ? 'desc' : 'asc';
 
+        // Resetear direcciones de todos los encabezados
+        ths.forEach(th => th.removeAttribute('data-direction'));
+        ths[columnIndex].setAttribute('data-direction', direction);
+
+        // Ordenar el dataset global completo (empleadosData)
         empleadosData.sort((a, b) => {
             const aValue = Object.values(a)[columnIndex];
             const bValue = Object.values(b)[columnIndex];
-            if (direction === 'asc') return aValue > bValue ? 1 : -1;
-            return aValue < bValue ? 1 : -1;
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                // Ordenar cadenas (ignorando mayúsculas)
+                return direction === 'asc'
+                    ? aValue.localeCompare(bValue)
+                    : bValue.localeCompare(aValue);
+            }
+
+            // Ordenar números o valores no cadenas
+            return direction === 'asc' ? aValue - bValue : bValue - aValue;
         });
 
+        // Renderizar nuevamente la tabla paginada después de ordenar
         renderTable(empleadosData);
     };
+
 
     // Función para calcular tendencia
     function calcularTendencia(actual, anterior) {

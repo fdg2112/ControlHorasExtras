@@ -41,3 +41,47 @@
     display: none;
 }
 
+/* Estilo de los encabezados */
+.sortable {
+    cursor: pointer;
+    background-color: #f8f9fa; /* Color claro */
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    position: relative;
+    user-select: none;
+    font-weight: bold;
+}
+
+    /* Ocultar flechas por defecto */
+    .sortable .sort-icon {
+        font-size: 12px;
+        margin-left: 5px;
+        color: #6c757d;
+        visibility: hidden; /* Ocultar inicialmente */
+    }
+
+    /* Mostrar flechas al pasar el mouse */
+    .sortable:hover .sort-icon {
+        visibility: visible;
+    }
+
+    /* Resaltar columna ordenada */
+    .sortable.active {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+        /* Flechas visibles para la columna activa */
+        .sortable.active .sort-icon {
+            visibility: visible;
+        }
+
+            /* Colores para flechas según dirección */
+            .sortable.active .sort-icon.asc {
+                color: green;
+            }
+
+            .sortable.active .sort-icon.desc {
+                color: red;
+            }
