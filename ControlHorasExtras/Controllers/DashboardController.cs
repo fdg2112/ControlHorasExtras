@@ -152,12 +152,10 @@ namespace ControlHorasExtras.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetChartData(int? areaId = null)
+        public async Task<IActionResult> GetChartData(int? areaId = null, int? secretariaId = null)
         {
-            // Obtener el rol y la secretaría del usuario logueado
+            // Obtener el rol del usuario logueado
             var rol = User.FindFirst("Rol")?.Value;
-            var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
-            int? secretariaId = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
 
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
@@ -170,12 +168,13 @@ namespace ControlHorasExtras.Controllers
                 .Include(h => h.Secretaria)
                 .AsQueryable();
 
-            // Aplicar filtros según el rol del usuario
+            // Filtrar por área si se seleccionó una
             if (areaId.HasValue)
             {
                 query = query.Where(h => h.AreaId == areaId.Value);
             }
-            else if (rol == "Secretario" && secretariaId.HasValue)
+            // Filtrar por secretaría si no se seleccionó un área
+            else if (secretariaId.HasValue)
             {
                 query = query.Where(h => h.SecretariaId == secretariaId.Value);
             }
@@ -213,7 +212,7 @@ namespace ControlHorasExtras.Controllers
             {
                 historicoQuery = historicoQuery.Where(h => h.AreaId == areaId.Value);
             }
-            else if (rol == "Secretario" && secretariaId.HasValue)
+            else if (secretariaId.HasValue)
             {
                 historicoQuery = historicoQuery.Where(h => h.SecretariaId == secretariaId.Value);
             }
@@ -250,7 +249,6 @@ namespace ControlHorasExtras.Controllers
                 Historico100 = historico100
             });
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetAreasBySecretaria(int? secretariaId)
