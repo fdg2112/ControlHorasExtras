@@ -164,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'y-horas': {
                         type: 'linear',
                         position: 'left',
+                        suggestedMax: Math.max(horas50, horas100) * 1.1, // Extiende un 10% por encima del máximo
                         title: {
                             display: true,
                             text: 'Horas',
@@ -199,7 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 }
-            },
+            }
+,
             plugins: [ChartDataLabels]
         });
 

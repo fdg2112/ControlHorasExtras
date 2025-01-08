@@ -51,3 +51,42 @@
     .pagination-container button {
         margin: 0 5px;
     }
+
+.sortable {
+    cursor: pointer;
+    background-color: #f8f9fa; /* Color claro */
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    position: relative;
+    user-select: none;
+    font-weight: bold;
+}
+
+    .sortable .sort-icon {
+        font-size: 12px;
+        margin-left: 5px;
+        color: #6c757d;
+        visibility: hidden;
+    }
+
+    .sortable:hover .sort-icon {
+        visibility: visible;
+    }
+
+    .sortable.active {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+        .sortable.active .sort-icon {
+            visibility: visible;
+        }
+
+            .sortable.active .sort-icon.asc {
+                color: green;
+            }
+
+            .sortable.active .sort-icon.desc {
+                color: red;
+            }

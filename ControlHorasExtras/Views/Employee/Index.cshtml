@@ -12,49 +12,49 @@
     <input type="text" id="searchInput" class="form-control mb-3" placeholder="Buscar empleados...">
 
     <!-- Tabla de empleados -->
-    @if (empleados != null && empleados.Count > 0)
-    {
-        <table id="empleadosTable" class="table table-striped">
-            <thead>
+    <table id="empleadosTable" class="table table-striped">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)" class="sortable">
+                    Legajo <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                </th>
+                <th onclick="sortTable(1)" class="sortable">
+                    Apellido <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                </th>
+                <th onclick="sortTable(2)" class="sortable">
+                    Nombre <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                </th>
+                <th onclick="sortTable(3)" class="sortable">
+                    Categoría Salarial <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                </th>
+                <th onclick="sortTable(4)" class="sortable">
+                    Área <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                </th>
+                <th onclick="sortTable(5)" class="sortable">
+                    Secretaría <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                </th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="empleadosBody">
+            @foreach (var empleado in empleados)
+            {
                 <tr>
-                    <th onclick="sortTable(0)">Legajo</th>
-                    <th onclick="sortTable(1)">Apellido</th>
-                    <th onclick="sortTable(2)">Nombre</th>
-                    <th onclick="sortTable(3)">Categoría Salarial</th>
-                    <th onclick="sortTable(4)">Área</th>
-                    <th onclick="sortTable(5)">Secretaría</th>
-                    <th>Acciones</th>
+                    <td>@empleado.Legajo</td>
+                    <td>@empleado.Apellido</td>
+                    <td>@empleado.Nombre</td>
+                    <td>@empleado.Categoria?.NombreCategoria</td>
+                    <td>@empleado.Area?.NombreArea</td>
+                    <td>@empleado.Secretaria?.NombreSecretaria</td>
+                    <td>
+                        <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody id="empleadosBody">
-                @foreach (var empleado in empleados)
-                {
-                    <tr>
-                        <td>@empleado.Legajo</td>
-                        <td>@empleado.Apellido</td>
-                        <td>@empleado.Nombre</td>
-                        <td>@empleado.Categoria?.NombreCategoria</td>
-                        <td>@empleado.Area?.NombreArea</td>
-                        <td>@empleado.Secretaria?.NombreSecretaria</td>
-                        <td>
-                            <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+            }
+        </tbody>
+    </table>
 
-        <!-- Controles de paginación -->
-        <div class="pagination-container">
-            <button class="btn btn-primary" onclick="prevPage()">&#171;</button>
-            <span id="pageInfo"></span>
-            <button class="btn btn-primary" onclick="nextPage()">&#187;</button>
-        </div>
-    }
-    else
-    {
-        <p>No hay empleados disponibles para tu área o secretaría.</p>
-    }
+
 </div>
 
 <!-- Formulario flotante para agregar nuevo empleado -->
