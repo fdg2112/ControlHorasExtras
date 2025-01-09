@@ -267,14 +267,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function fetchChartData() {
         const areaId = document.getElementById('areaFilter')?.value || '';
-        const secretariaId = document.getElementById('secretariaFilter')?.value || '';
+        const secretariaId = document.getElementById('secretariaFilter')?.value || ''; // Secretaría seleccionada (o ninguna)
 
-        fetch(`/Dashboard/GetChartData?areaId=${areaId}&secretariaId=${secretariaId}`)
-            .then(response => response.json())
-            .then(updateCharts)
-            .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+        if (!areaId && !secretariaId) {
+            // Si no hay área ni secretaría seleccionada y el rol es Intendente o Secretario Hacienda
+            if (UserRol === "Intendente" || UserRol === "Secretario Hacienda") {
+                fetch(`/Dashboard/GetChartData`) // Sin filtros para mostrar todo
+                    .then(response => response.json())
+                    .then(updateCharts)
+                    .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+            } else if (UserRol === "Secretario") {
+                fetch(`/Dashboard/GetChartData?secretariaId=${UserSecretariaId}`)
+                    .then(response => response.json())
+                    .then(updateCharts)
+                    .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+            }
+        } else if (areaId) {
+            // Si hay un área seleccionada
+            fetch(`/Dashboard/GetChartData?areaId=${areaId}`)
+                .then(response => response.json())
+                .then(updateCharts)
+                .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+        } else if (secretariaId) {
+            // Si hay una secretaría seleccionada
+            fetch(`/Dashboard/GetChartData?secretariaId=${secretariaId}`)
+                .then(response => response.json())
+                .then(updateCharts)
+                .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+        }
     }
-    // 6. Ejecutar inicializaciones
+
+
     initCharts();
     handleFilters();
 });

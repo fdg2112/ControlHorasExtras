@@ -154,9 +154,6 @@ namespace ControlHorasExtras.Controllers
         [HttpGet]
         public async Task<IActionResult> GetChartData(int? areaId = null, int? secretariaId = null)
         {
-            // Obtener el rol del usuario logueado
-            var rol = User.FindFirst("Rol")?.Value;
-
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
             var startDate = new DateTime(currentYear, currentMonth, 1).AddMonths(-11);
@@ -173,11 +170,15 @@ namespace ControlHorasExtras.Controllers
             {
                 query = query.Where(h => h.AreaId == areaId.Value);
             }
-            // Filtrar por secretaría si no se seleccionó un área
+            // Filtrar por secretaría si se seleccionó una y no hay área
             else if (secretariaId.HasValue)
             {
                 query = query.Where(h => h.SecretariaId == secretariaId.Value);
             }
+
+            // Si no hay filtros, devolver datos de todas las secretarías y áreas
+            // Esto ocurre cuando el rol es Intendente o Secretario Hacienda
+            // Y no se selecciona un filtro explícito
 
             // Filtrar solo las horas del mes actual
             query = query.Where(h => h.FechaHoraInicio.Month == currentMonth && h.FechaHoraInicio.Year == currentYear);
