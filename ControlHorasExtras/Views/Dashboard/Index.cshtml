@@ -8,13 +8,15 @@
 <!-- Graficos -->
 <div class="container mt-4">
     <h1>Bienvenido @User.FindFirst("Nombre")?.Value</h1>
+
     <div class="row">
+        <!-- Filtros -->
         @if (rol == "Intendente" || rol == "Secretario Hacienda")
         {
             <div class="col-md-6">
-                <label for="secretariaFilter">Filtrar por Secretaria:</label>
+                <label for="secretariaFilter">Filtrar por Secretaría:</label>
                 <select id="secretariaFilter" class="form-select">
-                    <option value="">Todas las secretarias</option>
+                    <option value="">Todas las Secretarías</option>
                     @foreach (var area in ViewData["Secretarias"] as List<ControlHorasExtras.Models.Secretaria>)
                     {
                         <option value="@area.SecretariaId">@area.NombreSecretaria</option>
@@ -25,9 +27,9 @@
         @if (rol == "Secretario" || rol == "Intendente" || rol == "Secretario Hacienda")
         {
             <div class="col-md-6">
-                <label for="areaFilter">Filtrar por área:</label>
+                <label for="areaFilter">Filtrar por Área:</label>
                 <select id="areaFilter" class="form-select">
-                    <option value="">Todas las áreas</option>
+                    <option value="">Todas las Áreas</option>
                     @foreach (var area in ViewData["Areas"] as List<ControlHorasExtras.Models.Area>)
                     {
                         <option value="@area.AreaId">@area.NombreArea</option>
@@ -37,22 +39,38 @@
         }
     </div>
 
-    <div class="row">
-        <div class="col-md-6 col-sm-12">
+    <div class="row mt-4">
+        <!-- Gráficos principales -->
+        <div class="col-lg-6 col-sm-12">
             <h3>Horas y Gasto Mensual</h3>
-            <canvas id="horasYGastoChart"></canvas>
+            <canvas id="horasYGastoChart" style="width: 100%; height: auto;"></canvas>
         </div>
-        <div class="col-md-6 col-sm-12">
+        <div class="col-lg-6 col-sm-12">
             <h3>Histórico de Horas por Mes</h3>
-            <canvas id="horasHistoricasChart"></canvas>
+            <canvas id="horasHistoricasChart" style="width: 100%; height: auto;"></canvas>
         </div>
     </div>
+
+    @if (rol == "Intendente" || rol == "Secretario Hacienda")
+    {
+        <div class="row mt-5">
+            <!-- Gráficos tipo dona -->
+            <div class="col-lg-6 col-sm-12">
+                <h3>Gasto Total por Secretaría</h3>
+                <canvas id="donutSecretariaChart" style="width: 100%; height: auto;"></canvas>
+            </div>
+            <div class="col-lg-6 col-sm-12">
+                <h3>Gasto Total por Área</h3>
+                <canvas id="donutAreaChart" style="width: 100%; height: auto;"></canvas>
+            </div>
+        </div>
+    }
 </div>
 
 <!-- Tabla empleados con búsqueda y paginación -->
 <div class="container mt-4">
+    <h3>Horas por Empleado</h3>
     <input type="text" id="searchInput" class="form-control mb-3" placeholder="Buscar empleados...">
-
     <div class="table-responsive">
         <table class="table table-striped" id="empleadosTable">
             <thead>

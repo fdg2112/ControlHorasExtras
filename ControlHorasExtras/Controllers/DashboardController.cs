@@ -250,6 +250,52 @@ namespace ControlHorasExtras.Controllers
                 Historico100 = historico100
             });
         }
+        [HttpGet]
+        public async Task<IActionResult> GetDonutChartData()
+        {
+            var query = _context.HorasExtras
+                .Include(h => h.Empleado)
+                .ThenInclude(e => e.Categoria)
+                .Include(h => h.Area)
+                .Include(h => h.Secretaria)
+                .AsQueryable();
+
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
+
+            // Filtrar horas del mes actual
+            query = query.Where(h => h.FechaHoraInicio.Month == currentMonth && h.FechaHoraInicio.Year == currentYear);
+
+            // Gasto por secretaría
+            var gastoPorSecretaria = await query
+                .GroupBy(h => h.Secretaria.NombreSecretaria)
+                .Select(g => new
+                {
+                    Secretaria = g.Key,
+                    TotalGasto = g.Sum(h => h.CantidadHoras * (h.TipoHora == "50%"
+                        ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+                        : (h.Empleado.Categoria.SueldoBasico / 132) * 2m))
+                })
+                .ToListAsync();
+
+            // Gasto por área
+            var gastoPorArea = await query
+                .GroupBy(h => h.Area.NombreArea)
+                .Select(g => new
+                {
+                    Area = g.Key,
+                    TotalGasto = g.Sum(h => h.CantidadHoras * (h.TipoHora == "50%"
+                        ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+                        : (h.Empleado.Categoria.SueldoBasico / 132) * 2m))
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                GastoPorSecretaria = gastoPorSecretaria,
+                GastoPorArea = gastoPorArea
+            });
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAreasBySecretaria(int? secretariaId)
@@ -332,6 +378,52 @@ namespace ControlHorasExtras.Controllers
                 .ToListAsync();
 
             return Json(empleados);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetGastosComparativos()
+        {
+            var currentMonth = DateTime.Now.Month;
+            var currentYear = DateTime.Now.Year;
+
+            var query = _context.HorasExtras
+                .Include(h => h.Empleado)
+                .ThenInclude(e => e.Categoria)
+                .Include(h => h.Area)
+                .Include(h => h.Secretaria)
+                .AsQueryable();
+
+            // Calcular gastos por secretaría
+            var gastosPorSecretaria = await query
+                .GroupBy(h => h.Secretaria.NombreSecretaria)
+                .Select(g => new
+                {
+                    Secretaria = g.Key,
+                    TotalGasto = g.Sum(h => h.CantidadHoras *
+                        (h.TipoHora == "50%"
+                            ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+                            : (h.Empleado.Categoria.SueldoBasico / 132) * 2m))
+                })
+                .ToListAsync();
+
+            // Calcular gastos por área
+            var gastosPorArea = await query
+                .GroupBy(h => h.Area.NombreArea)
+                .Select(g => new
+                {
+                    Area = g.Key,
+                    TotalGasto = g.Sum(h => h.CantidadHoras *
+                        (h.TipoHora == "50%"
+                            ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+                            : (h.Empleado.Categoria.SueldoBasico / 132) * 2m))
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                GastosPorSecretaria = gastosPorSecretaria,
+                GastosPorArea = gastosPorArea
+            });
         }
 
     }
