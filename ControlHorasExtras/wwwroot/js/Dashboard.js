@@ -307,120 +307,106 @@ document.addEventListener('DOMContentLoaded', () => {
     let donutSecretariaChart, donutAreaChart;
 
     function initDonutCharts() {
-        const ctxSecretaria = document.getElementById('donutSecretariaChart').getContext('2d');
-        const ctxArea = document.getElementById('donutAreaChart').getContext('2d');
+        const ctxSecretariaElement = document.getElementById('donutSecretariaChart');
+        const ctxAreaElement = document.getElementById('donutAreaChart');
+
+        if (!ctxSecretariaElement && !ctxAreaElement) {
+            console.warn('No se encontraron elementos para los gráficos de dona.');
+            return; // Salir si no hay elementos gráficos
+        }
 
         fetch(`/Dashboard/GetDonutChartData`)
             .then(response => response.json())
             .then(data => {
-                const secretarias = data.gastoPorSecretaria.map(s => s.secretaria); // Nombres de secretarías
-                const gastosSecretarias = data.gastoPorSecretaria.map(s => s.totalGasto); // Gastos de secretarías
+                if (ctxSecretariaElement) {
+                    const ctxSecretaria = ctxSecretariaElement.getContext('2d');
+                    const secretarias = data.gastoPorSecretaria.map(s => s.secretaria);
+                    const gastosSecretarias = data.gastoPorSecretaria.map(s => s.totalGasto);
 
-                const areas = data.gastoPorArea.map(a => a.area); // Nombres de áreas
-                const gastosAreas = data.gastoPorArea.map(a => a.totalGasto); // Gastos de áreas
-
-                // Total de gastos para calcular porcentajes
-                const totalGastoSecretarias = gastosSecretarias.reduce((a, b) => a + b, 0);
-                const totalGastoAreas = gastosAreas.reduce((a, b) => a + b, 0);
-
-                // Donut para Secretarías
-                donutSecretariaChart = new Chart(ctxSecretaria, {
-                    type: 'doughnut',
-                    data: {
-                        labels: secretarias,
-                        datasets: [{
-                            label: 'Gasto por Secretaría',
-                            data: gastosSecretarias,
-                            backgroundColor: secretarias.map((_, i) => `hsl(${i * 30}, 70%, 70%)`),
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        aspectRatio: 1.75,
-                        plugins: {
-                            legend: {
-                                display: false, // Oculta la leyenda
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        return ` $ ${context.raw.toLocaleString('es-AR')}`;
+                    donutSecretariaChart = new Chart(ctxSecretaria, {
+                        type: 'doughnut',
+                        data: {
+                            labels: secretarias,
+                            datasets: [{
+                                label: 'Gasto por Secretaría',
+                                data: gastosSecretarias,
+                                backgroundColor: secretarias.map((_, i) => `hsl(${i * 30}, 70%, 70%)`),
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return ` $ ${context.raw.toLocaleString('es-AR')}`;
+                                        }
                                     }
+                                },
+                                datalabels: {
+                                    color: 'black',
+                                    formatter: function (value, context) {
+                                        const label = context.chart.data.labels[context.dataIndex];
+                                        const percentage = (value / gastosSecretarias.reduce((a, b) => a + b) * 100).toFixed(1);
+                                        return `${label}\n${percentage}%`;
+                                    },
+                                    font: { size: 12, weight: 'bold' },
+                                    align: 'center',
+                                    anchor: 'center',
                                 }
-                            },
-                            datalabels: {
-                                color: 'black',
-                                formatter: function (value, context) {
-                                    const label = context.chart.data.labels[context.dataIndex];
-                                    const percentage = (value / totalGastoSecretarias * 100).toFixed(1); // Porcentaje
-                                    return `${label}\n${percentage}%`; // Muestra monto y porcentaje
-                                },
-                                font: {
-                                    size: 12,
-                                    weight: 'bold',
-                                },
-                                align: 'center',
-                                anchor: 'center', // Asegura que la etiqueta se ubique en el centro del segmento
-                                offset: 0, // Asegura que no haya desplazamiento
-                                rotation: 0, // Evita que se rote el texto
-                                textAlign: 'center', // Alinea el texto en el centro
-                                textBaseline: 'middle', // Centra el texto verticalmente
-                            },
-                        }
-                    },
-                    plugins: [ChartDataLabels] // Activa el plugin para etiquetas
-                });
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+                }
 
-                // Donut para Áreas
-                donutAreaChart = new Chart(ctxArea, {
-                    type: 'doughnut',
-                    data: {
-                        labels: areas,
-                        datasets: [{
-                            label: 'Gasto por Área',
-                            data: gastosAreas,
-                            backgroundColor: areas.map((_, i) => `hsl(${i * 30}, 70%, 70%)`),
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        aspectRatio: 1.75,
-                        plugins: {
-                            legend: {
-                                display: false, // Oculta la leyenda
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        return ` $ ${context.raw.toLocaleString('es-AR')}`;
+                if (ctxAreaElement) {
+                    const ctxArea = ctxAreaElement.getContext('2d');
+                    const areas = data.gastoPorArea.map(a => a.area);
+                    const gastosAreas = data.gastoPorArea.map(a => a.totalGasto);
+
+                    donutAreaChart = new Chart(ctxArea, {
+                        type: 'doughnut',
+                        data: {
+                            labels: areas,
+                            datasets: [{
+                                label: 'Gasto por Área',
+                                data: gastosAreas,
+                                backgroundColor: areas.map((_, i) => `hsl(${i * 30}, 70%, 70%)`),
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return ` $ ${context.raw.toLocaleString('es-AR')}`;
+                                        }
                                     }
+                                },
+                                datalabels: {
+                                    color: 'black',
+                                    formatter: function (value, context) {
+                                        const label = context.chart.data.labels[context.dataIndex];
+                                        const percentage = (value / gastosAreas.reduce((a, b) => a + b) * 100).toFixed(1);
+                                        return `${label}\n${percentage}%`;
+                                    },
+                                    font: { size: 12, weight: 'bold' },
+                                    align: 'center',
+                                    anchor: 'center',
                                 }
-                            },
-                            datalabels: {
-                                color: 'black',
-                                formatter: function (value, context) {
-                                    const label = context.chart.data.labels[context.dataIndex];
-                                    const percentage = (value / totalGastoAreas * 100).toFixed(1); // Porcentaje
-                                    return `${label}\n${percentage}%`; // Muestra monto y porcentaje
-                                },
-                                font: {
-                                    size: 12,
-                                    weight: 'bold',
-                                },
-                                align: 'center',
-                                anchor: 'center', // Asegura que la etiqueta se ubique en el centro del segmento
-                                offset: 0, // Asegura que no haya desplazamiento
-                                rotation: 0, // Evita que se rote el texto
-                                textAlign: 'center', // Alinea el texto en el centro
-                                textBaseline: 'middle', // Centra el texto verticalmente
-                            },
-                        }
-                    },
-                    plugins: [ChartDataLabels] // Activa el plugin para etiquetas
-                });
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+                }
             })
             .catch(error => console.error('Error al cargar los datos de los gráficos tipo dona:', error));
     }
+
 
     // Inicializar gráficos al cargar la página
     initDonutCharts();

@@ -1,19 +1,6 @@
-﻿
-$(document).ready(function() {
-    $('#searchInput').on('keyup', function() {
-        var value = $(this).val().toLowerCase();
-        $('#empleadosBody tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-        });
-    });
-
-    // Inicializar la paginación
-    showPage(currentPage);
-});
-
+﻿let empleadosData = [];
 var currentPage = 1;
 var rowsPerPage = 10;
-
 function showPage(page) {
     var table = document.getElementById("empleadosTable");
     var rows = table.rows;
@@ -27,17 +14,13 @@ function showPage(page) {
             rows[i].style.display = "none";
         }
     }
-
-    document.getElementById("pageInfo").innerText = "Página " + page + " de " + Math.ceil((rows.length - 1) / rowsPerPage);
 }
-
 function prevPage() {
     if (currentPage > 1) {
         currentPage--;
         showPage(currentPage);
     }
 }
-
 function nextPage() {
     var table = document.getElementById("empleadosTable");
     var rows = table.rows;
@@ -46,78 +29,45 @@ function nextPage() {
         showPage(currentPage);
     }
 }
-
-//function sortTable(columnIndex) {
-//    var table = document.getElementById("empleadosTable");
-//    var rows = table.rows;
-//    var switching = true;
-//    var shouldSwitch;
-//    var direction = "asc";
-//    var switchCount = 0;
-
-//    while (switching) {
-//        switching = false;
-//        var rowsArray = Array.from(rows).slice(1);
-//        for (var i = 0; i < rowsArray.length - 1; i++) {
-//            shouldSwitch = false;
-//            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
-//            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
-//            if (direction == "asc") {
-//                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-//                    shouldSwitch = true;
-//                    break;
-//                }
-//            } else if (direction == "desc") {
-//                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-//                    shouldSwitch = true;
-//                    break;
-//                }
-//            }
-//        }
-//        if (shouldSwitch) {
-//            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
-//            switching = true;
-//            switchCount++;
-//        } else {
-//            if (switchCount == 0 && direction == "asc") {
-//                direction = "desc";
-//                switching = true;
-//            }
-//        }
-//    }
-//    showPage(currentPage); // Actualizar la paginación después de ordenar
-//}
-
-window.sortTable = function (columnIndex) {
-    const ths = document.querySelectorAll('#empleadosTable th');
-    const direction = ths[columnIndex].dataset.direction === 'asc' ? 'desc' : 'asc';
-
-    // Resetear direcciones de los encabezados
-    ths.forEach(th => {
-        th.removeAttribute('data-direction');
-        th.classList.remove('active');
-    });
-
-    ths[columnIndex].setAttribute('data-direction', direction);
-    ths[columnIndex].classList.add('active');
-
-    // Obtener los datos de la tabla (adaptado según la fuente de datos)
-    empleadosData.sort((a, b) => {
-        const aValue = Object.values(a)[columnIndex];
-        const bValue = Object.values(b)[columnIndex];
-
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-            return direction === 'asc'
-                ? aValue.localeCompare(bValue)
-                : bValue.localeCompare(aValue);
+function sortTable(columnIndex) {
+    var table = document.getElementById("empleadosTable");
+    var rows = table.rows;
+    var switching = true;
+    var shouldSwitch;
+    var direction = "asc";
+    var switchCount = 0;
+    while (switching) {
+        switching = false;
+        var rowsArray = Array.from(rows).slice(1);
+        for (var i = 0; i < rowsArray.length - 1; i++) {
+            shouldSwitch = false;
+            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
+            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
+            if (direction == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (direction == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
         }
-        return direction === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-
-    // Renderizar nuevamente la tabla después de ordenar
-    renderTable(empleadosData);
-};
-
+        if (shouldSwitch) {
+            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+            switching = true;
+            switchCount++;
+        } else {
+            if (switchCount == 0 && direction == "asc") {
+                direction = "desc";
+                switching = true;
+            }
+        }
+    }
+    showPage(currentPage); // Actualizar la paginación después de ordenar
+}
 
 const formEmpleado = document.getElementById('formEmpleado');
 const btnAgregarEmpleado = document.getElementById('btnAgregarEmpleado');

@@ -33,7 +33,7 @@ namespace ControlHorasExtras.Controllers
             var usuarioId = int.Parse(usuarioIdClaim.Value);
             var rol = rolClaim.Value;
             int? areaId = string.IsNullOrEmpty(areaIdClaim?.Value) ? null : int.Parse(areaIdClaim.Value);
-            int secretariaId = int.Parse(secretariaIdClaim.Value);
+            int? secretariaId = string.IsNullOrEmpty(secretariaIdClaim?.Value) ? null : int.Parse(secretariaIdClaim.Value);
 
             // Incluir relaciones necesarias
             IQueryable<HorasExtra> query = _context.HorasExtras
