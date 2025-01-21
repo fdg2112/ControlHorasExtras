@@ -1,77 +1,124 @@
-﻿let empleadosData = [];
-var currentPage = 1;
-var rowsPerPage = 10;
-function showPage(page) {
-    var table = document.getElementById("empleadosTable");
-    var rows = table.rows;
-    var start = (page - 1) * rowsPerPage + 1;
-    var end = start + rowsPerPage - 1;
+﻿
+document.addEventListener('DOMContentLoaded', () => {
+    let empleadosData = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
 
-    for (var i = 1; i < rows.length; i++) {
-        if (i >= start && i <= end) {
-            rows[i].style.display = "";
-        } else {
-            rows[i].style.display = "none";
+    // Llamada inicial para cargar empleados
+    fetchEmpleados();
+
+    // Evento para búsqueda
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        const searchValue = this.value.toLowerCase();
+        const filteredData = empleadosData.filter(emp =>
+            `${emp.legajo} ${emp.apellido} ${emp.nombre} ${emp.categoriaNombre} ${emp.areaNombre} ${emp.secretariaNombre}`.toLowerCase().includes(searchValue)
+        );
+        renderTable(filteredData);
+    });
+
+    // Función para obtener empleados según el área seleccionada
+    function fetchEmpleados() {
+        const areaId = document.getElementById('areaFilter')?.value || '';
+
+        fetch(`/Employee/GetEmpleados?areaId=${areaId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                empleadosData = data;
+                renderTable(empleadosData);
+            })
+            .catch(error => console.error('Error al cargar empleados:', error));
+    }
+
+    // Renderizar la tabla con los datos
+    function renderTable(data) {
+        const tbody = document.querySelector('#empleadosTable tbody');
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        tbody.innerHTML = ''; // Limpiar contenido previo
+
+        // Renderizar solo los empleados de la página actual
+        const currentData = data.slice(start, end);
+        currentData.forEach(emp => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${emp.legajo}</td>
+                <td>${emp.apellido}</td>
+                <td>${emp.nombre}</td>
+                <td>${emp.categoriaNombre}</td>
+                <td>${emp.areaNombre}</td>
+                <td>${emp.secretariaNombre}</td>
+                <td>
+                    <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
+                </td>
+            </tr>
+        `;
+        });
+
+        // Actualizar información de paginación
+        document.getElementById("pageInfo").innerText = `Página ${currentPage} de ${Math.ceil(data.length / rowsPerPage)}`;
+    }
+
+    // Actualizar controles de paginación
+    function updatePagination(totalRows) {
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+        document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+    }
+
+    // Funciones de paginación
+    window.prevPage = function () {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(empleadosData);
         }
-    }
-}
-function prevPage() {
-    if (currentPage > 1) {
-        currentPage--;
-        showPage(currentPage);
-    }
-}
-function nextPage() {
-    var table = document.getElementById("empleadosTable");
-    var rows = table.rows;
-    if (currentPage < Math.ceil((rows.length - 1) / rowsPerPage)) {
-        currentPage++;
-        showPage(currentPage);
-    }
-}
-function sortTable(columnIndex) {
-    var table = document.getElementById("empleadosTable");
-    var rows = table.rows;
-    var switching = true;
-    var shouldSwitch;
-    var direction = "asc";
-    var switchCount = 0;
-    while (switching) {
-        switching = false;
-        var rowsArray = Array.from(rows).slice(1);
-        for (var i = 0; i < rowsArray.length - 1; i++) {
-            shouldSwitch = false;
-            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
-            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
-            if (direction == "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (direction == "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
+    };
+
+    window.nextPage = function () {
+        const totalPages = Math.ceil(empleadosData.length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable(empleadosData);
+        }
+    };
+
+    // Función para ordenar la tabla
+    window.sortTable = function (columnIndex) {
+        // Determinar dirección de orden
+        const ths = document.querySelectorAll('#empleadosTable th');
+        const direction = ths[columnIndex].dataset.direction === 'asc' ? 'desc' : 'asc';
+
+        // Resetear direcciones de todos los encabezados
+        ths.forEach(th => th.removeAttribute('data-direction'));
+        ths[columnIndex].setAttribute('data-direction', direction);
+
+        // Ordenar el dataset global completo (empleadosData)
+        empleadosData.sort((a, b) => {
+            const aValue = Object.values(a)[columnIndex];
+            const bValue = Object.values(b)[columnIndex];
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                // Ordenar cadenas (ignorando mayúsculas)
+                return direction === 'asc'
+                    ? aValue.localeCompare(bValue)
+                    : bValue.localeCompare(aValue);
             }
-        }
-        if (shouldSwitch) {
-            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
-            switching = true;
-            switchCount++;
-        } else {
-            if (switchCount == 0 && direction == "asc") {
-                direction = "desc";
-                switching = true;
-            }
-        }
-    }
-    showPage(currentPage); // Actualizar la paginación después de ordenar
-}
+
+            // Ordenar números o valores no cadenas
+            return direction === 'asc' ? aValue - bValue : bValue - aValue;
+        });
+
+        // Renderizar nuevamente la tabla paginada después de ordenar
+        renderTable(empleadosData);
+    };
+});
+
+
+
+// Formulario de Carga de Empleados
 
 const formEmpleado = document.getElementById('formEmpleado');
 const btnAgregarEmpleado = document.getElementById('btnAgregarEmpleado');
-
 function cargarFormulario() {
     formEmpleado.classList.toggle("hidden");
     btnAgregarEmpleado.classList.toggle("hidden");
@@ -86,7 +133,6 @@ function cargarFormulario() {
             .catch((error) => console.error("Error al cargar las opciones:", error));
     }
 }
-
 function cargarOpcionesConSeleccion(data) {
     // Cargar áreas
     const areaSelect = document.getElementById("areaId");
@@ -104,12 +150,10 @@ function cargarOpcionesConSeleccion(data) {
         secretariaSelect.innerHTML += `<option value="${secretaria.id}" ${selected}>${secretaria.nombre}</option>`;
     });
 }
-
 function toggleForm() {
     formEmpleado.classList.toggle('hidden');
     btnAgregarEmpleado.classList.toggle('hidden');
 }
-
 formEmpleado.addEventListener('submit', function (e) {
     e.preventDefault();
     const formData = new FormData(formEmpleado);
@@ -154,7 +198,6 @@ formEmpleado.addEventListener('submit', function (e) {
         });
     });
 });
-
 document.getElementById("legajo").addEventListener("blur", function () {
     const legajoInput = this.value;
 

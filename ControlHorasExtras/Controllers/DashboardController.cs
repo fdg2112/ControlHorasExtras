@@ -136,9 +136,6 @@ namespace ControlHorasExtras.Controllers
                 .ToListAsync();
 
             ViewData["Areas"] = areas;
-
-
-
             ViewData["Horas50"] = horas50;
             ViewData["Horas100"] = horas100;
             ViewData["Gasto50"] = Math.Round(gasto50, 2);

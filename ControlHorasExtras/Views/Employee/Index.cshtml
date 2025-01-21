@@ -4,30 +4,38 @@
     var rol = User.FindFirst("Rol")?.Value;
 }
 
+<!-- Tabla empleados con búsqueda y paginación DASHBOARD -->
 <h1>Gestión de Empleados</h1>
-
 <div class="container mt-4">
     <h2>Empleados en tu Área y Secretaría</h2>
-
-    <!-- Cuadro de búsqueda -->
     <input type="text" id="searchInput" class="form-control mb-3" placeholder="Buscar empleados...">
+    <div class="table-responsive">
+        <table class="table table-striped" id="empleadosTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" class="sortable">
+                        Legajo <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(1)" class="sortable">
+                        Apellido <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(2)" class="sortable">
+                        Nombre <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(3)" class="sortable">
+                        Categoría Salarial <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(4)" class="sortable">
+                        Área <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(4)" class="sortable">
+                        Secretaría <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
 
-    <!-- Tabla de empleados -->
-    <table id="empleadosTable" class="table table-striped">
-        <thead>
-            <tr>
-                <th onclick="sortTable(0)" class="sortable">Legajo</th>
-                <th onclick="sortTable(1)" class="sortable">Apellido</th>
-                <th onclick="sortTable(2)" class="sortable">Nombre</th>
-                <th onclick="sortTable(3)" class="sortable">Categoría Salarial</th>
-                <th onclick="sortTable(4)" class="sortable">Área</th>
-                <th onclick="sortTable(5)" class="sortable">Secretaría</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="empleadosBody">
-            @if (rol == "Intendente")
-            {
+            <tbody id="empleadosBody">
                 @foreach (var empleado in empleados)
                 {
                     <tr>
@@ -42,57 +50,14 @@
                         </td>
                     </tr>
                 }
-            }
-            else
-            {
-                @foreach (var empleado in empleados)
-                {
-                    <tr>
-                        <td>@empleado.Legajo</td>
-                        <td>@empleado.Apellido</td>
-                        <td>@empleado.Nombre</td>
-                        <td>@empleado.Categoria?.NombreCategoria</td>
-                        <td>@empleado.Area?.NombreArea</td>
-                        <td>@empleado.Secretaria?.NombreSecretaria</td>
-                        <td>
-                            <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 
-    <!-- Controles de paginación -->
-    <div class="pagination">
-        @if (ViewData["CurrentPage"] != null && ViewData["TotalPages"] != null)
-        {
-            var currentPage = (int)ViewData["CurrentPage"];
-            var totalPages = (int)ViewData["TotalPages"];
-
-            <ul class="pagination">
-                @if (currentPage > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1 })">Anterior</a>
-                    </li>
-                }
-
-                @for (int i = 1; i <= totalPages; i++)
-                {
-                    <li class="page-item @(i == currentPage ? "active" : "")">
-                        <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
-                    </li>
-                }
-
-                @if (currentPage < totalPages)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1 })">Siguiente</a>
-                    </li>
-                }
-            </ul>
-        }
+    <div class="pagination-container text-center mt-3">
+        <button class="btn btn-primary" onclick="prevPage()">&#171;</button>
+        <span id="pageInfo"></span>
+        <button class="btn btn-primary" onclick="nextPage()">&#187;</button>
     </div>
 </div>
 

@@ -14,64 +14,6 @@ namespace ControlHorasExtras.Controllers
             _context = context;
         }
 
-        //public IActionResult Index(int page = 1, int pageSize = 10)
-        //{
-        //    var areaIdClaim = User.FindFirst("AreaId");
-        //    var secretariaIdClaim = User.FindFirst("SecretariaId");
-
-        //    // Determinar Área y Secretaría del usuario
-        //    int? areaId = null;
-        //    if (areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value))
-        //    {
-        //        areaId = int.Parse(areaIdClaim.Value);
-        //    }
-
-        //    if (secretariaIdClaim == null || string.IsNullOrEmpty(secretariaIdClaim.Value))
-        //    {
-        //        return View("Error", new { message = "No se encontró el claim de Secretaría." });
-        //    }
-        //    int secretariaId = int.Parse(secretariaIdClaim.Value);
-
-        //    // Filtrar empleados según el área y/o secretaría del usuario
-        //    var query = _context.Empleados
-        //        .Include(e => e.Area)
-        //        .Include(e => e.Secretaria)
-        //        .Include(e => e.Categoria)
-        //        .Where(e =>
-        //            (areaId.HasValue && e.AreaId == areaId) ||  // Empleados del área si el usuario pertenece a un área
-        //            (!areaId.HasValue && e.SecretariaId == secretariaId)) // Empleados de la secretaría si el usuario no tiene área
-        //        .AsQueryable();
-
-        //    // Obtener el total de empleados para calcular la cantidad de páginas
-        //    var totalEmpleados = query.Count();
-
-        //    // Paginación: tomar los empleados según la página seleccionada
-        //    var empleados = query
-        //        .Skip((page - 1) * pageSize) // Omitir empleados de páginas anteriores
-        //        .Take(pageSize) // Tomar solo los empleados de la página actual
-        //        .ToList();
-
-        //    // Calcular la cantidad total de páginas
-        //    var totalPages = (int)Math.Ceiling((double)totalEmpleados / pageSize);
-
-        //    // Pasar los datos a la vista
-        //    ViewData["Empleados"] = empleados;
-        //    ViewData["TotalPages"] = totalPages;
-        //    ViewData["CurrentPage"] = page;
-        //    ViewData["PageSize"] = pageSize;
-
-        //    // Obtener áreas y secretarías para el formulario de creación
-        //    var areas = _context.Areas.ToList();
-        //    var secretarias = _context.Secretarias.ToList();
-        //    var categorias = _context.CategoriasSalariales.ToList();
-
-        //    ViewData["Areas"] = areas;
-        //    ViewData["Secretarias"] = secretarias;
-        //    ViewData["Categorias"] = categorias;
-
-        //    return View();
-        //}
-
         public IActionResult Index(int page = 1, int pageSize = 10)
         {
             var areaIdClaim = User.FindFirst("AreaId");
@@ -140,6 +82,55 @@ namespace ControlHorasExtras.Controllers
             }
 
             return View();
+        }
+
+        public async Task<IActionResult> GetEmpleados(int? areaId = null)
+        {
+            // Obtener datos del usuario logueado
+            var rol = User.FindFirst("Rol")?.Value;
+            var areaIdClaim = User.FindFirst("AreaId")?.Value;
+            var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
+
+            int? areaIdUsuario = string.IsNullOrEmpty(areaIdClaim) ? null : int.Parse(areaIdClaim);
+            int? secretariaIdUsuario = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
+
+            var empleadosQuery = _context.Empleados.AsQueryable();
+
+            // Filtrar según el rol del usuario
+            if (rol == "Jefe de Área" && areaIdUsuario.HasValue)
+            {
+                empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaIdUsuario.Value);
+            }
+            else if (rol == "Secretario" && secretariaIdUsuario.HasValue)
+            {
+                empleadosQuery = empleadosQuery.Where(e => e.Area.SecretariaId == secretariaIdUsuario.Value);
+                if (areaId.HasValue)
+                {
+                    empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaId.Value);
+                }
+            }
+            else if (rol == "Intendente" || rol == "Secretario Hacienda")
+            {
+                // Intendentes y Secretarios de Hacienda no tienen filtro inicial
+            }
+            else if (areaId.HasValue)
+            {
+                empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaId.Value);
+            }
+
+            var empleados = await empleadosQuery
+                .Select(e => new
+                {
+                    e.Legajo,
+                    e.Apellido,
+                    e.Nombre,
+                    categoriaNombre = e.Categoria.NombreCategoria,
+                    areaNombre = e.Area.NombreArea,
+                    secretariaNombre = e.Secretaria.NombreSecretaria,
+                })
+                .ToListAsync();
+
+            return Json(empleados);
         }
 
         [HttpGet]
