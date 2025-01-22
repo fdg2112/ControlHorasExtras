@@ -280,5 +280,58 @@ namespace ControlHorasExtras.Controllers
             return Json(new { exists = false });
         }
 
+        [HttpGet]
+        public IActionResult GetEmpleadoById(int id)
+        {
+            var empleado = _context.Empleados
+                .Include(e => e.Categoria)
+                .Include(e => e.Area)
+                .Include(e => e.Secretaria)
+                .FirstOrDefault(e => e.EmpleadoId == id);
+
+            if (empleado == null)
+            {
+                return NotFound();
+            }
+
+            // Obtener datos adicionales como listas de categorías, áreas y secretarías
+            var categorias = _context.CategoriasSalariales.Select(c => new { c.CategoriaId, c.NombreCategoria }).ToList();
+            var areas = _context.Areas.Select(a => new { a.AreaId, a.NombreArea }).ToList();
+            var secretarias = _context.Secretarias.Select(s => new { s.SecretariaId, s.NombreSecretaria }).ToList();
+
+            return Json(new
+            {
+                nombre = empleado.Nombre,
+                apellido = empleado.Apellido,
+                categoriaId = empleado.CategoriaId,
+                areaId = empleado.AreaId,
+                secretariaId = empleado.SecretariaId,
+                categorias,
+                areas,
+                secretarias
+            });
+        }
+
+        [HttpPost]
+        public IActionResult EditEmpleado(int id, Empleado model)
+        {
+            var empleado = _context.Empleados.FirstOrDefault(e => e.EmpleadoId == id);
+            if (empleado == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizar datos del empleado
+            empleado.Nombre = model.Nombre;
+            empleado.Apellido = model.Apellido;
+            empleado.CategoriaId = model.CategoriaId;
+            empleado.AreaId = model.AreaId;
+            empleado.SecretariaId = model.SecretariaId;
+
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "Empleado actualizado correctamente" });
+        }
+
     }
 }

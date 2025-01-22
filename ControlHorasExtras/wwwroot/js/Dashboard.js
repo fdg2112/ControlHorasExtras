@@ -54,81 +54,85 @@ function toggleForm() {
 }
 
 // Validación y envío del formulario
-formHoras.addEventListener('submit', function (e) {
-    e.preventDefault();
+if (formHoras) {
+    formHoras.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    const fechaInicio = new Date(document.getElementById('fechaInicio').value);
-    const fechaFin = new Date(document.getElementById('fechaFin').value);
+        const fechaInicio = new Date(document.getElementById('fechaInicio').value);
+        const fechaFin = new Date(document.getElementById('fechaFin').value);
 
-    // Validar fechas
-    if (!fechaInicio || !fechaFin) {
-        Swal.fire({
-            title: 'Error',
-            text: 'Debe completar las fechas de inicio y fin.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
-
-    if (fechaInicio >= fechaFin) {
-        Swal.fire({
-            title: 'Error',
-            text: 'La fecha y hora de inicio deben ser anteriores a la fecha y hora de fin.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
-
-    if (!empleadoId) {
-        Swal.fire({
-            title: 'Error',
-            text: 'Debe seleccionar un empleado.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
-
-    const formData = new FormData(formHoras);
-
-    fetch('/Overtime/Create', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    title: 'Éxito',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then(() => location.reload());
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        // Validar fechas
+        if (!fechaInicio || !fechaFin) {
             Swal.fire({
                 title: 'Error',
-                text: 'Ocurrió un error inesperado.',
+                text: 'Debe completar las fechas de inicio y fin.',
                 icon: 'error',
                 confirmButtonText: 'OK'
             });
-        });
-});
+            return;
+        }
+
+        if (fechaInicio >= fechaFin) {
+            Swal.fire({
+                title: 'Error',
+                text: 'La fecha y hora de inicio deben ser anteriores a la fecha y hora de fin.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const empleadoId = document.getElementById('empleado').value;
+        if (!empleadoId) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Debe seleccionar un empleado.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const formData = new FormData(formHoras);
+
+        fetch('/Overtime/Create', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error inesperado.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+    });
+}
+
 
 // GRAFICOS
 document.addEventListener('DOMContentLoaded', () => {
