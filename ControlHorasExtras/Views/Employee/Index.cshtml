@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Gestión de Empleados";
     var empleados = ViewData["Empleados"] as List<ControlHorasExtras.Models.Empleado>;
+    var categorias = ViewData["Categorias"] as List<ControlHorasExtras.Models.CategoriasSalariales>;
     var rol = User.FindFirst("Rol")?.Value;
 }
 
@@ -90,25 +91,7 @@
         <div class="mb-3">
             <label for="categoriaId" class="form-label">Categoría Salarial</label>
             <select class="form-select" id="categoriaId" name="CategoriaId" required>
-                @if (ViewData["Categorias"] != null)
-                {
-                    var categorias = ViewData["Categorias"] as List<ControlHorasExtras.Models.CategoriasSalariales>;
-                    if (categorias != null && categorias.Any())
-                    {
-                        @foreach (var categoria in categorias)
-                        {
-                            <option value="@categoria.CategoriaId">@categoria.NombreCategoria</option>
-                        }
-                    }
-                    else
-                    {
-                        <option value="">No hay categorías disponibles</option>
-                    }
-                }
-                else
-                {
-                    <option value="">No se pudo cargar las categorías</option>
-                }
+                <option value="" selected disabled>Seleccione una Categoria</option>
             </select>
         </div>
 

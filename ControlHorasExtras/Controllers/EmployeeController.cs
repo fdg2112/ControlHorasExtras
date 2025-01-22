@@ -144,10 +144,6 @@ namespace ControlHorasExtras.Controllers
             var secretarias = _context.Secretarias.ToList();
             var categorias = _context.CategoriasSalariales.ToList();
 
-            ViewData["Areas"] = areas;
-            ViewData["Secretarias"] = secretarias;
-            ViewData["Categorias"] = categorias;
-
             // Filtrar empleados que pertenecen al área y/o secretaría del usuario logueado
             int? areaId = areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value) ? int.Parse(areaIdClaim.Value) : (int?)null;
             int? secretariaId = secretariaIdClaim != null && !string.IsNullOrEmpty(secretariaIdClaim.Value) ? int.Parse(secretariaIdClaim.Value) : (int?)null;
@@ -159,6 +155,9 @@ namespace ControlHorasExtras.Controllers
                 .Where(e => (areaId.HasValue && e.AreaId == areaId) || (secretariaId.HasValue && e.SecretariaId == secretariaId))
                 .ToList();
 
+            ViewData["Areas"] = areas;
+            ViewData["Secretarias"] = secretarias;
+            ViewData["Categorias"] = categorias;
             ViewData["Empleados"] = empleados;
 
             return View();
@@ -241,11 +240,17 @@ namespace ControlHorasExtras.Controllers
                 .Select(s => new { id = s.SecretariaId, nombre = s.NombreSecretaria })
                 .ToList();
 
+            var categorias = _context.CategoriasSalariales
+                .Select(c => new { id = c.CategoriaId, nombre = c.NombreCategoria }) // Usa "NombreCategoria" aquí
+                .ToList();
+
+
             // Devolver datos con las áreas y secretarías por defecto
             return Json(new
             {
                 areas,
                 secretarias,
+                categorias,
                 defaultAreaId = areaId, // Área predeterminada
                 defaultSecretariaId = secretariaId // Secretaría predeterminada
             });

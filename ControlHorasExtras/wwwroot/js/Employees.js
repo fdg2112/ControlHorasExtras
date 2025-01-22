@@ -146,6 +146,16 @@ function cargarOpcionesConSeleccion(data) {
         const selected = data.defaultSecretariaId === secretaria.id ? "selected" : "";
         secretariaSelect.innerHTML += `<option value="${secretaria.id}" ${selected}>${secretaria.nombre}</option>`;
     });
+
+    // Cargar categorias
+    const categoriaSelect = document.getElementById("categoriaId");
+    categoriaSelect.innerHTML = '<option value="" disabled>Seleccione una categoria</option>';
+    data.categorias.forEach((categoria) => {
+        const selected = data.defaultCategoriaId === categoria.id ? "selected" : "";
+        categoriaSelect.innerHTML += `<option value="${categoria.id}" ${selected}>${categoria.nombre}</option>`;
+    });
+
+
 }
 function toggleForm() {
     formEmpleado.classList.toggle('hidden');
