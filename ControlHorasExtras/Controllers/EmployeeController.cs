@@ -121,6 +121,7 @@ namespace ControlHorasExtras.Controllers
             var empleados = await empleadosQuery
                 .Select(e => new
                 {
+                    e.EmpleadoId,
                     e.Legajo,
                     e.Apellido,
                     e.Nombre,

@@ -47,7 +47,7 @@
                         <td>@empleado.Area?.NombreArea</td>
                         <td>@empleado.Secretaria?.NombreSecretaria</td>
                         <td>
-                            <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
+                            <button class="btn btn-warning btn-sm" onclick="editarEmpleado(${emp.empleadoId})">Editar</button>
                         </td>
                     </tr>
                 }

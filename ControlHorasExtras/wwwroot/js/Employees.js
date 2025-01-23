@@ -1,4 +1,4 @@
-﻿
+﻿// Tabla de empleados
 document.addEventListener('DOMContentLoaded', () => {
     let empleadosData = [];
     let currentPage = 1;
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${emp.areaNombre}</td>
                 <td>${emp.secretariaNombre}</td>
                 <td>
-                    <a href="@Url.Action("EditEmpleado", new { id = empleado.EmpleadoId })" class="btn btn-warning btn-sm">Editar</a>
+                    <button class="btn btn-warning btn-sm" onclick="editarEmpleado(${emp.empleadoId})">Editar</button>
                 </td>
             </tr>
         `;
@@ -251,18 +251,18 @@ function toggleForm() {
     btnAgregarEmpleado.classList.toggle('hidden');
 }
 
-
+// Editar datos de un empleado
 function editarEmpleado(empleadoId) {
-    // Solicitar los datos del empleado desde el servidor
+    // Obtener los datos del empleado desde el servidor
     fetch(`/Employee/GetEmpleadoById?id=${empleadoId}`)
-        .then((response) => {
+        .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
-        .then((data) => {
-            // Generar el contenido HTML del formulario dentro de SweetAlert
+        .then(data => {
+            // Generar formulario pre-cargado
             const formHtml = `
                 <form id="formEditarEmpleado">
                     <div class="mb-3">
@@ -276,27 +276,27 @@ function editarEmpleado(empleadoId) {
                     <div class="mb-3">
                         <label for="categoriaId" class="form-label">Categoría Salarial</label>
                         <select class="form-select" id="categoriaId" name="CategoriaId" required>
-                            ${data.categorias.map(categoria =>
-                `<option value="${categoria.categoriaId}" ${categoria.categoriaId === data.categoriaId ? "selected" : ""}>
-                                    ${categoria.nombreCategoria}
+                            ${data.categorias.map(c => `
+                                <option value="${c.categoriaId}" ${c.categoriaId === data.categoriaId ? "selected" : ""}>
+                                    ${c.nombreCategoria}
                                 </option>`).join("")}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="areaId" class="form-label">Área</label>
                         <select class="form-select" id="areaId" name="AreaId" required>
-                            ${data.areas.map(area =>
-                    `<option value="${area.areaId}" ${area.areaId === data.areaId ? "selected" : ""}>
-                                    ${area.nombreArea}
+                            ${data.areas.map(a => `
+                                <option value="${a.areaId}" ${a.areaId === data.areaId ? "selected" : ""}>
+                                    ${a.nombreArea}
                                 </option>`).join("")}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="secretariaId" class="form-label">Secretaría</label>
                         <select class="form-select" id="secretariaId" name="SecretariaId" required>
-                            ${data.secretarias.map(secretaria =>
-                        `<option value="${secretaria.secretariaId}" ${secretaria.secretariaId === data.secretariaId ? "selected" : ""}>
-                                    ${secretaria.nombreSecretaria}
+                            ${data.secretarias.map(s => `
+                                <option value="${s.secretariaId}" ${s.secretariaId === data.secretariaId ? "selected" : ""}>
+                                    ${s.nombreSecretaria}
                                 </option>`).join("")}
                         </select>
                     </div>
@@ -310,46 +310,47 @@ function editarEmpleado(empleadoId) {
                 showCancelButton: true,
                 confirmButtonText: "Guardar",
                 preConfirm: () => {
-                    // Obtener los datos del formulario
+                    // Obtener datos del formulario
                     const form = document.getElementById("formEditarEmpleado");
                     const formData = new FormData(form);
 
-                    // Enviar datos al servidor
+                    // Enviar los datos actualizados al servidor
                     return fetch(`/Employee/EditEmpleado?id=${empleadoId}`, {
                         method: "POST",
                         body: formData,
                         headers: {
                             "X-Requested-With": "XMLHttpRequest",
-                            "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value,
-                        },
+                            "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
                     })
-                        .then((response) => {
+                        .then(response => {
                             if (!response.ok) {
-                                throw new Error("No se pudo actualizar el empleado");
+                                throw new Error("Error al actualizar el empleado.");
                             }
                             return response.json();
                         })
-                        .catch((error) => {
+                        .catch(error => {
                             Swal.showValidationMessage(`Error: ${error.message}`);
                         });
-                },
-            }).then((result) => {
+                }
+            }).then(result => {
                 if (result.isConfirmed) {
                     Swal.fire({
                         title: "Éxito",
-                        text: "Empleado actualizado correctamente",
+                        text: "Empleado actualizado correctamente.",
                         icon: "success",
-                        confirmButtonText: "OK",
+                        confirmButtonText: "OK"
                     }).then(() => location.reload());
                 }
             });
         })
-        .catch((error) => {
+        .catch(error => {
             Swal.fire({
                 title: "Error",
                 text: `No se pudo cargar el empleado: ${error.message}`,
                 icon: "error",
-                confirmButtonText: "OK",
+                confirmButtonText: "OK"
             });
         });
 }
+
