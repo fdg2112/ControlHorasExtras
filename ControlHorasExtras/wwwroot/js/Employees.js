@@ -116,6 +116,95 @@ document.addEventListener('DOMContentLoaded', () => {
 // Formulario de Carga de Empleados
 const formEmpleado = document.getElementById('formEmpleado');
 const btnAgregarEmpleado = document.getElementById('btnAgregarEmpleado');
+
+if (formEmpleado) {
+    formEmpleado.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(formEmpleado);
+        fetch('/Employee/CreateEmployee', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Éxito',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error inesperado.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+    });
+    document.getElementById("legajo").addEventListener("blur", function () {
+        const legajoInput = this.value;
+
+        // Validar que sea un número de 3 dígitos
+        if (!/^\d{3}$/.test(legajoInput)) {
+            Swal.fire({
+                title: "Error",
+                text: "El legajo debe ser un número de 3 dígitos.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+            this.value = ""; // Limpiar el campo
+            return;
+        }
+
+        // Verificar si el legajo ya existe en la base de datos
+        fetch(`/Employee/CheckLegajo?legajo=${legajoInput}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.exists) {
+                    Swal.fire({
+                        title: "Legajo ya registrado",
+                        html: `
+                        <p>El legajo ingresado pertenece a:</p>
+                        <p><strong>${data.empleado.nombre} ${data.empleado.apellido}</strong></p>
+                        <p>Área: ${data.empleado.areaNombre}</p>
+                        <p>Secretaría: ${data.empleado.secretariaNombre}</p>
+                        <p>Para agregar a este empleado tu área, debes solicitar la transferencia a su superior.</p>
+                    `,
+                        icon: "warning",
+                        confirmButtonText: "OK"
+                    });
+                    document.getElementById("legajo").value = ""; // Limpiar el campo
+                }
+            })
+            .catch(error => console.error("Error al verificar el legajo:", error));
+    });
+}
 function cargarFormulario() {
     formEmpleado.classList.toggle("hidden");
     btnAgregarEmpleado.classList.toggle("hidden");
@@ -161,92 +250,6 @@ function toggleForm() {
     formEmpleado.classList.toggle('hidden');
     btnAgregarEmpleado.classList.toggle('hidden');
 }
-formEmpleado.addEventListener('submit', function (e) {
-    e.preventDefault();
-    const formData = new FormData(formEmpleado);
-    fetch('/Employee/CreateEmployee', { // Cambiado el endpoint
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: 'Éxito',
-                text: data.message,
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => location.reload());
-        } else {
-            Swal.fire({
-                title: 'Error',
-                text: data.message,
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error en la solicitud:', error);
-        Swal.fire({
-            title: 'Error',
-            text: 'Ocurrió un error inesperado.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    });
-});
-document.getElementById("legajo").addEventListener("blur", function () {
-    const legajoInput = this.value;
-
-    // Validar que sea un número de 3 dígitos
-    if (!/^\d{3}$/.test(legajoInput)) {
-        Swal.fire({
-            title: "Error",
-            text: "El legajo debe ser un número de 3 dígitos.",
-            icon: "error",
-            confirmButtonText: "OK"
-        });
-        this.value = ""; // Limpiar el campo
-        return;
-    }
-
-    // Verificar si el legajo ya existe en la base de datos
-    fetch(`/Employee/CheckLegajo?legajo=${legajoInput}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.exists) {
-                Swal.fire({
-                    title: "Legajo ya registrado",
-                    html: `
-                        <p>El legajo ingresado pertenece a:</p>
-                        <p><strong>${data.empleado.nombre} ${data.empleado.apellido}</strong></p>
-                        <p>Área: ${data.empleado.areaNombre}</p>
-                        <p>Secretaría: ${data.empleado.secretariaNombre}</p>
-                        <p>Para agregar a este empleado tu área, debes solicitar la transferencia a su superior.</p>
-                    `,
-                    icon: "warning",
-                    confirmButtonText: "OK"
-                });
-                document.getElementById("legajo").value = ""; // Limpiar el campo
-            }
-        })
-        .catch(error => console.error("Error al verificar el legajo:", error));
-});
 
 
 function editarEmpleado(empleadoId) {

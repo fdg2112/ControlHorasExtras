@@ -63,58 +63,62 @@
 </div>
 
 <!-- Formulario flotante para agregar nuevo empleado -->
-<div class="floating-form">
-    <button class="btn btn-primary" id="btnAgregarEmpleado" onclick="cargarFormulario()">Agregar Empleado</button>
-    <form id="formEmpleado" class="hidden mt-3">
-        @Html.AntiForgeryToken()
-        <h4>Agregar Nuevo Empleado</h4>
+@if (rol != "Intendente")
+{
+    <div class="floating-form">
+        <button class="btn btn-primary" id="btnAgregarEmpleado" onclick="cargarFormulario()">Agregar Empleado</button>
+        <form id="formEmpleado" class="hidden mt-3">
+            @Html.AntiForgeryToken()
+            <h4>Agregar Nuevo Empleado</h4>
 
-        <!-- Campo de Legajo -->
-        <div class="mb-3">
-            <label for="legajo" class="form-label">Legajo</label>
-            <input type="number" class="form-control" id="legajo" name="Legajo" required>
-        </div>
+            <!-- Campo de Legajo -->
+            <div class="mb-3">
+                <label for="legajo" class="form-label">Legajo</label>
+                <input type="number" class="form-control" id="legajo" name="Legajo" required>
+            </div>
 
-        <!-- Campo de Nombre -->
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="Nombre" required>
-        </div>
+            <!-- Campo de Nombre -->
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="Nombre" required>
+            </div>
 
-        <!-- Campo de Apellido -->
-        <div class="mb-3">
-            <label for="apellido" class="form-label">Apellido</label>
-            <input type="text" class="form-control" id="apellido" name="Apellido" required>
-        </div>
+            <!-- Campo de Apellido -->
+            <div class="mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="apellido" name="Apellido" required>
+            </div>
 
-        <!-- Campo de Categoría Salarial -->
-        <div class="mb-3">
-            <label for="categoriaId" class="form-label">Categoría Salarial</label>
-            <select class="form-select" id="categoriaId" name="CategoriaId" required>
-                <option value="" selected disabled>Seleccione una Categoria</option>
-            </select>
-        </div>
+            <!-- Campo de Categoría Salarial -->
+            <div class="mb-3">
+                <label for="categoriaId" class="form-label">Categoría Salarial</label>
+                <select class="form-select" id="categoriaId" name="CategoriaId" required>
+                    <option value="" selected disabled>Seleccione una Categoria</option>
+                </select>
+            </div>
 
-        <!-- Campo de Área -->
-        <div class="mb-3">
-            <label for="areaId" class="form-label">Área</label>
-            <select class="form-select" id="areaId" name="AreaId" required>
-                <option value="" selected disabled>Seleccione un área</option>
-            </select>
-        </div>
+            <!-- Campo de Área -->
+            <div class="mb-3">
+                <label for="areaId" class="form-label">Área</label>
+                <select class="form-select" id="areaId" name="AreaId" required>
+                    <option value="" selected disabled>Seleccione un área</option>
+                </select>
+            </div>
 
-        <!-- Campo de Secretaría -->
-        <div class="mb-3">
-            <label for="secretariaId" class="form-label">Secretaría</label>
-            <select class="form-select" id="secretariaId" name="SecretariaId" required>
-                <option value="" selected disabled>Seleccione una secretaría</option>
-            </select>
-        </div>
+            <!-- Campo de Secretaría -->
+            <div class="mb-3">
+                <label for="secretariaId" class="form-label">Secretaría</label>
+                <select class="form-select" id="secretariaId" name="SecretariaId" required>
+                    <option value="" selected disabled>Seleccione una secretaría</option>
+                </select>
+            </div>
 
-        <button type="submit" class="btn btn-success">Guardar</button>
-        <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cerrar</button>
-    </form>
-</div>
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cerrar</button>
+        </form>
+    </div>
+}
+
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
