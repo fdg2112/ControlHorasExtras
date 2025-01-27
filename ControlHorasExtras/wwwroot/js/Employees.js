@@ -84,7 +84,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para ordenar la tabla
     window.sortTable = function (columnIndex) {
-        // Determinar dirección de orden
+        // Mapeo de índices de columnas a las propiedades de empleadosData
+        const columnMap = {
+            0: 'legajo',
+            1: 'apellido',
+            2: 'nombre',
+            3: 'categoriaNombre',
+            4: 'areaNombre',
+            5: 'secretariaNombre'
+        };
+
+        const sortKey = columnMap[columnIndex];
+        if (!sortKey) return; // Salir si el índice no es válido
+
+        // Determinar la dirección de orden
         const ths = document.querySelectorAll('#empleadosTable th');
         const direction = ths[columnIndex].dataset.direction === 'asc' ? 'desc' : 'asc';
 
@@ -92,10 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ths.forEach(th => th.removeAttribute('data-direction'));
         ths[columnIndex].setAttribute('data-direction', direction);
 
-        // Ordenar el dataset global completo (empleadosData)
+        // Ordenar empleadosData según la clave correspondiente
         empleadosData.sort((a, b) => {
-            const aValue = Object.values(a)[columnIndex];
-            const bValue = Object.values(b)[columnIndex];
+            const aValue = a[sortKey] || ''; // Manejar valores nulos o indefinidos
+            const bValue = b[sortKey] || '';
 
             if (typeof aValue === 'string' && typeof bValue === 'string') {
                 // Ordenar cadenas (ignorando mayúsculas)
@@ -111,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Renderizar nuevamente la tabla paginada después de ordenar
         renderTable(empleadosData);
     };
+
 });
 
 // Formulario de Carga de Empleados

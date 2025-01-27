@@ -109,6 +109,79 @@ CREATE TABLE AuditoriaLogins (
 );
 GO
 
+-- Crear la tabla de Categorias
+CREATE TABLE [dbo].[Categorias](
+    [CategoriaID] [int] IDENTITY(1,1) NOT NULL,
+    [NombreCategoria] NVARCHAR(20) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+    [CategoriaID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+-- Crear la tabla de Paritarias
+CREATE TABLE [dbo].[Paritarias](
+    [ParitariaID] [int] IDENTITY(1,1) NOT NULL,
+	[DecretoNumero] NVARCHAR(10) NOT NULL,
+    [FechaDesde] [date] NOT NULL,
+    [FechaHasta] [date] NULL,
+    [EsActual] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+    [ParitariaID] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
+        ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF)
+) ON [PRIMARY];
+
+-- Crear la tabla de Salarios
+CREATE TABLE [dbo].[Salarios](
+    [SalarioID] [int] IDENTITY(1,1) NOT NULL,
+    [CategoriaID] [int] NOT NULL,
+    [ParitariaID] [int] NOT NULL,
+    [SueldoBasico] [decimal](10, 2) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+    [SalarioID] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
+        ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF),
+CONSTRAINT [FK_Salarios_Paritarias] FOREIGN KEY([ParitariaID])
+REFERENCES [dbo].[Paritarias]([ParitariaID]),
+CONSTRAINT [FK_Salarios_Categorias] FOREIGN KEY([CategoriaID])
+REFERENCES [dbo].[Categorias]([CategoriaID]) -- Asegúrate de que exista esta tabla
+) ON [PRIMARY];
+
+-- Insertar las 10 categorías iniciales
+INSERT INTO [dbo].[Categorias] ([NombreCategoria])
+VALUES 
+    ('Categoría 1'),
+    ('Categoría 2'),
+    ('Categoría 3'),
+    ('Categoría 4'),
+    ('Categoría 5'),
+    ('Categoría 6'),
+    ('Categoría 7'),
+    ('Categoría 8'),
+    ('Categoría 9'),
+    ('Categoría 10');
+GO
+
+INSERT INTO [dbo].[Paritarias] (DecretoNumero, FechaDesde, FechaHasta, EsActual)
+VALUES ('0001/24', '2024-01-01', NULL, 1); -- Paritaria activa
+
+INSERT INTO [dbo].[Salarios] (CategoriaID, ParitariaID, SueldoBasico)
+VALUES 
+    (1, 1, 694909.66),
+    (2, 1, 602012.08),
+    (3, 1, 528806.60),
+    (4, 1, 482197.72),
+    (5, 1, 444741.96),
+    (6, 1, 435950.24),
+    (7, 1, 406174.32),
+    (8, 1, 376182.74),
+    (9, 1, 359284.17),
+    (10, 1, 342373.41);
+
 -- Insertar roles
 INSERT INTO Roles (NombreRol)
 VALUES 
