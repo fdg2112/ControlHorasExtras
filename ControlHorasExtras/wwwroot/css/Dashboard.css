@@ -1,41 +1,136 @@
 ﻿body {
 }
 
+/* Contenedor flotante */
 .floating-form {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 350px; /* Tamaño reducido */
+    background: #ecf0f3;
+    padding: 15px; /* Reducido */
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #cbced1, -10px -10px 20px #fff;
+    max-width: 350px;
     z-index: 9999;
-    font-size: 0.9rem; /* Fuente más pequeña */
+    font-size: 0.9rem;
+    transition: all 0.3s ease-in-out;
 }
 
+    /* Título del formulario */
     .floating-form h4 {
-        font-size: 1rem; /* Reducir título */
-        margin-bottom: 8px; /* Espacio más pequeño */
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1rem; /* Tamaño más pequeño */
+        color: #555;
+        margin-bottom: 10px; /* Menos espacio debajo */
+        text-align: center;
     }
 
+    /* Etiquetas */
     .floating-form .form-label {
-        font-size: 0.85rem; /* Reducir el tamaño de los labels */
-        margin-bottom: 4px; /* Menos espacio debajo de los labels */
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 0.85rem; /* Ligera reducción */
+        color: #666;
+        margin-bottom: 5px; /* Espaciado más pequeño */
     }
 
+    /* Inputs y selects */
     .floating-form .form-control,
     .floating-form .form-select {
-        font-size: 0.8rem; /* Reducir el tamaño de los inputs/selects */
-        padding: 6px; /* Menos padding para que quede más compacto */
-        height: 30px; /* Reducir la altura de los campos */
+        font-size: 0.85rem; /* Ligera reducción */
+        padding: 8px; /* Compacto */
+        border-radius: 15px; /* Menos redondeado */
+        box-shadow: inset 4px 4px 8px #cbced1, inset -4px -4px 8px #fff;
+        border: none;
+        background: #ecf0f3;
+        color: #555;
+        outline: none;
+        margin-bottom: 10px; /* Espaciado reducido entre elementos */
     }
 
-    .floating-form button {
-        font-size: 0.85rem; /* Reducir tamaño de los botones */
-        padding: 6px 12px; /* Menos padding para el botón */
-        margin-top: 10px; /* Espacio arriba del botón */
+    /* Botón flotante */
+    .floating-form .btn {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.85rem; /* Tamaño más pequeño */
+        font-weight: 500;
+        padding: 8px;
+        border-radius: 20px;
+        background-color: #03A9F4;
+        color: #fff;
+        box-shadow: 3px 3px 8px #b1b1b1, -3px -3px 8px #fff;
+        border: none;
+        transition: all 0.2s ease-in-out;
     }
+
+    /* Botones de acción dentro del formulario */
+    .floating-form .btn-success,
+    .floating-form .btn-secondary {
+        font-size: 0.8rem; /* Más pequeño */
+        padding: 6px 12px; /* Reducido */
+        border-radius: 15px; /* Más compacto */
+        box-shadow: 2px 2px 5px #cbced1, -2px -2px 5px #fff;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .floating-form .btn-success:hover {
+            background-color: #039BE5;
+            color: white;
+        }
+
+        .floating-form .btn-secondary:hover {
+            background-color: #a7aaa7;
+            color: white;
+        }
+
+/* Contenedor del Dashboard */
+.container mt-4{
+    padding: 20px;
+    background-color: #ecf0f3;
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #cbced1, -10px -10px 20px #fff;
+    margin-top: 20px;
+}
+
+/* Títulos */
+h1, h3 {
+    font-family: 'Poppins', sans-serif;
+    color: #555;
+    text-align: center;
+}
+
+/* Filtros */
+.form-select {
+    border-radius: 15px;
+    box-shadow: inset 5px 5px 10px #cbced1, inset -5px -5px 10px #fff;
+    font-size: 0.9rem;
+}
+
+/* Gráficos */
+canvas {
+    background-color: #f7f9fc;
+    box-shadow: 5px 5px 15px #b1b1b1, -5px -5px 15px #fff;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+/* Tabla */
+.table {
+    background-color: #ecf0f3;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px #b1b1b1, -5px -5px 10px #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f7f9fc;
+}
+
+.table thead th {
+    background-color: #03A9F4;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+}
 
 .hidden {
     display: none;
