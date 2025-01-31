@@ -30,16 +30,6 @@ CREATE TABLE Areas (
 );
 GO
 
--- Tabla Categorías Salariales
-CREATE TABLE CategoriasSalariales (
-    CategoriaID INT PRIMARY KEY IDENTITY(1,1),
-    NombreCategoria INT NOT NULL CHECK (NombreCategoria BETWEEN 1 AND 10),
-    SueldoBasico DECIMAL(10,2) NOT NULL,
-    DesdeMes DATE NOT NULL,
-    HastaMes DATE NULL
-);
-GO
-
 -- Tabla Usuarios
 CREATE TABLE Usuarios (
     UsuarioID INT PRIMARY KEY IDENTITY(1,1),
@@ -56,7 +46,39 @@ CREATE TABLE Usuarios (
 );
 GO
 
--- Tabla Empleados
+-- Tabla Categorías Salariales
+CREATE TABLE CategoriasSalariales (
+    [CategoriaID] [int] IDENTITY(1,1) NOT NULL,
+    [NombreCategoria] NVARCHAR(20) NOT NULL,
+);
+GO
+
+CREATE TABLE Paritarias (
+    ParitariaID INT IDENTITY(1,1) PRIMARY KEY,
+    DecretoNumero INT NOT NULL,  -- Número de la resolución
+    FechaPublicacion DATE NOT NULL  -- Cuándo se anunció el aumento
+);
+
+CREATE TABLE AumentosParitarias (
+    AumentoID INT IDENTITY(1,1) PRIMARY KEY,
+    ParitariaID INT NOT NULL,  -- Relación con el decreto paritario
+    CategoriaID INT NOT NULL,  -- Categoría afectada
+    FechaDesde DATE NOT NULL,  -- Desde cuándo aplica el aumento
+    PorcentajeAumento DECIMAL(5,2) NOT NULL,  -- % de aumento definido
+    FOREIGN KEY (ParitariaID) REFERENCES Paritarias(ParitariaID),
+    FOREIGN KEY (CategoriaID) REFERENCES CategoriasSalariales(CategoriaID)
+);
+
+CREATE TABLE Salarios (
+    SalarioID INT IDENTITY(1,1) PRIMARY KEY,
+    CategoriaID INT NOT NULL,
+    ParitariaID INT NOT NULL,
+    FechaDesde DATE NOT NULL,
+    SueldoBasico DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (CategoriaID) REFERENCES CategoriasSalariales(CategoriaID),
+    FOREIGN KEY (ParitariaID) REFERENCES Paritarias(ParitariaID)
+);
+
 CREATE TABLE Empleados (
     EmpleadoID INT PRIMARY KEY IDENTITY(1,1),
     Legajo INT NOT NULL UNIQUE CHECK (Legajo BETWEEN 1 AND 999),
@@ -64,13 +86,13 @@ CREATE TABLE Empleados (
     Apellido NVARCHAR(100) NOT NULL,
     AreaID INT NULL,
     SecretariaID INT NOT NULL,
-    CategoriaID INT NOT NULL,
+    CategoriaID INT NOT NULL,  -- Se mantiene solo la categoría
     FechaIngreso DATE NOT NULL,
     FOREIGN KEY (AreaID) REFERENCES Areas(AreaID),
     FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID),
     FOREIGN KEY (CategoriaID) REFERENCES CategoriasSalariales(CategoriaID)
 );
-GO
+
 
 -- Tabla Horas Extras
 CREATE TABLE HorasExtras (
@@ -108,79 +130,6 @@ CREATE TABLE AuditoriaLogins (
     FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
 );
 GO
-
--- Crear la tabla de Categorias
-CREATE TABLE [dbo].[Categorias](
-    [CategoriaID] [int] IDENTITY(1,1) NOT NULL,
-    [NombreCategoria] NVARCHAR(20) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-    [CategoriaID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-
--- Crear la tabla de Paritarias
-CREATE TABLE [dbo].[Paritarias](
-    [ParitariaID] [int] IDENTITY(1,1) NOT NULL,
-	[DecretoNumero] NVARCHAR(10) NOT NULL,
-    [FechaDesde] [date] NOT NULL,
-    [FechaHasta] [date] NULL,
-    [EsActual] [bit] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-    [ParitariaID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
-        ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF)
-) ON [PRIMARY];
-
--- Crear la tabla de Salarios
-CREATE TABLE [dbo].[Salarios](
-    [SalarioID] [int] IDENTITY(1,1) NOT NULL,
-    [CategoriaID] [int] NOT NULL,
-    [ParitariaID] [int] NOT NULL,
-    [SueldoBasico] [decimal](10, 2) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-    [SalarioID] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, 
-        ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF),
-CONSTRAINT [FK_Salarios_Paritarias] FOREIGN KEY([ParitariaID])
-REFERENCES [dbo].[Paritarias]([ParitariaID]),
-CONSTRAINT [FK_Salarios_Categorias] FOREIGN KEY([CategoriaID])
-REFERENCES [dbo].[Categorias]([CategoriaID]) -- Asegúrate de que exista esta tabla
-) ON [PRIMARY];
-
--- Insertar las 10 categorías iniciales
-INSERT INTO [dbo].[Categorias] ([NombreCategoria])
-VALUES 
-    ('Categoría 1'),
-    ('Categoría 2'),
-    ('Categoría 3'),
-    ('Categoría 4'),
-    ('Categoría 5'),
-    ('Categoría 6'),
-    ('Categoría 7'),
-    ('Categoría 8'),
-    ('Categoría 9'),
-    ('Categoría 10');
-GO
-
-INSERT INTO [dbo].[Paritarias] (DecretoNumero, FechaDesde, FechaHasta, EsActual)
-VALUES ('0001/24', '2024-01-01', NULL, 1); -- Paritaria activa
-
-INSERT INTO [dbo].[Salarios] (CategoriaID, ParitariaID, SueldoBasico)
-VALUES 
-    (1, 1, 694909.66),
-    (2, 1, 602012.08),
-    (3, 1, 528806.60),
-    (4, 1, 482197.72),
-    (5, 1, 444741.96),
-    (6, 1, 435950.24),
-    (7, 1, 406174.32),
-    (8, 1, 376182.74),
-    (9, 1, 359284.17),
-    (10, 1, 342373.41);
 
 -- Insertar roles
 INSERT INTO Roles (NombreRol)
