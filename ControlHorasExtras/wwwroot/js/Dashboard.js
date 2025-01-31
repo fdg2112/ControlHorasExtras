@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'y-gasto': {
                         type: 'linear',
                         position: 'right',
+                        suggestedMax: Math.max(gasto50, gasto100) * 1.1, // Extiende un 10% por encima del máximo
                         title: {
                             display: true,
                             text: 'Gasto ($)',
