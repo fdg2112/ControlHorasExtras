@@ -1,408 +1,129 @@
 ﻿-------- DDBB Script --------
-USE [master]
-GO
-/****** Object:  Database [OvertimeControl]    Script Date: 31/1/2025 11:13:03 ******/
-CREATE DATABASE [OvertimeControl]
- CONTAINMENT = NONE
- ON  PRIMARY 
-( NAME = N'OvertimeControl', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\OvertimeControl.mdf' , SIZE = 73728KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
- LOG ON 
-( NAME = N'OvertimeControl_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\OvertimeControl_log.ldf' , SIZE = 204800KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
- WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
-GO
-ALTER DATABASE [OvertimeControl] SET COMPATIBILITY_LEVEL = 160
-GO
-IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
-begin
-EXEC [OvertimeControl].[dbo].[sp_fulltext_database] @action = 'enable'
-end
-GO
-ALTER DATABASE [OvertimeControl] SET ANSI_NULL_DEFAULT OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET ANSI_NULLS OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET ANSI_PADDING OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET ANSI_WARNINGS OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET ARITHABORT OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET AUTO_CLOSE ON 
-GO
-ALTER DATABASE [OvertimeControl] SET AUTO_SHRINK OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET AUTO_UPDATE_STATISTICS ON 
-GO
-ALTER DATABASE [OvertimeControl] SET CURSOR_CLOSE_ON_COMMIT OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET CURSOR_DEFAULT  GLOBAL 
-GO
-ALTER DATABASE [OvertimeControl] SET CONCAT_NULL_YIELDS_NULL OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET NUMERIC_ROUNDABORT OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET QUOTED_IDENTIFIER OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET RECURSIVE_TRIGGERS OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET  ENABLE_BROKER 
-GO
-ALTER DATABASE [OvertimeControl] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET DATE_CORRELATION_OPTIMIZATION OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET TRUSTWORTHY OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET ALLOW_SNAPSHOT_ISOLATION OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET PARAMETERIZATION SIMPLE 
-GO
-ALTER DATABASE [OvertimeControl] SET READ_COMMITTED_SNAPSHOT OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET HONOR_BROKER_PRIORITY OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET RECOVERY SIMPLE 
-GO
-ALTER DATABASE [OvertimeControl] SET  MULTI_USER 
-GO
-ALTER DATABASE [OvertimeControl] SET PAGE_VERIFY CHECKSUM  
-GO
-ALTER DATABASE [OvertimeControl] SET DB_CHAINING OFF 
-GO
-ALTER DATABASE [OvertimeControl] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
-GO
-ALTER DATABASE [OvertimeControl] SET TARGET_RECOVERY_TIME = 60 SECONDS 
-GO
-ALTER DATABASE [OvertimeControl] SET DELAYED_DURABILITY = DISABLED 
-GO
-ALTER DATABASE [OvertimeControl] SET ACCELERATED_DATABASE_RECOVERY = OFF  
-GO
-ALTER DATABASE [OvertimeControl] SET QUERY_STORE = ON
-GO
-ALTER DATABASE [OvertimeControl] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200)
-GO
-USE [OvertimeControl]
-GO
-/****** Object:  Table [dbo].[Actividades]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Actividades](
-	[ActividadID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreActividad] [nvarchar](50) NOT NULL,
-	[Lugar] [nvarchar](100) NOT NULL,
-	[AreaID] [int] NULL,
-	[SecretariaID] [int] NOT NULL,
-	[LugarID] [int] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ActividadID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Areas]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Areas](
-	[AreaID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreArea] [nvarchar](100) NOT NULL,
-	[SecretariaID] [int] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[AreaID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[AuditoriaLogins]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[AuditoriaLogins](
-	[LoginID] [int] IDENTITY(1,1) NOT NULL,
-	[UsuarioID] [int] NOT NULL,
-	[FechaHoraLogin] [datetime] NOT NULL,
-	[IP] [nvarchar](50) NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[LoginID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[AumentosParitarias]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[AumentosParitarias](
-	[AumentoID] [int] IDENTITY(1,1) NOT NULL,
-	[ParitariaID] [int] NOT NULL,
-	[CategoriaID] [int] NOT NULL,
-	[FechaDesde] [date] NOT NULL,
-	[PorcentajeAumento] [decimal](5, 2) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[AumentoID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[CategoriasSalariales]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[CategoriasSalariales](
-	[CategoriaID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreCategoria] [int] NOT NULL,
-	[DesdeMes] [date] NULL,
-	[HastaMes] [date] NULL,
-	[SueldoBasico] [decimal](10, 2) NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[CategoriaID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Empleados]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Empleados](
-	[EmpleadoID] [int] IDENTITY(1,1) NOT NULL,
-	[Legajo] [int] NOT NULL,
-	[Nombre] [nvarchar](100) NOT NULL,
-	[Apellido] [nvarchar](100) NOT NULL,
-	[AreaID] [int] NULL,
-	[SecretariaID] [int] NOT NULL,
-	[CategoriaID] [int] NOT NULL,
-	[FechaIngreso] [date] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[EmpleadoID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
-(
-	[Legajo] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[HorasExtras]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[HorasExtras](
-	[HoraExtraID] [int] IDENTITY(1,1) NOT NULL,
-	[EmpleadoID] [int] NOT NULL,
-	[FechaHoraInicio] [datetime] NOT NULL,
-	[FechaHoraFin] [datetime] NOT NULL,
-	[CantidadHoras]  AS (datediff(hour,[FechaHoraInicio],[FechaHoraFin])),
-	[TipoHora] [nvarchar](50) NOT NULL,
-	[AreaID] [int] NULL,
-	[SecretariaID] [int] NOT NULL,
-	[ActividadID] [int] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[HoraExtraID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Lugares]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Lugares](
-	[LugarID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreLugar] [nvarchar](50) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[LugarID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Paritarias]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Paritarias](
-	[ParitariaID] [int] IDENTITY(1,1) NOT NULL,
-	[DecretoNumero] [int] NOT NULL,
-	[FechaPublicacion] [date] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ParitariaID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Roles]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Roles](
-	[RolID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreRol] [nvarchar](100) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[RolID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Salarios]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Salarios](
-	[SalarioID] [int] IDENTITY(1,1) NOT NULL,
-	[CategoriaID] [int] NOT NULL,
-	[ParitariaID] [int] NOT NULL,
-	[FechaDesde] [date] NOT NULL,
-	[SueldoBasico] [decimal](10, 2) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[SalarioID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Secretarias]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Secretarias](
-	[SecretariaID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreSecretaria] [nvarchar](100) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[SecretariaID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[TopesHoras]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[TopesHoras](
-	[TopeHoraID] [int] IDENTITY(1,1) NOT NULL,
-	[Mes] [int] NOT NULL,
-	[Año] [int] NOT NULL,
-	[AreaID] [int] NOT NULL,
-	[TopeHoras] [int] NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[TopeHoraID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Usuarios]    Script Date: 31/1/2025 11:13:03 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Usuarios](
-	[UsuarioID] [int] IDENTITY(1,1) NOT NULL,
-	[NombreUsuario] [nvarchar](100) NOT NULL,
-	[Contraseña] [nvarchar](255) NOT NULL,
-	[Nombre] [nvarchar](50) NOT NULL,
-	[Apellido] [nvarchar](50) NOT NULL,
-	[RolID] [int] NOT NULL,
-	[AreaID] [int] NULL,
-	[SecretariaID] [int] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[UsuarioID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
-(
-	[NombreUsuario] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[AuditoriaLogins] ADD  DEFAULT (getdate()) FOR [FechaHoraLogin]
-GO
-ALTER TABLE [dbo].[Actividades]  WITH CHECK ADD FOREIGN KEY([AreaID])
-REFERENCES [dbo].[Areas] ([AreaID])
-GO
-ALTER TABLE [dbo].[Actividades]  WITH CHECK ADD FOREIGN KEY([LugarID])
-REFERENCES [dbo].[Lugares] ([LugarID])
-GO
-ALTER TABLE [dbo].[Actividades]  WITH CHECK ADD FOREIGN KEY([SecretariaID])
-REFERENCES [dbo].[Secretarias] ([SecretariaID])
-GO
-ALTER TABLE [dbo].[Areas]  WITH CHECK ADD  CONSTRAINT [FK_Areas_Secretarias] FOREIGN KEY([SecretariaID])
-REFERENCES [dbo].[Secretarias] ([SecretariaID])
-GO
-ALTER TABLE [dbo].[Areas] CHECK CONSTRAINT [FK_Areas_Secretarias]
-GO
-ALTER TABLE [dbo].[AuditoriaLogins]  WITH CHECK ADD FOREIGN KEY([UsuarioID])
-REFERENCES [dbo].[Usuarios] ([UsuarioID])
-GO
-ALTER TABLE [dbo].[AumentosParitarias]  WITH CHECK ADD FOREIGN KEY([CategoriaID])
-REFERENCES [dbo].[CategoriasSalariales] ([CategoriaID])
-GO
-ALTER TABLE [dbo].[AumentosParitarias]  WITH CHECK ADD FOREIGN KEY([ParitariaID])
-REFERENCES [dbo].[Paritarias] ([ParitariaID])
-GO
-ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD FOREIGN KEY([AreaID])
-REFERENCES [dbo].[Areas] ([AreaID])
-GO
-ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD FOREIGN KEY([CategoriaID])
-REFERENCES [dbo].[CategoriasSalariales] ([CategoriaID])
-GO
-ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD FOREIGN KEY([SecretariaID])
-REFERENCES [dbo].[Secretarias] ([SecretariaID])
-GO
-ALTER TABLE [dbo].[HorasExtras]  WITH CHECK ADD FOREIGN KEY([ActividadID])
-REFERENCES [dbo].[Actividades] ([ActividadID])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[HorasExtras]  WITH CHECK ADD FOREIGN KEY([AreaID])
-REFERENCES [dbo].[Areas] ([AreaID])
-GO
-ALTER TABLE [dbo].[HorasExtras]  WITH CHECK ADD FOREIGN KEY([EmpleadoID])
-REFERENCES [dbo].[Empleados] ([EmpleadoID])
-GO
-ALTER TABLE [dbo].[HorasExtras]  WITH CHECK ADD FOREIGN KEY([SecretariaID])
-REFERENCES [dbo].[Secretarias] ([SecretariaID])
-GO
-ALTER TABLE [dbo].[Salarios]  WITH CHECK ADD FOREIGN KEY([CategoriaID])
-REFERENCES [dbo].[CategoriasSalariales] ([CategoriaID])
-GO
-ALTER TABLE [dbo].[Salarios]  WITH CHECK ADD FOREIGN KEY([ParitariaID])
-REFERENCES [dbo].[Paritarias] ([ParitariaID])
-GO
-ALTER TABLE [dbo].[TopesHoras]  WITH CHECK ADD FOREIGN KEY([AreaID])
-REFERENCES [dbo].[Areas] ([AreaID])
-GO
-ALTER TABLE [dbo].[Usuarios]  WITH CHECK ADD FOREIGN KEY([AreaID])
-REFERENCES [dbo].[Areas] ([AreaID])
-GO
-ALTER TABLE [dbo].[Usuarios]  WITH CHECK ADD FOREIGN KEY([RolID])
-REFERENCES [dbo].[Roles] ([RolID])
-GO
-ALTER TABLE [dbo].[Usuarios]  WITH CHECK ADD FOREIGN KEY([SecretariaID])
-REFERENCES [dbo].[Secretarias] ([SecretariaID])
-GO
-ALTER TABLE [dbo].[CategoriasSalariales]  WITH CHECK ADD CHECK  (([NombreCategoria]>=(1) AND [NombreCategoria]<=(10)))
-GO
-ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD CHECK  (([Legajo]>=(1) AND [Legajo]<=(999)))
-GO
-ALTER TABLE [dbo].[HorasExtras]  WITH CHECK ADD CHECK  (([TipoHora]='100%' OR [TipoHora]='50%'))
-GO
-ALTER TABLE [dbo].[TopesHoras]  WITH CHECK ADD CHECK  (([Mes]>=(1) AND [Mes]<=(12)))
-GO
-USE [master]
-GO
-ALTER DATABASE [OvertimeControl] SET  READ_WRITE 
-GO
+-- Crear base de datos
+CREATE DATABASE OvertimeControl;
+GO
+
+USE OvertimeControl;
+GO
+
+-- Tabla Secretarías
+CREATE TABLE Secretarias (
+    SecretariaID INT PRIMARY KEY IDENTITY(1,1),
+    NombreSecretaria NVARCHAR(100) NOT NULL
+);
+GO
+
+-- Tabla Roles
+CREATE TABLE Roles (
+    RolID INT PRIMARY KEY IDENTITY(1,1),
+    NombreRol NVARCHAR(100) NOT NULL
+);
+GO
+
+-- Tabla Áreas
+CREATE TABLE Areas (
+    AreaID INT PRIMARY KEY IDENTITY(1,1),
+    NombreArea NVARCHAR(100) NOT NULL,
+    SecretariaID INT NOT NULL,
+    CONSTRAINT FK_Areas_Secretarias
+    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID)
+);
+GO
+
+-- Tabla Categorías Salariales
+CREATE TABLE CategoriasSalariales (
+    CategoriaID INT PRIMARY KEY IDENTITY(1,1),
+    NombreCategoria INT NOT NULL CHECK (NombreCategoria BETWEEN 1 AND 10),
+    SueldoBasico DECIMAL(10,2) NOT NULL,
+    DesdeMes DATE NOT NULL,
+    HastaMes DATE NULL
+);
+GO
+
+-- Tabla Usuarios
+CREATE TABLE Usuarios (
+    UsuarioID INT PRIMARY KEY IDENTITY(1,1),
+    NombreUsuario NVARCHAR(100) NOT NULL UNIQUE,
+    Contraseña NVARCHAR(255) NOT NULL,
+    Nombre NVARCHAR(50) NOT NULL,
+    Apellido NVARCHAR(50) NOT NULL,
+    RolID INT NOT NULL,
+    AreaID INT NULL,
+    SecretariaID INT NULL,
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID),
+    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID),
+    FOREIGN KEY (RolID) REFERENCES Roles(RolID)
+);
+GO
+
+-- Tabla Empleados
+CREATE TABLE Empleados (
+    EmpleadoID INT PRIMARY KEY IDENTITY(1,1),
+    Legajo INT NOT NULL UNIQUE CHECK (Legajo BETWEEN 1 AND 999),
+    Nombre NVARCHAR(100) NOT NULL,
+    Apellido NVARCHAR(100) NOT NULL,
+    AreaID INT NULL,
+    SecretariaID INT NOT NULL,
+    CategoriaID INT NOT NULL,
+    FechaIngreso DATE NOT NULL,
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID),
+    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID),
+    FOREIGN KEY (CategoriaID) REFERENCES CategoriasSalariales(CategoriaID)
+);
+GO
+
+-- Tabla Horas Extras
+CREATE TABLE HorasExtras (
+    HoraExtraID INT PRIMARY KEY IDENTITY(1,1),
+    EmpleadoID INT NOT NULL,
+    FechaHoraInicio DATETIME NOT NULL,
+    FechaHoraFin DATETIME NOT NULL,
+    CantidadHoras AS DATEDIFF(HOUR, FechaHoraInicio, FechaHoraFin),
+    TipoHora NVARCHAR(50) NOT NULL CHECK (TipoHora IN ('50%', '100%')),
+    AreaID INT NULL,
+    SecretariaID INT NOT NULL,
+    FOREIGN KEY (EmpleadoID) REFERENCES Empleados(EmpleadoID),
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID),
+    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID)
+);
+GO
+
+-- Tabla Lugares de Trabajo
+CREATE TABLE LugaresTrabajo (
+    LugarID INT PRIMARY KEY IDENTITY(1,1),
+    NombreLugar NVARCHAR(100) NOT NULL
+);
+
+
+-- Tabla de Actividades de Trabajo
+CREATE TABLE ActividadesTrabajo (
+    ActividadID INT PRIMARY KEY IDENTITY(1,1),
+    NombreActividad NVARCHAR(100) NOT NULL,
+    LugarID INT NOT NULL,
+    FOREIGN KEY (LugarID) REFERENCES LugaresTrabajo(LugarID)
+);
+
+-- Tabla Topes de Horas
+CREATE TABLE TopesHoras (
+    TopeHoraID INT PRIMARY KEY IDENTITY(1,1),
+    Mes INT NOT NULL CHECK (Mes BETWEEN 1 AND 12),
+    Año INT NOT NULL,
+    AreaID INT NOT NULL,
+    TopeHoras INT NOT NULL,
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID)
+);
+GO
+
+-- Tabla Auditoria de Logins
+CREATE TABLE AuditoriaLogins (
+    LoginID INT PRIMARY KEY IDENTITY(1,1),
+    UsuarioID INT NOT NULL,
+    FechaHoraLogin DATETIME NOT NULL DEFAULT GETDATE(),
+    IP NVARCHAR(50) NULL,
+    FOREIGN KEY (UsuarioID) REFERENCES Usuarios(UsuarioID)
+);
+GO
+
 
 
 -- Insertar roles
@@ -783,3 +504,20 @@ END
 
 CLOSE EmployeeCursor;
 DEALLOCATE EmployeeCursor;
+
+GO
+
+-- Vista para calcular el gasto en horas extras
+CREATE VIEW VistaGastosHorasExtras AS
+SELECT 
+    TipoHora,
+    SUM(CantidadHoras * 
+        CASE 
+            WHEN TipoHora = '50%' THEN (C.SueldoBasico / 132) * 1.5
+            ELSE (C.SueldoBasico / 132) * 2 
+        END) AS TotalGasto
+FROM HorasExtras H
+JOIN Empleados E ON H.EmpleadoId = E.EmpleadoID
+JOIN CategoriasSalariales C ON E.CategoriaId = C.CategoriaID
+GROUP BY TipoHora;
+GO;
