@@ -88,6 +88,7 @@ namespace ControlHorasExtras.Controllers
             ModelState.Remove("Area");
             ModelState.Remove("Secretaria");
             ModelState.Remove("Empleado");
+            //ModelState.Remove("Actividad");
 
             if (horasExtra.FechaHoraInicio >= horasExtra.FechaHoraFin)
             {
@@ -114,6 +115,7 @@ namespace ControlHorasExtras.Controllers
                 // Asignar Área y Secretaría al modelo
                 horasExtra.AreaId = empleado.AreaId ?? 0; // Manejar nulos si AreaId puede ser nulo
                 horasExtra.SecretariaId = empleado.SecretariaId;
+                //horasExtra.ActividadId = 1; //HAY QUE CAMBIAR ESTO
 
                 // Validar que las horas no se solapen
                 var solapamiento = await _context.HorasExtras

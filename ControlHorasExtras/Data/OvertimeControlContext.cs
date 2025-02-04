@@ -23,6 +23,7 @@ public partial class OvertimeControlContext : DbContext
     public virtual DbSet<Secretaria> Secretarias { get; set; } = null!;
     public virtual DbSet<TopesHora> TopesHoras { get; set; } = null!;
     public virtual DbSet<Usuario> Usuarios { get; set; } = null!;
+    public virtual DbSet<VistaGastosHorasExtras> VistaGastosHorasExtras { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -123,6 +124,11 @@ public partial class OvertimeControlContext : DbContext
             entity.HasOne(d => d.Secretaria).WithMany(p => p.Usuarios).HasConstraintName("FK__Usuarios__Secret__4316F928");
         });
 
+        modelBuilder.Entity<VistaGastosHorasExtras>(entity =>
+        {
+            entity.HasNoKey(); // Las vistas no tienen clave primaria
+            entity.ToView("VistaGastosHorasExtras"); // Nombre exacto de la vista en SQL
+        });
         OnModelCreatingPartial(modelBuilder);
     }
 

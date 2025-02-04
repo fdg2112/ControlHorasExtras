@@ -77,23 +77,24 @@ namespace ControlHorasExtras.Controllers
             var horas100 = horasDelMes.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0;
 
             // Gasto del mes actual
-            var gastoDelMes = await query
-                .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
-                .Select(h => new
-                {
-                    TipoHora = h.TipoHora,
-                    CantidadHoras = h.CantidadHoras,
-                    ValorHora = h.TipoHora.Trim() == "50%"
-                        ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
-                        : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
-                })
-                .GroupBy(h => h.TipoHora)
-                .Select(g => new
-                {
-                    TipoHora = g.Key,
-                    TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
-                })
-                .ToListAsync();
+            var gastoDelMes = await _context.VistaGastosHorasExtras.ToListAsync();
+            //var gastoDelMes = await query
+            //    .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
+            //    .Select(h => new
+            //    {
+            //        TipoHora = h.TipoHora,
+            //        CantidadHoras = h.CantidadHoras,
+            //        ValorHora = h.TipoHora.Trim() == "50%"
+            //            ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
+            //            : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
+            //    })
+            //    .GroupBy(h => h.TipoHora)
+            //    .Select(g => new
+            //    {
+            //        TipoHora = g.Key,
+            //        TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
+            //    })
+            //    .ToListAsync();
 
             var gasto50 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "50%")?.TotalGasto ?? 0;
             var gasto100 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "100%")?.TotalGasto ?? 0;
