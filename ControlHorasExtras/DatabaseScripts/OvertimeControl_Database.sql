@@ -125,7 +125,6 @@ CREATE TABLE AuditoriaLogins (
 GO
 
 
-
 -- Insertar roles
 INSERT INTO Roles (NombreRol)
 VALUES 
@@ -133,6 +132,22 @@ VALUES
     ('Secretario'),
     ('Secretario Hacienda'),
     ('Intendente');
+GO
+
+INSERT INTO LugaresTrabajo (NombreLugar)
+VALUES 
+    ('Municipio'),
+    ('Edificio Predio Ferroviario'),
+    ('Polideportivo'),
+    ('NIDO');
+GO
+
+INSERT INTO ActividadesTrabajo (NombreActividad, LugarID)
+VALUES 
+    ('Atencion al Publico',1),
+    ('Atencion al Publico',2),
+    ('Barrido',3),
+    ('Gestion de Archivos',2);
 GO
 
 INSERT INTO Secretarias (NombreSecretaria)
