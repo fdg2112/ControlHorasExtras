@@ -25,14 +25,18 @@ public partial class HorasExtra
     public string TipoHora { get; set; } = null!;
 
     [Column("AreaID")]
-    public int AreaId { get; set; }
+    public int? AreaId { get; set; } // Permite valores nulos según la base de datos
 
     [Column("SecretariaID")]
     public int SecretariaId { get; set; }
 
+    [Column("ActividadID")]
+    public int? ActividadId { get; set; }
+
+    // 🔄 Propiedades de navegación
     [ForeignKey("AreaId")]
     [InverseProperty("HorasExtras")]
-    public virtual Area Area { get; set; } = null!;
+    public virtual Area? Area { get; set; }
 
     [ForeignKey("EmpleadoId")]
     [InverseProperty("HorasExtras")]

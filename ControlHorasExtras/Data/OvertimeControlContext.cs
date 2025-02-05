@@ -14,7 +14,7 @@ public partial class OvertimeControlContext : DbContext
     {
     }
 
-    public virtual DbSet<ActividadesTrabajo> ActividadesTrabajos { get; set; } = null!;
+    public virtual DbSet<ActividadesTrabajo> ActividadesTrabajos { get; set; }
     public virtual DbSet<Area> Areas { get; set; } = null!;
     public virtual DbSet<AuditoriaLogin> AuditoriaLogins { get; set; } = null!;
     public virtual DbSet<CategoriasSalariales> CategoriasSalariales { get; set; } = null!;
@@ -88,9 +88,19 @@ public partial class OvertimeControlContext : DbContext
 
         modelBuilder.Entity<HorasExtra>(entity =>
         {
-            entity.HasKey(e => e.HoraExtraId).HasName("PK__HorasExt__BEE2482FCADAE585");
+            entity.HasKey(e => e.HoraExtraId).HasName("PK__HorasExt__BEE2482F70673057");
 
             entity.ToTable(tb => tb.HasTrigger("trg_ValidarAreaSecretaria_HorasExtras"));
+
+            entity.Property(e => e.HoraExtraId).HasColumnName("HoraExtraID");
+            entity.Property(e => e.ActividadId).HasColumnName("ActividadID");
+            entity.Property(e => e.AreaId).HasColumnName("AreaID");
+            entity.Property(e => e.CantidadHoras).HasComputedColumnSql("(datediff(hour,[FechaHoraInicio],[FechaHoraFin]))", false);
+            entity.Property(e => e.EmpleadoId).HasColumnName("EmpleadoID");
+            entity.Property(e => e.FechaHoraFin).HasColumnType("datetime");
+            entity.Property(e => e.FechaHoraInicio).HasColumnType("datetime");
+            entity.Property(e => e.SecretariaId).HasColumnName("SecretariaID");
+            entity.Property(e => e.TipoHora).HasMaxLength(50);
 
             entity.HasOne(d => d.Area).WithMany(p => p.HorasExtras)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -101,9 +111,11 @@ public partial class OvertimeControlContext : DbContext
                 .HasConstraintName("FK__HorasExtr__Emple__4E88ABD4");
 
             entity.HasOne(d => d.Secretaria).WithMany(p => p.HorasExtras)
+                .HasForeignKey(d => d.SecretariaId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__HorasExtr__Secre__5070F446");
         });
+
 
         modelBuilder.Entity<LugaresTrabajo>(entity =>
         {
