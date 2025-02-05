@@ -88,6 +88,32 @@ CREATE TABLE HorasExtras (
 );
 GO
 
+CREATE TABLE HorasExtras (
+    HoraExtraID INT PRIMARY KEY IDENTITY(1,1),
+    EmpleadoID INT NOT NULL,
+    FechaHoraInicio DATETIME NOT NULL,
+    FechaHoraFin DATETIME NOT NULL,
+    CantidadHoras AS DATEDIFF(HOUR, FechaHoraInicio, FechaHoraFin),
+    TipoHora NVARCHAR(50) NOT NULL CHECK (TipoHora IN ('50%', '100%')),
+    AreaID INT NULL,
+    SecretariaID INT NOT NULL,
+    ActividadID INT NULL,
+    FOREIGN KEY (EmpleadoID) REFERENCES Empleados(EmpleadoID),
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID),
+    FOREIGN KEY (SecretariaID) REFERENCES Secretarias(SecretariaID),
+    FOREIGN KEY (ActividadID) REFERENCES ActividadesTrabajo(ActividadID)
+);
+GO
+
+ALTER TABLE HorasExtras
+ADD ActividadID INT NULL;
+GO
+
+ALTER TABLE HorasExtras
+ADD CONSTRAINT FK_HorasExtras_ActividadesTrabajo
+FOREIGN KEY (ActividadID) REFERENCES ActividadesTrabajo(ActividadID);
+GO
+
 -- Tabla Lugares de Trabajo
 CREATE TABLE LugaresTrabajo (
     LugarID INT PRIMARY KEY IDENTITY(1,1),

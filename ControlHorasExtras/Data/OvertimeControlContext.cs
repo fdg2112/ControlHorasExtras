@@ -14,11 +14,13 @@ public partial class OvertimeControlContext : DbContext
     {
     }
 
+    public virtual DbSet<ActividadesTrabajo> ActividadesTrabajos { get; set; } = null!;
     public virtual DbSet<Area> Areas { get; set; } = null!;
     public virtual DbSet<AuditoriaLogin> AuditoriaLogins { get; set; } = null!;
     public virtual DbSet<CategoriasSalariales> CategoriasSalariales { get; set; } = null!;
     public virtual DbSet<Empleado> Empleados { get; set; } = null!;
     public virtual DbSet<HorasExtra> HorasExtras { get; set; } = null!;
+    public virtual DbSet<LugaresTrabajo> LugaresTrabajos { get; set; } = null!;
     public virtual DbSet<Rol> Roles { get; set; } = null!;
     public virtual DbSet<Secretaria> Secretarias { get; set; } = null!;
     public virtual DbSet<TopesHora> TopesHoras { get; set; } = null!;
@@ -31,6 +33,17 @@ public partial class OvertimeControlContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ActividadesTrabajo>(entity =>
+        {
+            entity.HasKey(e => e.ActividadId).HasName("PK__Activida__981483F0D82D8843");
+
+            entity.ToTable("ActividadesTrabajo");
+
+            entity.Property(e => e.ActividadId).HasColumnName("ActividadID");
+            entity.Property(e => e.LugarId).HasColumnName("LugarID");
+            entity.Property(e => e.NombreActividad).HasMaxLength(100);
+        });
+
         modelBuilder.Entity<Area>(entity =>
         {
             entity.HasKey(e => e.AreaId).HasName("PK__Areas__70B8202883BF80F8");
@@ -90,6 +103,16 @@ public partial class OvertimeControlContext : DbContext
             entity.HasOne(d => d.Secretaria).WithMany(p => p.HorasExtras)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__HorasExtr__Secre__5070F446");
+        });
+
+        modelBuilder.Entity<LugaresTrabajo>(entity =>
+        {
+            entity.HasKey(e => e.LugarId).HasName("PK__LugaresT__1BDE0D808AA4CB5E");
+
+            entity.ToTable("LugaresTrabajo");
+
+            entity.Property(e => e.LugarId).HasColumnName("LugarID");
+            entity.Property(e => e.NombreLugar).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Rol>(entity =>
