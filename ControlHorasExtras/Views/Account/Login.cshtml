@@ -14,7 +14,7 @@
         Control y Gestión de Horas Extras
     </div>
     <form class="p-3 mt-3" asp-action="Login" method="post" autocomplete="off">
-        @Html.AntiForgeryToken() <!-- Token antifalsificación -->
+        @Html.AntiForgeryToken()
         <div class="form-field d-flex align-items-center">
             <span class="far fa-user"></span>
             <input type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Nombre de usuario" required asp-for="NombreUsuario" />
@@ -30,7 +30,6 @@
         <button type="submit" class="btn mt-3">Iniciar sesión</button>
     </form>
 
-    <!-- Mostrar errores desde el ModelState -->
     @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert alert-danger mt-2">

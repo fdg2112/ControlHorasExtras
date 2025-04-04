@@ -14,20 +14,17 @@ namespace ControlHorasExtras.Controllers
             _context = context;
         }
 
-        // Modificar el método Dashboard para incluir empleados
         public IActionResult Dashboard()
         {
             return View();
         }
 
-        // Mostrar el formulario de carga
         [HttpGet]
         public IActionResult Create()
         {
             var areaIdClaim = User.FindFirst("AreaId");
             var secretariaIdClaim = User.FindFirst("SecretariaId");
 
-            // Determinar Área y Secretaría del usuario
             int? areaId = null;
             if (areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value))
             {
@@ -40,13 +37,12 @@ namespace ControlHorasExtras.Controllers
             }
             int secretariaId = int.Parse(secretariaIdClaim.Value);
 
-            // Filtrar empleados según el rol del usuario
             var empleados = _context.Empleados
                 .Include(e => e.Area)
                 .Include(e => e.Secretaria)
                 .Where(e =>
-                    (areaId.HasValue && e.AreaId == areaId) ||  // Empleados del área si el usuario pertenece a un área
-                    (!areaId.HasValue && e.SecretariaId == secretariaId)) // Empleados de la secretaría si el usuario no tiene área
+                    (areaId.HasValue && e.AreaId == areaId) ||  
+                    (!areaId.HasValue && e.SecretariaId == secretariaId)) 
                 .Select(e => new
                 {
                     EmpleadoId = e.EmpleadoId,
@@ -60,18 +56,15 @@ namespace ControlHorasExtras.Controllers
                 })
                 .ToList();
 
-            // Filtrar secretarías
             var secretarias = _context.Secretarias
                 .Select(s => new { id = s.SecretariaId, nombre = s.NombreSecretaria })
                 .ToList();
 
-            // Filtrar áreas
             var areas = _context.Areas
                 .Where(a => a.SecretariaId == secretariaId)
                 .Select(a => new { id = a.AreaId, nombre = a.NombreArea })
                 .ToList();
 
-            // Devolver datos en formato JSON
             return Json(new
             {
                 empleados,
@@ -100,7 +93,6 @@ namespace ControlHorasExtras.Controllers
 
             if (ModelState.IsValid)
             {
-                // Obtener área y secretaría del empleado
                 var empleado = await _context.Empleados
                     .Where(e => e.EmpleadoId == horasExtra.EmpleadoId)
                     .Select(e => new { e.AreaId, e.SecretariaId })
@@ -111,11 +103,9 @@ namespace ControlHorasExtras.Controllers
                     return Json(new { success = false, message = "El empleado seleccionado no existe." });
                 }
 
-                // Asignar Área y Secretaría al modelo
-                horasExtra.AreaId = empleado.AreaId ?? 0; // Manejar nulos si AreaId puede ser nulo
+                horasExtra.AreaId = empleado.AreaId ?? 0; 
                 horasExtra.SecretariaId = empleado.SecretariaId;
 
-                // Validar que las horas no se solapen
                 var solapamiento = await _context.HorasExtras
                     .AnyAsync(h => h.EmpleadoId == horasExtra.EmpleadoId &&
                                    h.FechaHoraInicio.Date == horasExtra.FechaHoraInicio.Date &&
@@ -126,7 +116,6 @@ namespace ControlHorasExtras.Controllers
                     return Json(new { success = false, message = "Las horas extras se solapan con otras ya registradas." });
                 }
 
-                // Guardar en la base de datos
                 _context.Add(horasExtra);
                 await _context.SaveChangesAsync();
 
@@ -134,7 +123,6 @@ namespace ControlHorasExtras.Controllers
             }
             else
             {
-                // Mostrar los errores de validación en la consola
                 foreach (var error in ModelState.Values.SelectMany(v => v.Errors)) Console.WriteLine(error.ErrorMessage);
                 return Json(new { success = false, message = "Error al guardar las horas extras. Por favor, revise los datos ingresados." });
             }

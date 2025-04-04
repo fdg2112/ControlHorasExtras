@@ -9,8 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAuthentication("Cookies")
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login";  // Ruta a la que redirigir cuando no esté autenticado
-        options.LogoutPath = "/Account/Logout";  // Ruta para cerrar sesión
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
     });
 
 // Otros servicios
@@ -20,12 +20,13 @@ builder.Services.AddDbContext<OvertimeControlContext>(options =>
 
 // Agrega IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
-// Agrega el servicio de CustomCircuitHandler
+
+// Servicio de CustomCircuitHandler
 builder.Services.AddSingleton<CircuitHandler, CustomCircuitHandler>();
 
 var app = builder.Build();
 
-// Configurar el pipeline de la aplicación
+// Pipeline de la aplicación
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -35,8 +36,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-// Añadir el middleware de autenticación
-app.UseAuthentication();  // Este middleware debe ir antes de UseAuthorization
+// Middleware de autenticación
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

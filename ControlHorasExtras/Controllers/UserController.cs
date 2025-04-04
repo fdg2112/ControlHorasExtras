@@ -27,7 +27,6 @@ namespace ControlHorasExtras.Controllers
             return View(usuarios);
         }
 
-        // Crear nuevo usuario (GET)
         public IActionResult Create()
         {
             ViewData["Roles"] = _context.Roles.ToList();
@@ -36,7 +35,6 @@ namespace ControlHorasExtras.Controllers
             return View();
         }
 
-        // Crear nuevo usuario (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Usuario usuario)
@@ -53,7 +51,6 @@ namespace ControlHorasExtras.Controllers
             return View(usuario);
         }
 
-        // Detalles de un usuario
         public async Task<IActionResult> Details(int id)
         {
             var usuario = await _context.Usuarios
@@ -65,7 +62,6 @@ namespace ControlHorasExtras.Controllers
             return View(usuario);
         }
 
-        // Editar usuario (GET)
         public async Task<IActionResult> Edit(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
@@ -77,7 +73,6 @@ namespace ControlHorasExtras.Controllers
             return View(usuario);
         }
 
-        // Editar usuario (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Usuario usuario)
@@ -105,7 +100,6 @@ namespace ControlHorasExtras.Controllers
             return View(usuario);
         }
 
-        // Eliminar usuario
         public async Task<IActionResult> Delete(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);

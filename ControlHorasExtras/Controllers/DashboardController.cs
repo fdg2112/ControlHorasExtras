@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace ControlHorasExtras.Controllers
 {
-    [Authorize]  // Esto garantiza que solo los usuarios autenticados pueden acceder al Dashboard
+    [Authorize] 
     public class DashboardController : Controller
     {
         private readonly OvertimeControlContext _context;
@@ -18,7 +18,6 @@ namespace ControlHorasExtras.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            // Obtener los claims del usuario logueado
             var usuarioIdClaim = User.FindFirst("UsuarioId");
             var rolClaim = User.FindFirst("Rol");
             var areaIdClaim = User.FindFirst("AreaId");
@@ -26,23 +25,20 @@ namespace ControlHorasExtras.Controllers
 
             if (usuarioIdClaim == null || rolClaim == null)
             {
-                return Unauthorized(); // Redirigir a una página de error o al login
+                return Unauthorized();
             }
 
-            // Parsear los valores de los claims
             var usuarioId = int.Parse(usuarioIdClaim.Value);
             var rol = rolClaim.Value;
             int? areaId = string.IsNullOrEmpty(areaIdClaim?.Value) ? null : int.Parse(areaIdClaim.Value);
             int? secretariaId = string.IsNullOrEmpty(secretariaIdClaim?.Value) ? null : int.Parse(secretariaIdClaim.Value);
 
-            // Incluir relaciones necesarias
             IQueryable<HorasExtra> query = _context.HorasExtras
                 .Include(h => h.Area)
                 .Include(h => h.Empleado)
                 .Include(h => h.Secretaria)
                 .AsQueryable();
 
-            // Filtrar por rol
             if (rol == "Jefe de Área" && areaId.HasValue)
             {
                 query = query.Where(h => h.AreaId == areaId.Value);
@@ -57,12 +53,10 @@ namespace ControlHorasExtras.Controllers
                 ViewData["Secretarias"] = secretarias;
             }
 
-            // Obtener los últimos 12 meses
             var mesActual = DateTime.Now.Month;
             var anioActual = DateTime.Now.Year;
             var fechaInicio = DateTime.Now.AddMonths(-11);
 
-            // Datos del mes actual
             var horasDelMes = await query
                 .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
                 .GroupBy(h => h.TipoHora)
@@ -75,31 +69,9 @@ namespace ControlHorasExtras.Controllers
 
             var horas50 = horasDelMes.FirstOrDefault(h => h.TipoHora == "50%")?.TotalHoras ?? 0;
             var horas100 = horasDelMes.FirstOrDefault(h => h.TipoHora == "100%")?.TotalHoras ?? 0;
-
-            // Gasto del mes actual
             var gastoDelMes = await _context.VistaGastosHorasExtras.ToListAsync();
-            //var gastoDelMes = await query
-            //    .Where(h => h.FechaHoraInicio.Month == mesActual && h.FechaHoraInicio.Year == anioActual)
-            //    .Select(h => new
-            //    {
-            //        TipoHora = h.TipoHora,
-            //        CantidadHoras = h.CantidadHoras,
-            //        ValorHora = h.TipoHora.Trim() == "50%"
-            //            ? (h.Empleado.Categoria.SueldoBasico / 132) * 1.5m
-            //            : (h.Empleado.Categoria.SueldoBasico / 132) * 2m
-            //    })
-            //    .GroupBy(h => h.TipoHora)
-            //    .Select(g => new
-            //    {
-            //        TipoHora = g.Key,
-            //        TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
-            //    })
-            //    .ToListAsync();
-
             var gasto50 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "50%")?.TotalGasto ?? 0;
             var gasto100 = gastoDelMes.FirstOrDefault(g => g.TipoHora.Trim() == "100%")?.TotalGasto ?? 0;
-
-            // Histórico
             var historicoHoras = await query
                 .Where(h => h.FechaHoraInicio >= fechaInicio)
                 .GroupBy(h => new { h.FechaHoraInicio.Year, h.FechaHoraInicio.Month, h.TipoHora })
@@ -131,7 +103,6 @@ namespace ControlHorasExtras.Controllers
                     .Sum(h => h.TotalHoras))
                 .ToList();
 
-            // Obtener las áreas y secretarías según el rol
             var areas = await _context.Areas
                 .Where(a => rol == "Secretario" ? a.SecretariaId == secretariaId : true)
                 .ToListAsync();
@@ -163,25 +134,16 @@ namespace ControlHorasExtras.Controllers
                 .Include(h => h.Secretaria)
                 .AsQueryable();
 
-            // Filtrar por área si se seleccionó una
             if (areaId.HasValue)
             {
                 query = query.Where(h => h.AreaId == areaId.Value);
             }
-            // Filtrar por secretaría si se seleccionó una y no hay área
             else if (secretariaId.HasValue)
             {
                 query = query.Where(h => h.SecretariaId == secretariaId.Value);
             }
-
-            // Si no hay filtros, devolver datos de todas las secretarías y áreas
-            // Esto ocurre cuando el rol es Intendente o Secretario Hacienda
-            // Y no se selecciona un filtro explícito
-
-            // Filtrar solo las horas del mes actual
             query = query.Where(h => h.FechaHoraInicio.Month == currentMonth && h.FechaHoraInicio.Year == currentYear);
 
-            // Horas y gastos
             var horas = await query.GroupBy(h => h.TipoHora).Select(g => new
             {
                 TipoHora = g.Key,
@@ -201,7 +163,6 @@ namespace ControlHorasExtras.Controllers
                 TotalGasto = g.Sum(h => h.CantidadHoras * h.ValorHora)
             }).ToListAsync();
 
-            // Histórico
             var historicoQuery = _context.HorasExtras
                 .Include(h => h.Empleado)
                 .Include(h => h.Area)
@@ -248,6 +209,7 @@ namespace ControlHorasExtras.Controllers
                 Historico100 = historico100
             });
         }
+
         [HttpGet]
         public async Task<IActionResult> GetDonutChartData()
         {
@@ -261,10 +223,8 @@ namespace ControlHorasExtras.Controllers
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
 
-            // Filtrar horas del mes actual
             query = query.Where(h => h.FechaHoraInicio.Month == currentMonth && h.FechaHoraInicio.Year == currentYear);
 
-            // Gasto por secretaría
             var gastoPorSecretaria = await query
                 .GroupBy(h => h.Secretaria.NombreSecretaria)
                 .Select(g => new
@@ -276,7 +236,6 @@ namespace ControlHorasExtras.Controllers
                 })
                 .ToListAsync();
 
-            // Gasto por área
             var gastoPorArea = await query
                 .GroupBy(h => h.Area.NombreArea)
                 .Select(g => new
@@ -309,7 +268,6 @@ namespace ControlHorasExtras.Controllers
         [HttpGet]
         public async Task<IActionResult> GetEmpleadosPorArea(int? areaId = null)
         {
-            // Obtener datos del usuario logueado
             var rol = User.FindFirst("Rol")?.Value;
             var areaIdClaim = User.FindFirst("AreaId")?.Value;
             var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
@@ -321,10 +279,8 @@ namespace ControlHorasExtras.Controllers
             var anioActual = DateTime.Now.Year;
             var mesAnterior = mesActual == 1 ? 12 : mesActual - 1;
             var anioMesAnterior = mesActual == 1 ? anioActual - 1 : anioActual;
-
             var empleadosQuery = _context.Empleados.AsQueryable();
 
-            // Filtrar según el rol del usuario
             if (rol == "Jefe de Área" && areaIdUsuario.HasValue)
             {
                 empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaIdUsuario.Value);
@@ -339,7 +295,7 @@ namespace ControlHorasExtras.Controllers
             }
             else if (rol == "Intendente" || rol == "Secretario Hacienda")
             {
-                // Intendentes y Secretarios de Hacienda no tienen filtro inicial
+                // Intendentes y Secretarios de Hacienda no tienen filtro inicial por ahora
             }
             else if (areaId.HasValue)
             {
@@ -391,7 +347,6 @@ namespace ControlHorasExtras.Controllers
                 .Include(h => h.Secretaria)
                 .AsQueryable();
 
-            // Calcular gastos por secretaría
             var gastosPorSecretaria = await query
                 .GroupBy(h => h.Secretaria.NombreSecretaria)
                 .Select(g => new
@@ -404,7 +359,6 @@ namespace ControlHorasExtras.Controllers
                 })
                 .ToListAsync();
 
-            // Calcular gastos por área
             var gastosPorArea = await query
                 .GroupBy(h => h.Area.NombreArea)
                 .Select(g => new

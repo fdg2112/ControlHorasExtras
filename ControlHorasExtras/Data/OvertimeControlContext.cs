@@ -161,8 +161,8 @@ public partial class OvertimeControlContext : DbContext
 
         modelBuilder.Entity<VistaGastosHorasExtras>(entity =>
         {
-            entity.HasNoKey(); // Las vistas no tienen clave primaria
-            entity.ToView("VistaGastosHorasExtras"); // Nombre exacto de la vista en SQL
+            entity.HasNoKey();
+            entity.ToView("VistaGastosHorasExtras");
         });
         OnModelCreatingPartial(modelBuilder);
     }

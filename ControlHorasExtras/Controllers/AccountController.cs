@@ -42,7 +42,6 @@ namespace ControlHorasExtras.Controllers
                         .FirstOrDefaultAsync(u => u.NombreUsuario == model.NombreUsuario);
                     if (usuario != null && usuario.Contraseña == model.Contraseña)
                     {
-                        // Auditoría de login
                         var auditoriaLogin = new AuditoriaLogin
                         {
                             UsuarioId = usuario.UsuarioId,
@@ -52,7 +51,6 @@ namespace ControlHorasExtras.Controllers
                         _context.AuditoriaLogins.Add(auditoriaLogin);
                         await _context.SaveChangesAsync();
 
-                        // Claims para la sesión del usuario
                         var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.Name, usuario.NombreUsuario),
@@ -66,7 +64,6 @@ namespace ControlHorasExtras.Controllers
                         var identity = new ClaimsIdentity(claims, "Cookies");
                         var principal = new ClaimsPrincipal(identity);
 
-                        // Inicia sesión con el esquema de cookies
                         await HttpContext.SignInAsync("Cookies", principal);
 
                         return RedirectToAction("Index", "Dashboard");
@@ -75,9 +72,7 @@ namespace ControlHorasExtras.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Manejo de excepciones
                     ModelState.AddModelError("", "Error al intentar iniciar sesión. Por favor, inténtelo de nuevo más tarde.");
-                    // Loguear el error
                     _logger.LogError(ex, "Error al intentar iniciar sesión.");
                 }
             }
@@ -86,29 +81,22 @@ namespace ControlHorasExtras.Controllers
 
         public IActionResult Create()
         {
-            // Obtener el AreaId del usuario logueado desde los claims
             var areaIdClaim = User.FindFirst("AreaId");
 
             if (areaIdClaim == null)
             {
-                // Si no se encuentra el AreaId en los claims, redirigir o mostrar un error
-                return Unauthorized(); // O redirigir a alguna página de error
+                return Unauthorized();
             }
 
-            var areaId = int.Parse(areaIdClaim.Value);  // Convertir el AreaId a entero
-
-            // Filtrar los empleados según el área del usuario logueado
+            var areaId = int.Parse(areaIdClaim.Value);
             var empleados = _context.Empleados
-                .Where(e => e.AreaId == areaId)  // Filtrar empleados por el AreaId del usuario
+                .Where(e => e.AreaId == areaId) 
                 .ToList();
 
-            // Pasar los empleados filtrados a la vista
             ViewData["Empleados"] = empleados;
 
             return View();
         }
-
-        // Logout
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync();

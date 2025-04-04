@@ -20,7 +20,6 @@ namespace ControlHorasExtras.Controllers
             var secretariaIdClaim = User.FindFirst("SecretariaId");
             var rolClaim = User.FindFirst("Rol");
 
-            // Si el rol es "Intendente", mostramos todos los empleados sin filtrar por área ni secretaría
             if (rolClaim?.Value == "Intendente")
             {
                 var empleados = _context.Empleados
@@ -45,7 +44,6 @@ namespace ControlHorasExtras.Controllers
             }
             else
             {
-                // Lógica anterior para usuarios con área o secretaría
                 int? areaId = null;
                 if (areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value))
                 {
@@ -86,7 +84,6 @@ namespace ControlHorasExtras.Controllers
 
         public async Task<IActionResult> GetEmpleados(int? areaId = null)
         {
-            // Obtener datos del usuario logueado
             var rol = User.FindFirst("Rol")?.Value;
             var areaIdClaim = User.FindFirst("AreaId")?.Value;
             var secretariaIdClaim = User.FindFirst("SecretariaId")?.Value;
@@ -96,7 +93,6 @@ namespace ControlHorasExtras.Controllers
 
             var empleadosQuery = _context.Empleados.AsQueryable();
 
-            // Filtrar según el rol del usuario
             if (rol == "Jefe de Área" && areaIdUsuario.HasValue)
             {
                 empleadosQuery = empleadosQuery.Where(e => e.AreaId == areaIdUsuario.Value);
@@ -111,7 +107,7 @@ namespace ControlHorasExtras.Controllers
             }
             else if (rol == "Intendente" || rol == "Secretario Hacienda")
             {
-                // Intendentes y Secretarios de Hacienda no tienen filtro inicial
+                // Intendentes y Secretarios de Hacienda no tienen filtro inicial por ahora
             }
             else if (areaId.HasValue)
             {
@@ -139,13 +135,10 @@ namespace ControlHorasExtras.Controllers
         {
             var areaIdClaim = User.FindFirst("AreaId");
             var secretariaIdClaim = User.FindFirst("SecretariaId");
-
-            // Obtener áreas, secretarías y categorías salariales
             var areas = _context.Areas.ToList();
             var secretarias = _context.Secretarias.ToList();
             var categorias = _context.CategoriasSalariales.ToList();
 
-            // Filtrar empleados que pertenecen al área y/o secretaría del usuario logueado
             int? areaId = areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value) ? int.Parse(areaIdClaim.Value) : (int?)null;
             int? secretariaId = secretariaIdClaim != null && !string.IsNullOrEmpty(secretariaIdClaim.Value) ? int.Parse(secretariaIdClaim.Value) : (int?)null;
 
@@ -164,12 +157,10 @@ namespace ControlHorasExtras.Controllers
             return View();
         }
 
-        // Crear nuevo empleado
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateEmployee(Empleado empleado)
         {
-            // Validar que el legajo sea único
             if (_context.Empleados.Any(e => e.Legajo == empleado.Legajo))
             {
                 return Json(new
@@ -178,8 +169,6 @@ namespace ControlHorasExtras.Controllers
                     message = "El número de legajo ya está registrado."
                 });
             }
-
-            // Validar que el legajo sea un número de 3 dígitos
             if (empleado.Legajo < 0 && empleado.Legajo > 999)
             {
                 return Json(new
@@ -217,7 +206,6 @@ namespace ControlHorasExtras.Controllers
             var areaIdClaim = User.FindFirst("AreaId");
             var secretariaIdClaim = User.FindFirst("SecretariaId");
 
-            // Determinar Área y Secretaría del usuario
             int? areaId = null;
             if (areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value))
             {
@@ -228,9 +216,9 @@ namespace ControlHorasExtras.Controllers
             {
                 return Json(new { error = "No se encontró el claim de Secretaría." });
             }
+
             int secretariaId = int.Parse(secretariaIdClaim.Value);
 
-            // Obtener áreas y secretarías del usuario
             var areas = _context.Areas
                 .Where(a => a.SecretariaId == secretariaId && (!areaId.HasValue || a.AreaId == areaId))
                 .Select(a => new { id = a.AreaId, nombre = a.NombreArea })
@@ -242,25 +230,22 @@ namespace ControlHorasExtras.Controllers
                 .ToList();
 
             var categorias = _context.CategoriasSalariales
-                .Select(c => new { id = c.CategoriaId, nombre = c.NombreCategoria }) // Usa "NombreCategoria" aquí
+                .Select(c => new { id = c.CategoriaId, nombre = c.NombreCategoria })
                 .ToList();
 
-
-            // Devolver datos con las áreas y secretarías por defecto
             return Json(new
             {
                 areas,
                 secretarias,
                 categorias,
-                defaultAreaId = areaId, // Área predeterminada
-                defaultSecretariaId = secretariaId // Secretaría predeterminada
+                defaultAreaId = areaId,
+                defaultSecretariaId = secretariaId
             });
         }
 
         [HttpGet]
         public IActionResult CheckLegajo(int legajo)
         {
-            // Verificar si el legajo ya existe en la base de datos
             var empleadoExistente = _context.Empleados
                 .Include(e => e.Area)
                 .Include(e => e.Secretaria)
@@ -299,8 +284,6 @@ namespace ControlHorasExtras.Controllers
             {
                 return NotFound();
             }
-
-            // Obtener datos adicionales como listas de categorías, áreas y secretarías
             var categorias = _context.CategoriasSalariales.Select(c => new { c.CategoriaId, c.NombreCategoria }).ToList();
             var areas = _context.Areas.Select(a => new { a.AreaId, a.NombreArea }).ToList();
             var secretarias = _context.Secretarias.Select(s => new { s.SecretariaId, s.NombreSecretaria }).ToList();
@@ -326,8 +309,6 @@ namespace ControlHorasExtras.Controllers
             {
                 return NotFound();
             }
-
-            // Actualizar datos del empleado
             empleado.Nombre = model.Nombre;
             empleado.Apellido = model.Apellido;
             empleado.CategoriaId = model.CategoriaId;
